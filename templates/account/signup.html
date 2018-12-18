@@ -1,0 +1,9 @@
+{% extends 'site_structure/index.html' %}
+
+{% block content %}
+    <form action="complete/" method="post">
+        {% csrf_token %}
+        {{ form }}
+        <input type="submit" name="submit" value="Sign Up">
+    </form>
+{% endblock %}
