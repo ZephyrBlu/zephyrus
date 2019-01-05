@@ -108,10 +108,10 @@ h1 {
     margin: 0;
     padding: 10px;
     letter-spacing: 0.5em;
-    text-shadow: 4px 4px white;
-    color: black;
+    text-shadow: 4px 4px black;
+    color: white;
     //text-shadow: 4px 4px #D3D3D3;
-    transition: color 2s ease-out;
+    transition: text-shadow 2s ease-out;
 
 }
 
@@ -229,9 +229,9 @@ header {
 }
 
 header h1:hover {
-    color: white;
-    text-shadow: 4px 4px black;
-    transition: text-shadow 2s ease-out;
+    color: black;
+    text-shadow: 4px 4px white;
+    transition: color 2s ease-out;
 }
 
 body, footer {
