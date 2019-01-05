@@ -14,6 +14,7 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'site_structure/css/normalize.css' %}">
   <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
+  <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400" rel="stylesheet">
 </head>
 
 <body>
@@ -23,28 +24,33 @@
 
   <div class='container'>
     <header>
-      <p>{{ heading }}</p>
+      <h1>zephyrus</h1>
     </header>
-    <nav>
-      <ul id="main">
-        <li><a href="{% url 'site_structure:home' %}">Home</a></li>
-        <li><a href="{% url 'site_structure:upload' %}">Upload</a></li>
-        <li><a href="{% url 'site_structure:user' %}">User Overview</a></li>
-        <li><a href="{% url 'site_structure:premium' %}">Premium</a></li>
-        <li><a href="{% url 'site_structure:signup' %}">Sign Up</a></li>
-        <li><a href="{% url 'site_structure:about' %}">About</a></li>
-        <li><a href="{% url 'site_structure:contact' %}">Contact</a></li>
+    <nav id="main">
+      <ul>
+        <li><a {% if active == 'home' %} class="active" {% endif %} href="{% url 'site_structure:home' %}">Home</a></li>
+        {% if user.is_authenticated %}
+          <li><a {% if active == 'upload' %} class="active" {% endif %} href="{% url 'site_structure:upload' %}">Upload</a></li>
+          <li><a {% if active == 'profile' %} class="active" {% endif %} href="{% url 'site_structure:profile' %}">Profile</a></li>
+        {% endif %}
+        <li><a {% if active == 'premium' %} class="active" {% endif %} href="{% url 'site_structure:premium' %}">Premium</a></li>
+        {% if not user.is_authenticated %}
+          <li><a {% if active == 'signup' %} class="active" {% endif %} href="{% url 'site_structure:signup' %}">Sign Up</a></li>
+          <li><a {% if active == 'login' %} class="active" {% endif %} href="{% url 'site_structure:login' %}">Login</a></li>
+        {% endif %}
+        <li><a {% if active == 'about' %} class="active" {% endif %} href="{% url 'site_structure:about' %}">About</a></li>
+        <li><a {% if active == 'contact' %} class="active" {% endif %} href="{% url 'site_structure:contact' %}">Contact</a></li>
       </ul>
     </nav>
     <div class='content'>
       <main>
-        <p>{{ info }}</p>
         {% block content %}
         {% endblock %}
+        <p>{{ info }}</p>
       </main>
     </div>
 
-    <footer></footer>
+    <footer>Luke Holroyd 2019</footer>
   </div>
 
   <script src="js/vendor/modernizr-3.6.0.min.js"></script>

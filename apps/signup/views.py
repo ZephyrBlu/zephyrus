@@ -1,15 +1,7 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import UserCreationForm
+from django.shortcuts import render
 from django import forms
 from usermanager.models import CustomUser, CustomManager
 from django.contrib.auth import login, authenticate
-
-class SignupForm(UserCreationForm):
-    username = forms.EmailField(label='Email')
-
-    class Meta:
-        model = CustomUser
-        fields = ('username',)
 
 def email_form(request, context=None):
     form = SignupForm()

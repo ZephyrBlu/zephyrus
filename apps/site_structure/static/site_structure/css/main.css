@@ -97,35 +97,123 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-nav li {
+html {
+    background-color: #000000;
+    color: white;
+}
+
+h1 {
+    display: inline-block;
+    font-size: 80px;
+    margin: 0;
+    padding: 10px;
+    letter-spacing: 0.5em;
+    text-shadow: 4px 4px white;
+    color: black;
+    //text-shadow: 4px 4px #D3D3D3;
+    transition: color 2s ease-out;
+
+}
+
+nav#main li {
     display: inline;
-    border: 2px solid black;
-    border-bottom: none;
-    padding: 2px;
+    padding: 3px;
+    padding-bottom: 0px;
     margin: 2px 2px 0 2px;
+    background-color: black;
+    color: white;
+}
+
+nav#main a {
+    font-size: 24px;
+    border: 2px solid transparent;
+    border-bottom: none;
+    padding: 3px;
     border-radius: 8px 8px 0 0;
+    transition: border 0.5s;
+}
+
+nav#main a.active {
+    padding: 3px;
+    background-color: white;
+    border-radius: 8px 8px 0 0;
+    color: black;
+    transition: text-shadow 0.5s ease-in-out;
+}
+
+nav a.active {
+    font-weight: bold;
 }
 
 li {
     list-style-type: none;
+    color: white;
 }
 
-nav {
-    //text-align: left;
-}
-
-nav, ul {
+nav#main, nav#main ul {
     margin-bottom: 0;
     padding: 0;
 }
 
-div.content {
-    border: 2px solid black;
+nav.profile * {
+    padding: 0;
+}
 
+nav.profile {
+    display: inline-block;
+    float: left;
+    left: 0;
+    text-align: center;
+    padding: 0px;
+    width: 100px;
+    height: 1000px;
+    background-color: black;
+    transition: background-color 1s;
+}
+
+nav.profile li {
+    padding: 0 15px 5px 15px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    transition: background-color 0.5s;
+}
+
+nav a {
+    color: white;
+    transition: color 0.5s;
+}
+
+nav.profile li:hover {
+    background-color: white;
+}
+
+nav.profile li:hover a {
+    color: black;
+    font-weight: bold;
+}
+
+nav.profile li:hover button {
+    color: black;
+    font-weight: bold;
+}
+
+div.content {
+    border: 1px solid white;
+    border-radius: 5px;
+    color: black;
+    background-color: white;
+    height: 500px;
+    width: 80%;
+    overflow: hidden;
+}
+
+div.content * {
+    margin: 0;
+    //padding: 10px;
 }
 
 div.content, nav {
-    margin: 0 50px -1px 50px;
+    margin: 0 auto;
     text-align: center;
 }
 
@@ -136,17 +224,66 @@ header {
     border-style: solid;
     margin: 0;
     text-align: center;
+    font-family: 'Major Mono Display', monospace;
+    background-color: #D5EFFF;
 }
 
-a:hover, a:visited, a:link {
-    color: black;
+header h1:hover {
+    color: white;
+    text-shadow: 4px 4px black;
+    transition: text-shadow 2s ease-out;
+}
+
+body, footer {
+    font-family: 'Quicksand', sans-serif;
+}
+
+footer {
+    color: white;
+    text-align: center;
+}
+
+a:visited, a:link {
     text-decoration: none;
+    color: white;
 }
 
+nav#main a:hover {
+    border-color: white;
+    border-bottom: none;
+}
 
+nav#main a.active:hover {
+    text-shadow: 1px 1px #D3D3D3;
+}
 
+nav.profile a.active {
+    color: black;
+    background-color: white;
+    font-weight: bold;
+    transition: background-color 0.5s;
+}
 
+li.active, li.active a {
+    color: black;
+    background-color: white;
+}
 
+nav.profile li.active:hover, nav.profile li.active:hover a {
+    background-color: black;
+    color: white;
+}
+
+div.content main {
+    padding: 0;
+}
+
+button {
+    background-color: transparent;
+    color: white;
+    border: none;
+    text-decoration: underline;
+}
 
 
 /* ==========================================================================
