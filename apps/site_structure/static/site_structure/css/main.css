@@ -97,31 +97,103 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+/*--------------------------------------------------------------------------
+  General Element Styles
+  --------------------------------------------------------------------------*/
+
+div.content, div.content *, nav#main {
+    padding: 0;
+    margin: 0 auto;
+    text-align: center;
+}
+
+header * {
+    margin: 0;
+    border: 0;
+}
+
+nav * {
+    margin-bottom: 0;
+    padding: 0;
+}
+
+a:visited, a:link {
+    text-decoration: none;
+}
+
+li {
+    list-style-type: none;
+    color: white;
+}
+
+li.active, li.active a {
+    color: black;
+}
+
+button {
+    background-color: black;
+    color: white;
+    border: none;
+    text-decoration: underline;
+}
+
+/*-----------------------------------------------------------------------------
+  Core Element Styles
+  -----------------------------------------------------------------------------*/
+
 html {
     background-color: #000000;
     color: white;
 }
 
-h1 {
-    display: inline-block;
+div.container {
+    background-color: black;
+}
+
+body, footer {
+    font-family: 'Quicksand', sans-serif;
+}
+
+header {
+    background-color: #D5EFFF;
+    text-align: center;
+}
+
+header h1 {
+    font-family: 'Major Mono Display', monospace;
     font-size: 80px;
-    margin: 0;
-    padding: 10px;
     letter-spacing: 0.5em;
     text-shadow: 4px 4px black;
     color: white;
-    //text-shadow: 4px 4px #D3D3D3;
     transition: text-shadow 2s ease-out;
-
+    padding: 10px;
+    display: inline-block;
 }
 
-nav#main li {
-    display: inline;
-    padding: 3px;
-    padding-bottom: 0px;
-    margin: 2px 2px 0 2px;
+header h1:hover {
+    color: black;
+    text-shadow: 4px 4px white;
+    transition: color 2s ease-out;
+}
+
+nav {
     background-color: black;
+}
+
+nav a {
     color: white;
+    background-color: transparent;
+    transition: color 0.5s;
+}
+
+nav a.active {
+    font-weight: bold;
+    color: black;
+}
+
+nav#main a:hover {
+    border-color: white;
+    border-bottom: none;
 }
 
 nav#main a {
@@ -134,32 +206,24 @@ nav#main a {
 }
 
 nav#main a.active {
-    padding: 3px;
-    background-color: white;
-    border-radius: 8px 8px 0 0;
-    color: black;
     transition: text-shadow 0.5s ease-in-out;
+    background-color: white;
 }
 
-nav a.active {
-    font-weight: bold;
+nav#main a.active:hover {
+    text-shadow: 1px 1px #D3D3D3;
 }
 
-li {
-    list-style-type: none;
+nav#main li {
+    display: inline;
+    padding: 3px;
+    padding-bottom: 0px;
+    margin: 2px 2px 0 2px;
+    background-color: transparent;
     color: white;
 }
 
-nav#main, nav#main ul {
-    margin-bottom: 0;
-    padding: 0;
-}
-
-nav.profile * {
-    padding: 0;
-}
-
-nav.profile {
+nav#profile {
     display: inline-block;
     float: left;
     left: 0;
@@ -167,33 +231,41 @@ nav.profile {
     padding: 0px;
     width: 100px;
     height: 1000px;
-    background-color: black;
     transition: background-color 1s;
 }
 
-nav.profile li {
-    padding: 0 15px 5px 15px;
-    padding-bottom: 5px;
-    padding-top: 5px;
+nav#profile li {
+    padding: 5px 15px 5px 15px;
     transition: background-color 0.5s;
+    background-color: black;
 }
 
-nav a {
-    color: white;
-    transition: color 0.5s;
-}
-
-nav.profile li:hover {
+nav#profile li:hover {
     background-color: white;
 }
 
-nav.profile li:hover a {
+nav#profile li:hover a, nav#profile li:hover button {
     color: black;
     font-weight: bold;
 }
 
-nav.profile li:hover button {
-    color: black;
+nav#profile li.active {
+    background-color: white;
+}
+
+nav#profile li.active:hover  {
+    background-color: black;
+}
+
+nav#profile li.active:hover a {
+    color: white;
+}
+
+nav#profile li * {
+    background-color: transparent;
+}
+
+nav#profile a.active {
     font-weight: bold;
 }
 
@@ -207,84 +279,10 @@ div.content {
     overflow: hidden;
 }
 
-div.content * {
-    margin: 0;
-    //padding: 10px;
-}
-
-div.content, nav {
-    margin: 0 auto;
-    text-align: center;
-}
-
-header {
-    border: 0px;
-    border-bottom: 2px;
-    border-color: black;
-    border-style: solid;
-    margin: 0;
-    text-align: center;
-    font-family: 'Major Mono Display', monospace;
-    background-color: #D5EFFF;
-}
-
-header h1:hover {
-    color: black;
-    text-shadow: 4px 4px white;
-    transition: color 2s ease-out;
-}
-
-body, footer {
-    font-family: 'Quicksand', sans-serif;
-}
-
 footer {
     color: white;
     text-align: center;
 }
-
-a:visited, a:link {
-    text-decoration: none;
-    color: white;
-}
-
-nav#main a:hover {
-    border-color: white;
-    border-bottom: none;
-}
-
-nav#main a.active:hover {
-    text-shadow: 1px 1px #D3D3D3;
-}
-
-nav.profile a.active {
-    color: black;
-    background-color: white;
-    font-weight: bold;
-    transition: background-color 0.5s;
-}
-
-li.active, li.active a {
-    color: black;
-    background-color: white;
-}
-
-nav.profile li.active:hover, nav.profile li.active:hover a {
-    background-color: black;
-    color: white;
-}
-
-div.content main {
-    padding: 0;
-}
-
-button {
-    background-color: transparent;
-    color: white;
-    border: none;
-    text-decoration: underline;
-}
-
 
 /* ==========================================================================
    Helper classes
