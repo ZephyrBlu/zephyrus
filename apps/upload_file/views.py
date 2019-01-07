@@ -10,4 +10,4 @@ def upload_form(request):
             return # success url
     else:
         form = UploadFileForm()
-    return render(request, 'upload.html', {'form': form})
+    return render(request, 'upload_file/upload_form.html', {'form': form})
