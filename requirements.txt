@@ -1,0 +1,2 @@
+django_allauth==0.38.0
+Django==2.1.4
