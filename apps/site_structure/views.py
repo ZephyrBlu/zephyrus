@@ -27,7 +27,8 @@ def upload(request):
         'title': title,
         'active': active
     }
-    return render(request, 'upload_file/upload_form.html', context)
+    return upload_form(request)
+    # return render(request, 'upload_file/upload_form.html', context)
 
 def user_profile(request):
     info = 'This is the User Profile page'
@@ -70,7 +71,7 @@ class MySignupView(SignupView):
 
     def form_valid(self, form):
         self.user = form.save(self.request)
-        return signedup(self.request)
+        return redirect('signup/complete')
 
 class MyLoginView(LoginView):
     template_name = "login/login.html"

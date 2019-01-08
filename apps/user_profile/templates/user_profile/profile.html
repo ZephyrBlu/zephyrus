@@ -7,9 +7,8 @@
     <nav id="profile">
         <ul>
             <li class="active"><a class="active" href="">Overview</a></li>
-            <li><a href="">Replays</a></li>
             <li><a href="">Analysis</a></li>
-            <li><a href="">Settings</a></li>
+            <li><a href="">Replays</a></li>
             <li>
                 <form method="post" action="{% url 'account_logout' %}">
                   {% csrf_token %}
