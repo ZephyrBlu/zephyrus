@@ -1,3 +1,6 @@
-from django.shortcuts import render
+from .utils.replay_parser_production import main as replay_parser
 
-# Create your views here.
+
+def parse_replay(file):
+    gameLength, errors = replay_parser(file)
+    return gameLength

@@ -28,7 +28,6 @@ def upload(request):
         'active': active
     }
     return upload_form(request)
-    # return render(request, 'upload_file/upload_form.html', context)
 
 def user_profile(request):
     info = 'This is the User Profile page'
