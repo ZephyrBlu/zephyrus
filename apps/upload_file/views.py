@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from .forms import ReplayFileForm
 from django.core.validators import FileExtensionValidator
 from django.views.generic.edit import FormView
+from apps.processreplays.views import parse_replay
 
 # class ReplayFileFormView(FormView):
 #     form_class = ReplayFileForm
@@ -26,8 +27,9 @@ def upload_form(request):
         if form.is_valid():
             file_extension_checker = FileExtensionValidator(['sc2replay'])
             file_extension_checker(request.FILES['file'])
+            replay_data = parse_replay(request.FILES['file'])
             form.save()
-            return redirect('/home/')
+            return render(request, 'user_profile/profile.html', {'info': replay_data})
     else:
         form = ReplayFileForm()
     return render(request, 'upload_file/upload_form.html', {'form': form})
