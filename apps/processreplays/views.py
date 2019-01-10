@@ -2,5 +2,5 @@ from .utils.replay_parser_production import main as replay_parser
 
 
 def parse_replay(file):
-    gameLength, errors = replay_parser(file)
-    return gameLength
+    summary_info = replay_parser(file)
+    return summary_info

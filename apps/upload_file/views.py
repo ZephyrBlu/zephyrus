@@ -21,6 +21,7 @@ from apps.processreplays.views import parse_replay
 #         else:
 #             return self.form_invalid(form)
 
+
 def upload_form(request, context):
     if request.method == 'POST':
         form = ReplayFileForm(request.POST, request.FILES)

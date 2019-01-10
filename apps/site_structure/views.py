@@ -4,6 +4,7 @@ from apps.upload_file.views import upload_form
 from allauth.account.views import SignupView, LoginView
 from apps.user_profile.views import display_replay
 
+
 def homepage(request):
     info = 'This is the homepage'
     heading = 'Welcome'
@@ -17,6 +18,7 @@ def homepage(request):
     }
     return render(request, 'site_structure/index.html', context)
 
+
 def upload(request):
     info = 'This is the upload page'
     heading = 'Upload'
@@ -29,6 +31,7 @@ def upload(request):
         'active': active
     }
     return upload_form(request, context)
+
 
 def user_profile(request):
     info = 'This is the User Profile page'
@@ -44,6 +47,7 @@ def user_profile(request):
     # return render(request, 'user_profile/profile.html', context)
     return display_replay(request, context)
 
+
 def premium(request):
     info = 'This is the premium sign up page'
     heading = 'Premium'
@@ -56,6 +60,7 @@ def premium(request):
         'active': active
     }
     return render(request, 'site_structure/index.html', context)
+
 
 class MySignupView(SignupView):
     def get_context_data(self, **kwargs):
@@ -74,6 +79,7 @@ class MySignupView(SignupView):
         self.user = form.save(self.request)
         return redirect('signup/complete')
 
+
 class MyLoginView(LoginView):
     template_name = "login/login.html"
 
@@ -89,6 +95,7 @@ class MyLoginView(LoginView):
         context['active'] = active
         return context
 
+
 def about(request):
     info = 'This is the about page'
     heading = 'About Us'
@@ -101,6 +108,7 @@ def about(request):
         'active': active
     }
     return render(request, 'site_structure/index.html', context)
+
 
 def contact(request):
     info = 'This is the contact page'
