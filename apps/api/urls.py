@@ -1,7 +1,9 @@
 from django.urls import path
-from . import views
+from .views import ReplayList, Replay, LatestReplay
 
 app_name = 'api'
 urlpatterns = [
-    path('replay-data/', views.return_replay_data, name='return_replay_data'),
+    path('replay/all/', ReplayList.as_view(), name='replay_list'),
+    path('replay/<int:pk>/', Replay.as_view(), name='replay_specific'),
+    path('replay/recent/', LatestReplay.as_view(), name='replay_latest'),
 ]
