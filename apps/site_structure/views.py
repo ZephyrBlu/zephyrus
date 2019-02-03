@@ -2,7 +2,6 @@ from django.shortcuts import render, redirect
 from apps.signup.views import email_form, signedup
 from apps.upload_file.views import upload_form
 from allauth.account.views import SignupView, LoginView
-from apps.user_profile.views import display_replay
 
 
 def homepage(request):
@@ -31,21 +30,6 @@ def upload(request):
         'active': active
     }
     return upload_form(request, context)
-
-
-def user_profile(request):
-    info = 'This is the User Profile page'
-    heading = 'Profile'
-    title = 'Zephyrus | Profile'
-    active = 'profile'
-    context = {
-        'info': info,
-        'heading': heading,
-        'title': title,
-        'active': active
-    }
-    # return render(request, 'user_profile/profile.html', context)
-    return display_replay(request, context)
 
 
 def premium(request):

@@ -10,5 +10,6 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('contact/', views.contact, name='contact'),
     path('login/', views.MyLoginView.as_view(), name='login'),
-    path('profile/', views.user_profile, name='profile'),
+    # path('profile/', views.user_profile, name='profile'),
+    # path('profile/', include('apps.user_profile.urls', namespace='user_profile'))
 ]

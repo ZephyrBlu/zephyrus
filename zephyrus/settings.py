@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'apps.upload_file.apps.UploadFileConfig',
     'apps.login.apps.LoginConfig',
     'apps.user_profile.apps.UserProfileConfig',
+    'apps.api.apps.ApiConfig',
 
 
     'django.contrib.admin',
@@ -142,9 +143,9 @@ STATIC_URL = '/static/'
 
 # STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'apps/site_structure/static/')
-]
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'apps/site_structure/static/'),
+# ]
 
 AUTH_USER_MODEL = 'usermanager.CustomUser'
 

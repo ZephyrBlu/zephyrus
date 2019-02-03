@@ -14,6 +14,7 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'site_structure/css/normalize.css' %}">
   <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
+  {% if active == 'profile' %} {% block profile_style %}{% endblock %} {% endif %}
   <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400" rel="stylesheet">
 </head>
 
@@ -31,7 +32,7 @@
         <li><a {% if active == 'home' %} class="active" {% endif %} href="{% url 'site_structure:home' %}">Home</a></li>
         {% if user.is_authenticated %}
           <li><a {% if active == 'upload' %} class="active" {% endif %} href="{% url 'site_structure:upload' %}">Upload</a></li>
-          <li><a {% if active == 'profile' %} class="active" {% endif %} href="{% url 'site_structure:profile' %}">Profile</a></li>
+          <li><a {% if active == 'profile' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">Profile</a></li>
         {% endif %}
         <li><a {% if active == 'premium' %} class="active" {% endif %} href="{% url 'site_structure:premium' %}">Premium</a></li>
         {% if not user.is_authenticated %}
@@ -43,11 +44,16 @@
       </ul>
     </nav>
     <div class='content'>
-      <main>
-        {% block content %}
+      {% if active == 'profile' %}
+        {% block profile-app %}
         {% endblock %}
-        <p>{{ info }}</p>
-      </main>
+      {% else %}
+        <main>
+          {% block content %}
+          {% endblock %}
+          <p>{{ info }}</p>
+        </main>
+      {% endif %}
     </div>
 
     <footer></footer>
