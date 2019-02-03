@@ -24,4 +24,6 @@ urlpatterns = [
     path('', include('apps.site_structure.urls')),
     path('', include('apps.signup.urls')),
     path('', include('allauth.urls')),
-] #+ static(settings.STATIC_URL)
+    path('profile/', include('apps.user_profile.urls')),
+    path('', include('apps.api.urls')),
+]

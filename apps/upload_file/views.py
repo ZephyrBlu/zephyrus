@@ -3,6 +3,7 @@ from .forms import ReplayFileForm
 from django.core.validators import FileExtensionValidator
 from django.views.generic.edit import FormView
 from apps.processreplays.views import parse_replay
+from .models import ReplayInfo
 
 # class ReplayFileFormView(FormView):
 #     form_class = ReplayFileForm
@@ -22,14 +23,28 @@ from apps.processreplays.views import parse_replay
 #             return self.form_invalid(form)
 
 
+# def upload_form(request, context):
+#     if request.method == 'POST':
+#         form = ReplayFileForm(request.POST, request.FILES)
+#         if form.is_valid():
+#             file_extension_checker = FileExtensionValidator(['sc2replay'])
+#             file_extension_checker(request.FILES['file'])
+#             form.save()
+#             return redirect('/profile/')
+#     else:
+#         form = ReplayFileForm()
+#         context['form'] = form
+#     return render(request, 'upload_file/upload_form.html', context)
+
+
 def upload_form(request, context):
     if request.method == 'POST':
-        form = ReplayFileForm(request.POST, request.FILES)
-        if form.is_valid():
-            file_extension_checker = FileExtensionValidator(['sc2replay'])
-            file_extension_checker(request.FILES['file'])
-            form.save()
-            return redirect('/profile/')
+        file_extension_checker = FileExtensionValidator(['sc2replay'])
+        file_extension_checker(request.FILES['file'])
+        raw_replay = parse_replay(request.FILES['file'])
+        replay = ReplayInfo(player1=raw_replay['player1'], player2=raw_replay['player2'])
+        replay.save()
+        return redirect('/profile/')
     else:
         form = ReplayFileForm()
         context['form'] = form
