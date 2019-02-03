@@ -1,11 +1,25 @@
-from django.shortcuts import render
+from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from apps.upload_file.models import ReplayInfo
 from .models import ReplaySerializer
-from django.http import JsonResponse
-from rest_framework.renderers import JSONRenderer
 
-def return_replay_data(request):
-    if request.method == 'GET':
-        replay_data = ReplayInfo.objects.latest('uploaded_at')
-        serializer = ReplaySerializer(replay_data)
-        return JsonResponse(serializer.data, safe=False)
+
+# returns all replays
+class ReplayList(generics.ListAPIView):
+    queryset = ReplayInfo.objects.all()
+    serializer_class = ReplaySerializer
+
+
+# returns particular replay based on pk ID in database
+class Replay(generics.RetrieveAPIView):
+    queryset = ReplayInfo.objects.all()
+    serializer_class = ReplaySerializer
+
+
+# returns last uploaded replay
+class LatestReplay(APIView):
+    def get(self, request, format=None):
+        replay = ReplayInfo.objects.latest('uploaded_at')
+        serializer = ReplaySerializer(replay)
+        return Response(serializer.data)
