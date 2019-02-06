@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from .settings_secret import *
+from google.oauth2 import service_account
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -159,7 +160,14 @@ AUTHENTICATION_BACKENDS = (
 )
 
 
-MEDIA_URL = '/media/'
+DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+GS_BUCKET_NAME = 'sc2-replays'
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-3e7a6f1bc4e5.json')
+GS_PROJECT_ID = 'reflected-codex-228006'
+# GS_DEFAULT_ACL = 'publicRead'
+
+
+# MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
@@ -167,7 +175,7 @@ ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = False
-#ACCOUNT_SESSION_REMEMBER = True
+# ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
 
