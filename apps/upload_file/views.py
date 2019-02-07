@@ -1,41 +1,12 @@
 import os
 import hashlib
-from django.shortcuts import render, reverse, redirect
+from django.shortcuts import render, redirect
 from .forms import ReplayFileForm
 from django.core.validators import FileExtensionValidator
+from django.core.files.storage import default_storage
 from apps.processreplays.views import parse_replay
 from .models import ReplayInfo
-
-# class ReplayFileFormView(FormView):
-#     form_class = ReplayFileForm
-#     template_name = 'upload_file/upload_form.html'  # Replace with your template.
-#     success_url = 'home/'  # Replace with your URL or reverse().
-#
-#     def post(self, request, *args, **kwargs):
-#         form_class = self.get_form_class()
-#         form = self.get_form(form_class)
-#         files = request.FILES.getlist('file')
-#         if form.is_valid():
-#             for f in files:
-#                 file_extension_checker = FileExtensionValidator(['sc2replay'])
-#                 file_extension_checker(f.name)
-#             return self.form_valid(form)
-#         else:
-#             return self.form_invalid(form)
-
-
-# def upload_form(request, context):
-#     if request.method == 'POST':
-#         form = ReplayFileForm(request.POST, request.FILES)
-#         if form.is_valid():
-#             file_extension_checker = FileExtensionValidator(['sc2replay'])
-#             file_extension_checker(request.FILES['file'])
-#             form.save()
-#             return redirect('/profile/')
-#     else:
-#         form = ReplayFileForm()
-#         context['form'] = form
-#     return render(request, 'upload_file/upload_form.html', context)
+from apps.user_profile.models import BattlenetAccount
 
 
 def sha256sum(f):
@@ -52,17 +23,24 @@ def upload_form(request, context):
         file_extension_checker = FileExtensionValidator(['sc2replay'])
         file_extension_checker(request.FILES['file'])
 
-        raw_replay = parse_replay(request.FILES['file'])
-
-        file_hash = sha256sum(request.FILES['file'])
-        request.FILES['file'].name = f'{file_hash}.SC2Replay'
-
         form = ReplayFileForm(request.POST, request.FILES)
+        if form.is_valid():
+            raw_replay = parse_replay(request.FILES['file'])
+            replay = ReplayInfo(player1=raw_replay['player1'], player2=raw_replay['player2'])
+            replay.save()
 
-        replay = ReplayInfo(player1=raw_replay['player1'], player2=raw_replay['player2'])
+            file_hash = sha256sum(request.FILES['file'])
+            request.FILES['file'].name = f'{file_hash}.SC2Replay'
 
-        form.save()
-        replay.save()
+            current_user = request.user
+            filename = request.FILES['file'].name
+            file_contents = request.FILES['file'].open(mode='rb')
+            # user_battlenet = BattlenetAccount.objects.all()
+            bucket_path = f'{current_user.email}/{filename}'
+
+            current_replay = default_storage.open(bucket_path, 'w')
+            current_replay.write(file_contents.read())
+            current_replay.close()
         return redirect('/profile/')
     else:
         form = ReplayFileForm()

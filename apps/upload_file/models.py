@@ -3,11 +3,6 @@ from django.contrib.postgres.fields import JSONField
 from apps.user_profile.models import BattlenetAccount
 
 
-class Replay(models.Model):
-    file = models.FileField(upload_to='replays')
-    uploaded_at = models.DateTimeField(auto_now_add=True)
-
-
 class ReplayInfo(models.Model):
     # file_link = models.CharField(max_length=200)
     # battlenet_account = models.ForeignKey(BattlenetAccount, on_delete=models.CASCADE)
