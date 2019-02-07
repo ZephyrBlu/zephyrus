@@ -1,7 +1,6 @@
 from django import forms
-from .models import Replay
+# from .models import Replay
 
-class ReplayFileForm(forms.ModelForm):
-    class Meta:
-        model = Replay
-        fields = ['file']
+
+class ReplayFileForm(forms.Form):
+    file = forms.FileField()
