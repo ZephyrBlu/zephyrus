@@ -4,8 +4,8 @@ from apps.user_profile.models import BattlenetAccount
 
 
 class ReplayInfo(models.Model):
-    file_path = models.CharField(max_length=200)
-    # battlenet_account = models.ForeignKey(BattlenetAccount, on_delete=models.CASCADE)
+    bucket_path = models.CharField(max_length=200)
+    battlenet_account = models.ForeignKey(BattlenetAccount, on_delete=models.CASCADE)
     # timeline = JSONField()
     player1 = JSONField()
     player2 = JSONField()

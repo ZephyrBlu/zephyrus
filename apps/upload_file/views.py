@@ -5,6 +5,7 @@ from django.core.validators import FileExtensionValidator
 from django.core.files.storage import default_storage
 from apps.processreplays.views import parse_replay
 from .models import ReplayInfo
+from allauth.account.models import EmailAddress
 from apps.user_profile.models import BattlenetAccount
 
 
@@ -31,9 +32,10 @@ def upload_form(request, context):
             file_hash = sha256sum(request.FILES['file'])
             request.FILES['file'].name = f'{file_hash}.SC2Replay'
             filename = request.FILES['file'].name
-            bucket_path = f'{current_user.email}/{filename}'
+            current_user_battlenet = BattlenetAccount.objects.get(user_account=EmailAddress.objects.get(user=current_user))
+            bucket_path = f'{current_user.email}/{current_user_battlenet.battletag}/{filename}'
 
-            replay = ReplayInfo(file_path=bucket_path, player1=raw_replay['player1'], player2=raw_replay['player2'])
+            replay = ReplayInfo(file_path=bucket_path, battlenet_account=current_user_battlenet, player1=raw_replay['player1'], player2=raw_replay['player2'])
             replay.save()
 
             file_contents = request.FILES['file'].open(mode='rb')
