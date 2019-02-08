@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 from django.db import models
 from django.utils import timezone
 
+
 class CustomManager(BaseUserManager):
     def _create_user(self, email, password, **extra_fields):
         """
@@ -33,6 +34,7 @@ class CustomManager(BaseUserManager):
 
         return self._create_user(email, password)
 
+
 class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
         An abstract base class implementing a fully featured User model with
@@ -46,6 +48,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         _('email'),
         max_length=150,
         unique=True,
+        primary_key=True,
         help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
         validators=[email_validator],
         error_messages={
@@ -82,5 +85,3 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
-
-

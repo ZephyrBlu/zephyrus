@@ -1,4 +1,3 @@
-import os
 import hashlib
 from django.shortcuts import render, redirect
 from .forms import ReplayFileForm
@@ -25,19 +24,19 @@ def upload_form(request, context):
 
         form = ReplayFileForm(request.POST, request.FILES)
         if form.is_valid():
-            raw_replay = parse_replay(request.FILES['file'])
-            replay = ReplayInfo(player1=raw_replay['player1'], player2=raw_replay['player2'])
-            replay.save()
+            current_user = request.user
+            # user_battlenet = BattlenetAccount.objects.all()
 
+            raw_replay = parse_replay(request.FILES['file'])
             file_hash = sha256sum(request.FILES['file'])
             request.FILES['file'].name = f'{file_hash}.SC2Replay'
-
-            current_user = request.user
             filename = request.FILES['file'].name
-            file_contents = request.FILES['file'].open(mode='rb')
-            # user_battlenet = BattlenetAccount.objects.all()
             bucket_path = f'{current_user.email}/{filename}'
 
+            replay = ReplayInfo(file_path=bucket_path, player1=raw_replay['player1'], player2=raw_replay['player2'])
+            replay.save()
+
+            file_contents = request.FILES['file'].open(mode='rb')
             current_replay = default_storage.open(bucket_path, 'w')
             current_replay.write(file_contents.read())
             current_replay.close()
