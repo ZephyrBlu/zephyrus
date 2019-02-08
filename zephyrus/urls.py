@@ -15,8 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -26,4 +25,6 @@ urlpatterns = [
     path('', include('allauth.urls')),
     path('profile/', include('apps.user_profile.urls')),
     path('', include('apps.api.urls')),
+    # path('', include('oauth2_provider.urls', namespace='oauth2_provider')),
+    path('', include('apps.battlenet_api.urls')),
 ]

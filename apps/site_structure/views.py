@@ -61,7 +61,7 @@ class MySignupView(SignupView):
 
     def form_valid(self, form):
         self.user = form.save(self.request)
-        return redirect('signup/complete')
+        return redirect('authorize/')
 
 
 class MyLoginView(LoginView):

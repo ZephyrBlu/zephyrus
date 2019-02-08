@@ -16,8 +16,9 @@
 	<nav id="profile">
         <ul>
            	<li><a {% if profile_active == 'overview' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">Overview</a></li>
-              <li><a {% if profile_active == 'analysis' %} class="active" {% endif %} href="{% url 'user_profile:analysis' %}">Analysis</a></li>
-              <li><a {% if profile_active == 'replays' %} class="active" {% endif %} href="{% url 'user_profile:replays' %}">Replays</a></li>
+			<li><a {% if profile_active == 'analysis' %} class="active" {% endif %} href="{% url 'user_profile:analysis' %}">Analysis</a></li>
+			<li><a {% if profile_active == 'replays' %} class="active" {% endif %} href="{% url 'user_profile:replays' %}">Replays</a></li>
+			<li><a href="{% url 'battlenet_api:authorize' %}">{{ auth }}</a></li>
            	<li>
 	            <form method="post" action="{% url 'account_logout' %}">
 		            {% csrf_token %}
@@ -29,7 +30,6 @@
           	</li>
      	</ul>
    	</nav>
-
 	<div id='root'>
 
 	</div>

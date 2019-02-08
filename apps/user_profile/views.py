@@ -1,24 +1,6 @@
 from django.shortcuts import render
 from django.views import View
 
-class ProfileGeneric(View):
-    title = ''
-    template = 'user_profile/profile.html'
-    component = ''
-
-    def get(self, request):
-        props = {
-
-        }
-
-        context = {
-            'title': self.title,
-            'component': self.component,
-            'props': props
-        }
-
-        render(request, self.template, context)
-
 
 def overview(request):
     profile_active = 'overview'
@@ -26,12 +8,14 @@ def overview(request):
     heading = 'Profile'
     title = 'Zephyrus | Profile'
     active = 'profile'
+    auth = 'Authorize'
     context = {
         'info': info,
         'heading': heading,
         'title': title,
         'active': active,
-        'profile_active': profile_active
+        'profile_active': profile_active,
+        'auth': auth
     }
     return render(request, 'user_profile/profile.html', context)
 

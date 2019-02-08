@@ -36,6 +36,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'rest_framework',
+    'sslserver',
+    'django_extensions',
+    # 'oauth2_provider',
 
 
     'usermanager.apps.UsermanagerConfig',
@@ -45,6 +48,7 @@ INSTALLED_APPS = [
     'apps.login.apps.LoginConfig',
     'apps.user_profile.apps.UserProfileConfig',
     'apps.api.apps.ApiConfig',
+    'apps.battlenet_api.apps.BattlenetApiConfig',
 
 
     'django.contrib.admin',
