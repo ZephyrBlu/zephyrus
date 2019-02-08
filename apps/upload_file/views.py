@@ -35,7 +35,7 @@ def upload_form(request, context):
             current_user_battlenet = BattlenetAccount.objects.get(user_account=EmailAddress.objects.get(user=current_user))
             bucket_path = f'{current_user.email}/{current_user_battlenet.battletag}/{filename}'
 
-            replay = ReplayInfo(file_path=bucket_path, battlenet_account=current_user_battlenet, player1=raw_replay['player1'], player2=raw_replay['player2'])
+            replay = ReplayInfo(file_hash=file_hash, battlenet_account=current_user_battlenet, player1=raw_replay['player1'], player2=raw_replay['player2'])
             replay.save()
 
             file_contents = request.FILES['file'].open(mode='rb')
