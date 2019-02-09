@@ -2,4 +2,6 @@
 
 {% block content %}
   <p>Woohoo! You're all signed up</p>
+  <p>You still need to Authorize your Battlenet account so we can verify your Battletag</p>
+  <button type="button"><a href="{% url 'battlenet_api:authorize' %}">Authorize Your Account</a></button>
 {% endblock %}

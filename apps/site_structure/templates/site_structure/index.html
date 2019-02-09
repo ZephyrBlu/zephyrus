@@ -31,13 +31,13 @@
       <ul>
         <li><a {% if active == 'home' %} class="active" {% endif %} href="{% url 'site_structure:home' %}">Home</a></li>
         {% if user.is_authenticated %}
-          <li><a {% if active == 'upload' %} class="active" {% endif %} href="{% url 'site_structure:upload' %}">Upload</a></li>
+          <li><a {% if active == 'upload' %} class="active" {% endif %} href="{% url 'upload:upload_form' %}">Upload</a></li>
           <li><a {% if active == 'profile' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">Profile</a></li>
         {% endif %}
         <li><a {% if active == 'premium' %} class="active" {% endif %} href="{% url 'site_structure:premium' %}">Premium</a></li>
         {% if not user.is_authenticated %}
-          <li><a {% if active == 'signup' %} class="active" {% endif %} href="{% url 'site_structure:signup' %}">Sign Up</a></li>
-          <li><a {% if active == 'login' %} class="active" {% endif %} href="{% url 'site_structure:login' %}">Login</a></li>
+          <li><a {% if active == 'signup' %} class="active" {% endif %} href="{% url 'signup:signup' %}">Sign Up</a></li>
+          <li><a {% if active == 'login' %} class="active" {% endif %} href="{% url 'login:login' %}">Login</a></li>
         {% endif %}
         <li><a {% if active == 'about' %} class="active" {% endif %} href="{% url 'site_structure:about' %}">About</a></li>
         <li><a {% if active == 'contact' %} class="active" {% endif %} href="{% url 'site_structure:contact' %}">Contact</a></li>
