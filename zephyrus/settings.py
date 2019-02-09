@@ -33,14 +33,6 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'allauth',
-    'allauth.account',
-    'rest_framework',
-    'sslserver',
-    'django_extensions',
-    # 'oauth2_provider',
-
-
     'usermanager.apps.UsermanagerConfig',
     'apps.signup.apps.SignupConfig',
     'apps.site_structure.apps.SiteStructureConfig',
@@ -48,8 +40,13 @@ INSTALLED_APPS = [
     'apps.login.apps.LoginConfig',
     'apps.user_profile.apps.UserProfileConfig',
     'apps.api.apps.ApiConfig',
-    'apps.battlenet_api.apps.BattlenetApiConfig',
 
+    'allauth',
+    'allauth.account',
+    'rest_framework',
+    'sslserver',
+    'django_extensions',
+    # 'oauth2_provider',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -173,7 +170,7 @@ GS_PROJECT_ID = 'reflected-codex-228006'
 # MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-
+ACCOUNT_ADAPTER = 'zephyrus.users.adapter.CustomAccountAdapter'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False

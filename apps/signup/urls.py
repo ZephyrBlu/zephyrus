@@ -3,5 +3,6 @@ from . import views
 
 app_name = 'signup'
 urlpatterns = [
-    path('signup/complete/', views.signedup, name='signedup'),
+    path('', views.MySignupView.as_view(), name='signup'),
+    path('complete/', views.signedup, name='signedup'),
 ]

@@ -1,7 +1,4 @@
-from django.shortcuts import render, redirect
-from apps.signup.views import email_form, signedup
-from apps.upload_file.views import upload_form
-from allauth.account.views import SignupView, LoginView
+from django.shortcuts import render
 
 
 def homepage(request):
@@ -18,20 +15,6 @@ def homepage(request):
     return render(request, 'site_structure/index.html', context)
 
 
-def upload(request):
-    info = 'This is the upload page'
-    heading = 'Upload'
-    title = 'Zephyrus | Upload'
-    active = 'upload'
-    context = {
-        'info': info,
-        'heading': heading,
-        'title': title,
-        'active': active
-    }
-    return upload_form(request, context)
-
-
 def premium(request):
     info = 'This is the premium sign up page'
     heading = 'Premium'
@@ -44,40 +27,6 @@ def premium(request):
         'active': active
     }
     return render(request, 'site_structure/index.html', context)
-
-
-class MySignupView(SignupView):
-    def get_context_data(self, **kwargs):
-        context = super(MySignupView, self).get_context_data(**kwargs)
-        info = 'This is the sign up page'
-        heading = 'Sign Up'
-        title = 'Zephyrus | Sign Up'
-        active = 'signup'
-        context['info'] = info
-        context['heading'] = heading
-        context['title'] = title
-        context['active'] = active
-        return context
-
-    def form_valid(self, form):
-        self.user = form.save(self.request)
-        return redirect('authorize/')
-
-
-class MyLoginView(LoginView):
-    template_name = "login/login.html"
-
-    def get_context_data(self, **kwargs):
-        context = super(LoginView, self).get_context_data(**kwargs)
-        info = 'This is the login page'
-        heading = 'Login'
-        title = 'Zephyrus | Login'
-        active = 'login'
-        context['info'] = info
-        context['heading'] = heading
-        context['title'] = title
-        context['active'] = active
-        return context
 
 
 def about(request):

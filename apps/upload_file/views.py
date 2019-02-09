@@ -18,7 +18,7 @@ def sha256sum(f):
     return h.hexdigest()
 
 
-def upload_form(request, context):
+def upload_form(request):
     if request.method == 'POST':
         file_extension_checker = FileExtensionValidator(['sc2replay'])
         file_extension_checker(request.FILES['file'])
@@ -26,7 +26,6 @@ def upload_form(request, context):
         form = ReplayFileForm(request.POST, request.FILES)
         if form.is_valid():
             current_user = request.user
-            # user_battlenet = BattlenetAccount.objects.all()
 
             raw_replay = parse_replay(request.FILES['file'])
             file_hash = sha256sum(request.FILES['file'])
@@ -44,6 +43,17 @@ def upload_form(request, context):
             current_replay.close()
         return redirect('/profile/')
     else:
+        info = 'This is the upload page'
+        heading = 'Upload'
+        title = 'Zephyrus | Upload'
+        active = 'upload'
+        context = {
+            'info': info,
+            'heading': heading,
+            'title': title,
+            'active': active
+        }
+
         form = ReplayFileForm()
         context['form'] = form
     return render(request, 'upload_file/upload_form.html', context)
