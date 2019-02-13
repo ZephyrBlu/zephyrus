@@ -1,0 +1,141 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Zephyrus</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+  {% load static %}
+  <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'user_profile/css/new-profile.css' %}">
+</head>
+
+<body id='body'>
+  <!--[if lte IE 9]>
+    <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
+  <![endif]-->
+    <nav id="profile" onmouseover="openNav()">
+        <div class='logo'>
+            <span class='title' id='title'>
+                <a href="">zephyrus</a>
+                <h4 class='sub-heading' id='sub-heading'>beta</h4>
+            </span>
+            <img src="https://via.placeholder.com/67/000000?text=Logo">
+        </div>
+        <ul id="side-menu">
+            <li><a href="">upload</a></li>
+            <li class='active' ><a href="">profile</a></li>
+            <li><a href="">about</a></li>
+            <li><a href="">contact</a></li>
+            <li><a href=""><span class='special'>zephyr</span></a></li>
+        </ul>
+    </nav>
+    <header id='header' class='sticky'>
+        <h2 id='page-head'>Summary</h2>
+        <nav class="menu" id='menu'>
+            <ul>
+                <li><a class='active'>overview</a></li>
+                <li><a>analysis</a></li>
+                <li><a>replays</a></li>
+            </ul>
+        </nav>
+    </header>
+    <div class='wrapper' id='wrapper'>
+        <div class='content' id='content'>
+            <div class='summary'>
+            </div>
+            <div class='analysis'>
+                <div class='timeline'>
+                </div>
+            </div>
+        </div>
+        <footer>
+            <div class='footer'>
+                <h4>© Luke Holroyd 2019</h4>
+                <span class='info'><a>Privacy Policy</a> | <a>Terms of Service</a></span>
+            </div>
+    </footer>
+    </div>
+  <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
+  <script>
+    window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
+    ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
+  </script>
+  <script src="https://www.google-analytics.com/analytics.js" async defer></script>
+</body>
+<script type="text/javascript">
+    var nav = document.getElementById("profile");
+    var main = document.getElementById("wrapper");
+    var sideMenu = document.getElementById("side-menu");
+    var menu = document.getElementById("menu");
+    var title = document.getElementById("title");
+    var sub = document.getElementById("sub-heading");
+    var content = document.getElementById("content");
+    var header = document.getElementById("header");
+    var body = document.getElementById("body");
+
+    function headerOffset() {
+        var width = body.clientWidth;
+        var offsetRect = content.getBoundingClientRect();
+        var offsetRight = offsetRect.right;
+        var final = width - offsetRight;
+        header.style.gridTemplateColumns = offsetRect.left.toString()+'px 1fr 2fr '+final.toString()+'px';
+    }
+
+    document.onload = headerOffset();
+    window.addEventListener('resize', headerOffset);
+
+    /* Set the width of the side navigation to 250px */
+    function openNav() {
+        sub.style.opacity = '1';
+
+        title.style.transition = '0.5s';
+        title.style.transitionDelay = '0.2s';
+
+        nav.style.width = "360px";
+        main.style.marginLeft = "360px";
+        content.style.width = '1400px';
+        header.style.marginLeft = '246px';
+        menu.style.marginRight = '293px';
+
+        nav.addEventListener('mouseout', closeNav);
+        nav.removeEventListener('mouseover', openNav);
+
+        sideMenu.style.opacity = '1';
+
+        title.style.opacity = '1';
+    }
+
+    var nav = document.getElementById("profile")
+    var main = document.getElementById("wrapper")
+    var close = document.getElementById("closebtn")
+
+    /* Set the width of the side navigation to 0 */
+    function closeNav() {
+        nav.style.width = "67px";
+        main.style.marginLeft = "67px";
+        content.style.width = '1700px';
+        header.style.marginLeft = '0px';
+        menu.style.marginRight = '0px';
+
+        nav.addEventListener('mouseover', openNav);
+        nav.removeEventListener('mouseout', closeNav);
+
+        sideMenu.style.opacity= '0';
+
+        sub.style.transition = '0.1s';
+        sub.style.opacity = '0';
+
+        title.style.transition = '0.1s';
+        title.style.transitionDelay = '0.3s';
+        title.style.opacity = '0';
+    }
+</script>
+
+</html>

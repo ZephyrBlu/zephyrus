@@ -44,39 +44,12 @@
                     <li><a href="">profile</a></li>
                     <li><a href="">about</a></li>
                     <li><a href="">contact</a></li>
-                    <li><a class='special' href="">sign in</a></li>
-                    <li><a class='special' href="">premium</a></li>
+                    <li><a href="">zephyr</a></li>
+                    <li><a class='special' href="">sign up</a></li>
+                    <li><a class='special' href="">log in</a></li>
                 </ul>
             </nav>
         </header>
-        <script>
-
-            var header_placeholder = document.getElementById("placeholder")
-
-            // When the user scrolls the page, execute myFunction
-            window.onscroll = function() {myFunction()};
-
-            // Get the header
-            function hideHeader() {
-                header_placeholder.style.zIndex = '-1';
-            }
-
-            // Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
-            function myFunction() {
-              if (window.pageYOffset > 500) {
-                header_placeholder.style.animationName = 'fadein';
-                header_placeholder.style.animationDuration = '0.3s';
-                header_placeholder.style.opacity = '1';
-                header_placeholder.removeEventListener("mouseover", hideHeader);
-                header_placeholder.style.zIndex = '1';
-              } else if (header_placeholder.style.opacity == '1') {
-                header_placeholder.style.animationName = 'fadeout';
-                header_placeholder.style.animationDuration = '0.3s';
-                header_placeholder.style.opacity = '0';
-                header_placeholder.addEventListener("mouseover", hideHeader);
-              }
-            }
-        </script>
         <div class='content'>
             <div class='hero'>
                 <h1><span class='highlight'>powerful</span> and <span class='highlight'>easy</span><br> replay analysis</h1>
@@ -124,6 +97,34 @@
             </div>
         </div>
     </div>
+    <script>
+
+        var header_placeholder = document.getElementById("placeholder")
+
+        // When the user scrolls the page, execute myFunction
+        window.onscroll = function() {myFunction()};
+
+        // Get the header
+        function hideHeader() {
+            header_placeholder.style.zIndex = '-1';
+        }
+
+        // Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
+        function myFunction() {
+          if (window.pageYOffset > 500) {
+            header_placeholder.style.animationName = 'fadein';
+            header_placeholder.style.animationDuration = '0.3s';
+            header_placeholder.style.opacity = '1';
+            header_placeholder.removeEventListener("mouseover", hideHeader);
+            header_placeholder.style.zIndex = '1';
+          } else if (header_placeholder.style.opacity == '1') {
+            header_placeholder.style.animationName = 'fadeout';
+            header_placeholder.style.animationDuration = '0.3s';
+            header_placeholder.style.opacity = '0';
+            header_placeholder.addEventListener("mouseover", hideHeader);
+          }
+        }
+        </script>
     <footer>
         <div class='footer'>
             <h4>© Luke Holroyd 2019</h4>
