@@ -1,6 +1,10 @@
 from django.shortcuts import render
 
 
+def landing_page(request):
+    return render(request, 'site_structure/landing-page.html')
+
+
 def homepage(request):
     info = 'This is the homepage'
     heading = 'Welcome'

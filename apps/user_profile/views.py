@@ -8,6 +8,10 @@ import requests
 api_url = 'https://us.battle.net/'
 
 
+def updated_profile(request):
+    return render(request, 'user_profile/profile-redesign.html')
+
+
 def need_authorization(request):
     return render(request, 'user_profile/profile.html', {'active': 'profile'})
 
