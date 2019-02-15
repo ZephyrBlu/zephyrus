@@ -9,7 +9,7 @@ api_url = 'https://us.battle.net/'
 
 
 def updated_profile(request):
-    return render(request, 'user_profile/profile-redesign.html')
+    return render(request, 'user_profile/profile-redesign.html', {'active': 'profile'})
 
 
 def need_authorization(request):
@@ -69,7 +69,7 @@ def battlenet_authorized(user):
 
 
 # implement class based view for profile sections
-@user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
+# @user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
 def overview(request):
     profile_active = 'overview'
     info = 'This is the User Profile page'
