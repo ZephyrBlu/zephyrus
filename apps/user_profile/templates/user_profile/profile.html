@@ -4,42 +4,126 @@
 
 {% load static %}
 
-{% block profile_style %}
-
-	<link href="{% static 'user_profile/assets/profile-app/build/overview.7e32aac65e8494a6a90a1d7f0f683baa.css' %}" rel="stylesheet"/>
-	<link href="{% static 'user_profile/css/profile.css' %}" rel="stylesheet"/>
-
+{% block stylesheet %}
+    <link rel="stylesheet" href="{% static 'user_profile/css/profile.css' %}">
 {% endblock %}
 
-{% block profile-app %}
-
-	<nav id="profile">
-        <ul>
-           	<li><a {% if profile_active == 'overview' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">Overview</a></li>
-			<li><a {% if profile_active == 'analysis' %} class="active" {% endif %} href="{% url 'user_profile:analysis' %}">Analysis</a></li>
-			<li><a {% if profile_active == 'replays' %} class="active" {% endif %} href="{% url 'user_profile:replays' %}">Replays</a></li>
-			<li><a href="{% url 'user_profile:authorize' %}">{{ auth }}</a></li>
-           	<li>
-	            <form method="post" action="{% url 'account_logout' %}">
+{% block nav %}
+    <nav id="profile" onmouseover="openNav()">
+        <div class='logo'>
+            <span class='title' id='title'>
+                <a href="{% url 'site_structure:home' %}">zephyrus</a>
+                <h4 class='sub-heading' id='sub-heading'>beta</h4>
+            </span>
+            <img src="https://via.placeholder.com/67/000000?text=Logo">
+        </div>
+        <ul id="side-menu">
+            <li {% if active == 'upload' %} class="active" {% endif %}><a  href="{% url 'upload:upload_form' %}">upload</a></li>
+            <li {% if active == 'profile' %} class="active" {% endif %}><a href="{% url 'user_profile:overview' %}">profile</a></li>
+            <li {% if active == 'about' %} class="active" {% endif %}><a href="{% url 'site_structure:about' %}">about</a></li>
+            <li {% if active == 'contact' %} class="active" {% endif %}><a href="{% url 'site_structure:contact' %}">contact</a></li>
+            <li {% if active == 'premium' %} class="active" {% endif %}><a href="{% url 'site_structure:premium' %}"><span class='special'>zephyr</span></a></li>
+            <li class='button'>
+                <form method="post" action="{% url 'account_logout' %}">
 		            {% csrf_token %}
 		            {% if redirect_field_value %}
 			            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
 		            {% endif %}
-		            <button type="submit">{% trans 'Sign Out' %}</button>
+		            <button type="submit" class='underline'>{% trans 'sign out' %}</button>
 	           </form>
-          	</li>
-     	</ul>
-   	</nav>
-	<div id='root'>
-		{% include 'user_profile/authorization.html' %}
-	</div>
+            </li>
+        </ul>
+    </nav>
+    <header id='header' class='sticky'>
+        <h2 id='page-head'>Summary</h2>
+        <nav class="menu" id='menu'>
+            <ul>
+                <li><a {% if profile_active == 'overview' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">overview</a></li>
+                <li><a {% if profile_active == 'analysis' %} class="active" {% endif %} href="{% url 'user_profile:analysis' %}">analysis</a></li>
+                <li><a {% if profile_active == 'replays' %} class="active" {% endif %} href="{% url 'user_profile:replays' %}">replays</a></li>
+            </ul>
+        </nav>
+    </header>
+{% endblock %}
 
-	<script src="{% static 'user_profile/assets/profile-app/build/runtime.js' %}" type="text/javascript"></script>
+{% block content %}
+    {% include 'user_profile/authorization.html' %}
+
+    <script src="{% static 'user_profile/assets/profile-app/build/runtime.js' %}" type="text/javascript"></script>
 	{% if profile_active == 'overview' %}
 		<script src="{% static 'user_profile/assets/profile-app/build/overview.js' %}" type="text/javascript"></script>
 	{% elif profile_active == 'analysis' %}
 		<script src="{% static 'user_profile/assets/profile-app/build/analysis.js' %}" type="text/javascript"></script>
 	{% endif %}
-	
+{% endblock %}
 
+{% block js %}
+    <script type="text/javascript">
+        var nav = document.getElementById("profile");
+        var main = document.getElementById("wrapper");
+        var sideMenu = document.getElementById("side-menu");
+        var menu = document.getElementById("menu");
+        var title = document.getElementById("title");
+        var sub = document.getElementById("sub-heading");
+        var root = document.getElementById("root");
+        var header = document.getElementById("header");
+        var body = document.getElementById("body");
+
+        function headerOffset() {
+            var width = body.clientWidth;
+            var offsetRect = root.getBoundingClientRect();
+            var offsetRight = offsetRect.right;
+            var final = width - offsetRight;
+            header.style.gridTemplateColumns = offsetRect.left.toString()+'px 1fr 2fr '+final.toString()+'px';
+        }
+
+        document.onload = headerOffset();
+        window.addEventListener('resize', headerOffset);
+
+        /* Set the width of the side navigation to 250px */
+        function openNav() {
+            sub.style.opacity = '1';
+
+            title.style.transition = '0.5s';
+            title.style.transitionDelay = '0.2s';
+
+            nav.style.width = "360px";
+            main.style.marginLeft = "360px";
+            root.style.width = '1400px';
+            header.style.marginLeft = '246px';
+            menu.style.marginRight = '293px';
+
+            nav.addEventListener('mouseout', closeNav);
+            nav.removeEventListener('mouseover', openNav);
+
+            sideMenu.style.opacity = '1';
+
+            title.style.opacity = '1';
+        }
+
+        var nav = document.getElementById("profile")
+        var main = document.getElementById("wrapper")
+        var close = document.getElementById("closebtn")
+
+        /* Set the width of the side navigation to 0 */
+        function closeNav() {
+            nav.style.width = "67px";
+            main.style.marginLeft = "67px";
+            root.style.width = '1700px';
+            header.style.marginLeft = '0px';
+            menu.style.marginRight = '0px';
+
+            nav.addEventListener('mouseover', openNav);
+            nav.removeEventListener('mouseout', closeNav);
+
+            sideMenu.style.opacity= '0';
+
+            sub.style.transition = '0.1s';
+            sub.style.opacity = '0';
+
+            title.style.transition = '0.1s';
+            title.style.transitionDelay = '0.3s';
+            title.style.opacity = '0';
+        }
+    </script>
 {% endblock %}

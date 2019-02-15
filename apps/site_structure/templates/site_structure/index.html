@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
-  <title>{{ title }}</title>
+  <title>Zephyrus</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
@@ -12,58 +12,51 @@
   <link rel="apple-touch-icon" href="icon.png">
   <!-- Place favicon.ico in the root directory -->
   {% load static %}
-  <link rel="stylesheet" href="{% static 'site_structure/css/normalize.css' %}">
-  <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
-  {% if active == 'profile' %} {% block profile_style %}{% endblock %} {% endif %}
   <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
+  {% block stylesheet %}{% endblock %}
 </head>
 
-<body>
+<body id='body'>
   <!--[if lte IE 9]>
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
+    {% block nav %}
+    {% endblock %}
+    <div class='wrapper' id='wrapper'>
+        {% if active != 'profile' %}
+            <header id='header'>
+                <a class='title' href="{% url 'site_structure:home' %}">zephyrus</a>
+                <h4 class='sub-heading'>beta</h4>
+                <nav class="menu">
+                    <ul>
+                        <li {% if active == 'upload' %} class="active" {% endif %}><a  href="{% url 'upload:upload_form' %}">upload</a></li>
+                        <li {% if active == 'profile' %} class="active" {% endif %}><a href="{% url 'user_profile:overview' %}">profile</a></li>
+                        <li {% if active == 'about' %} class="active" {% endif %}><a href="{% url 'site_structure:about' %}">about</a></li>
+                        <li {% if active == 'contact' %} class="active" {% endif %}><a href="{% url 'site_structure:contact' %}">contact</a></li>
+                        <li {% if active == 'premium' %} class="active" {% endif %}><a href="{% url 'site_structure:premium' %}">zephyr</a></li>
+                        <li {% if active == 'signup' %} class="active" {% endif %}><a class='special' href="{% url 'signup:signup' %}">sign up</a></li>
+                        <li {% if active == 'login' %} class="active" {% endif %}><a class='special' href="{% url 'login:login' %}">log in</a></li>
+                    </ul>
+                </nav>
+            </header>
 
-  <div class='container'>
-    <header>
-      <h1>zephyrus</h1>
-    </header>
-    <nav id="main">
-      <ul>
-        <li><a {% if active == 'home' %} class="active" {% endif %} href="{% url 'site_structure:home' %}">Home</a></li>
-        {% if user.is_authenticated %}
-          <li><a {% if active == 'upload' %} class="active" {% endif %} href="{% url 'upload:upload_form' %}">Upload</a></li>
-          <li><a {% if active == 'profile' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">Profile</a></li>
+        <div class='content' id='content'>
+        {% else %}
+            <div class='content' id='root'>
         {% endif %}
-        <li><a {% if active == 'premium' %} class="active" {% endif %} href="{% url 'site_structure:premium' %}">Premium</a></li>
-        {% if not user.is_authenticated %}
-          <li><a {% if active == 'signup' %} class="active" {% endif %} href="{% url 'signup:signup' %}">Sign Up</a></li>
-          <li><a {% if active == 'login' %} class="active" {% endif %} href="{% url 'login:login' %}">Login</a></li>
-        {% endif %}
-        <li><a {% if active == 'about' %} class="active" {% endif %} href="{% url 'site_structure:about' %}">About</a></li>
-        <li><a {% if active == 'contact' %} class="active" {% endif %} href="{% url 'site_structure:contact' %}">Contact</a></li>
-      </ul>
-    </nav>
-    <div class='content'>
-      {% if active == 'profile' %}
-        {% block profile-app %}
+        {% block content %}
         {% endblock %}
-      {% else %}
-        <main>
-          {% block content %}
-          {% endblock %}
-          <p>{{ info }}</p>
-        </main>
-      {% endif %}
+        </div>
     </div>
-
-    <footer></footer>
-  </div>
-
-  <script src="js/vendor/modernizr-3.6.0.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
-  <script>window.jQuery || document.write('<script src="js/vendor/jquery-3.3.1.min.js"><\/script>')</script>
-  <script src="js/plugins.js"></script>
-  <script src="js/main.js"></script>
+        {% block js %}
+        {% endblock %}
+    <footer>
+        <div class='footer'>
+            <h4>© Luke Holroyd 2019</h4>
+            <span class='info'><a>Privacy Policy</a> | <a>Terms of Service</a></span>
+        </div>
+    </footer>
 
   <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
   <script>

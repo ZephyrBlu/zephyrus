@@ -1,8 +1,8 @@
 from django.shortcuts import render
 
 
-def landing_page(request):
-    return render(request, 'site_structure/landing-page.html')
+def landing(request):
+    return render(request, 'site_structure/landing.html')
 
 
 def homepage(request):
