@@ -12,7 +12,7 @@
   <link rel="apple-touch-icon" href="icon.png">
   <!-- Place favicon.ico in the root directory -->
   {% load static %}
-  <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400, 500|Lato" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
   {% block stylesheet %}{% endblock %}
 </head>
@@ -30,13 +30,13 @@
                 <h4 class='sub-heading'>beta</h4>
                 <nav class="menu">
                     <ul>
-                        <li {% if active == 'upload' %} class="active" {% endif %}><a  href="{% url 'upload:upload_form' %}">upload</a></li>
-                        <li {% if active == 'profile' %} class="active" {% endif %}><a href="{% url 'user_profile:overview' %}">profile</a></li>
-                        <li {% if active == 'about' %} class="active" {% endif %}><a href="{% url 'site_structure:about' %}">about</a></li>
-                        <li {% if active == 'contact' %} class="active" {% endif %}><a href="{% url 'site_structure:contact' %}">contact</a></li>
-                        <li {% if active == 'premium' %} class="active" {% endif %}><a href="{% url 'site_structure:premium' %}">zephyr</a></li>
-                        <li {% if active == 'signup' %} class="active" {% endif %}><a class='special' href="{% url 'signup:signup' %}">sign up</a></li>
-                        <li {% if active == 'login' %} class="active" {% endif %}><a class='special' href="{% url 'login:login' %}">log in</a></li>
+                        <li><a {% if active == 'upload' %} class="active" {% endif %} href="{% url 'upload:upload_form' %}">upload</a></li>
+                        <li><a {% if active == 'profile' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">profile</a></li>
+                        <li><a {% if active == 'about' %} class="active" {% endif %} href="{% url 'site_structure:about' %}">about</a></li>
+                        <li><a {% if active == 'contact' %} class="active" {% endif %} href="{% url 'site_structure:contact' %}">contact</a></li>
+                        <li><a {% if active == 'premium' %} class="active" {% endif %} href="{% url 'site_structure:premium' %}">zephyr</a></li>
+                        <li><a {% if active == 'signup' %} class="active" {% endif %} class='special' href="{% url 'signup:signup' %}">sign up</a></li>
+                        <li><a {% if active == 'login' %} class="active" {% endif %} class='special' href="{% url 'login:login' %}">login</a></li>
                     </ul>
                 </nav>
             </header>

@@ -1,6 +1,14 @@
 {% extends 'site_structure/index.html' %}
 
+{% load static %}
+
+{% block stylesheet %}
+    <link rel="stylesheet" href="{% static 'signup/css/signup.css' %}">
+{% endblock %}
+
 {% block content %}
+    <h1>Sign up</h1>
+
     <form method="post">
         {% csrf_token %}
         {{ form }}

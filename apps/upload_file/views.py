@@ -83,4 +83,4 @@ def upload_form(request):
 
         form = ReplayFileForm()
         context['form'] = form
-    return render(request, 'upload_file/upload_form.html', context)
+    return render(request, 'upload_file/upload.html', context)
