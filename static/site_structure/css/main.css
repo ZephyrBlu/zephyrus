@@ -98,60 +98,139 @@ textarea {
    ========================================================================== */
 
 html {
-    color: #FF0000
+  scroll-behavior: smooth;
 }
 
-nav li {
-    display: inline;
-    border: 2px solid black;
-    border-bottom: none;
-    padding: 2px;
-    margin: 2px 2px 0 2px;
-    border-radius: 8px 8px 0 0;
+body {
+    font-family: 'Quicksand', sans-serif;
 }
 
 li {
-    list-style-type: none;
-}
-
-nav {
-    //text-align: left;
-}
-
-nav, ul {
-    margin-bottom: 0;
-    padding: 0;
-}
-
-div.content {
-    border: 2px solid black;
-
-}
-
-div.content, nav {
-    margin: 0 50px -1px 50px;
-    text-align: center;
-}
-
-header {
-    border: 0px;
-    border-bottom: 2px;
-    border-color: black;
-    border-style: solid;
-    margin: 0;
-    text-align: center;
-}
-
-a:hover, a:visited, a:link {
-    color: black;
+    display: inline;
     text-decoration: none;
 }
 
+header * {
+    text-decoration: none;
+}
 
+body, nav * {
+    padding: 0;
+    margin: 0;
+}
 
+header {
+    grid-template-rows: min-content;
+    grid-template-columns: min-content min-content 1fr;
+    display: grid;
+    padding-top: 30px;
+    margin-bottom: 30px;
+}
 
+header li {
+    display: inline-block;
+    text-decoration: none;
+}
 
+ul {
+    text-align: right;
+}
 
+li {
+    color: black;
+    display: block;
+}
+
+.title {
+    justify-self: start;
+    align-self: center;
+    text-align: left;
+    font-family: 'Major Mono Display', monospace;
+    text-shadow: 0.1em 0.08em 0.5px rgba(0, 0, 0, 0.25);
+    font-size: 30pt;
+    font-weight: 900;
+}
+
+.title, .title a, .title a:visited, .menu a {
+    color: black;
+}
+
+.sub-heading {
+    margin: 0;
+    padding-bottom: 6px;
+    padding-left: 8px;
+    padding-right: 3px;
+    #font-size: normal;
+
+    align-self: flex-end;
+    justify-self: flex-start;
+    #padding: 0 3px;
+
+    font-weight: bolder !important;
+}
+
+#header .title, #header .sub-heading {
+    border-bottom: 1px solid rgba(170, 170, 170);
+}
+
+.menu {
+    justify-self: end;
+    align-self: center;
+}
+
+.menu li {
+    margin-left: 20px;
+}
+
+li a {
+    padding: 5px;
+    border: 1px solid transparent;
+    text-align: center;
+    transition: background-color 0.5s, color 0.5s, border 0.5s;
+    font-size: 16pt;
+    font-weight: 500;
+    border-radius: 25px;
+    padding: 10px 18px 12px;
+}
+
+li a:hover {
+    color: white;
+    background-color: #87CEEB;
+}
+
+.special {
+    border: 2px solid #87CEEB;
+}
+
+.special:hover {
+    color: white;
+    background-color: #87CEEB;
+}
+
+.footer {
+    padding: 20px 0;
+    width: 100%;
+    display: grid;
+    grid-template: 1fr / 1fr 1fr;
+    border-top: 2px solid rgba(170, 170, 170);
+}
+
+.footer * {
+    margin: 0;
+}
+
+.footer h4 {
+    justify-self: center;
+}
+
+.footer span {
+    justify-self: center;
+    font-weight: bolder;
+}
+
+.footer span a {
+    padding: 0 8px;
+}
 
 /* ==========================================================================
    Helper classes
