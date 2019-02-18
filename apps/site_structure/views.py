@@ -44,7 +44,7 @@ def about(request):
         'title': title,
         'active': active
     }
-    return render(request, 'site_structure/index.html', context)
+    return render(request, 'site_structure/about.html', context)
 
 
 def contact(request):
@@ -58,4 +58,4 @@ def contact(request):
         'title': title,
         'active': active
     }
-    return render(request, 'site_structure/index.html', context)
+    return render(request, 'site_structure/contact.html', context)

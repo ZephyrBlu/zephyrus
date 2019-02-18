@@ -34,7 +34,7 @@ body {
     font-weight: lighter;
 }
 
-.title a, a:visited {
+.title, .title a:visited {
     color: white;
     text-decoration: none;
 }
@@ -46,10 +46,6 @@ body {
     font-weight: lighter !important;
     font-size: medium;
     padding: 0px;
-}
-
-.menu a:visited {
-    color: black;
 }
 
 .logo {
@@ -135,6 +131,10 @@ body {
     box-shadow: none;
 }
 
+nav a:visited {
+    color: white;
+}
+
 .wrapper {
     padding-top: 64px;
     margin-left: 67px;
@@ -162,6 +162,10 @@ body {
 li {
     display: inline;
     text-decoration: none;
+}
+
+li a {
+    font-size: 14.5pt;
 }
 
 header * {
@@ -194,6 +198,10 @@ header h2 {
     font-size: xx-large;
 }
 
+header a:visited {
+    color: black;
+}
+
 .sticky {
     position: fixed;
     top: 0;
@@ -211,12 +219,12 @@ header h2 {
 }
 
 .menu ul {
+    color: white;
     text-align: center;
 }
 
 .menu li {
     text-decoration: none;
-    color: black;
     margin: 0 60px;
 }
 
