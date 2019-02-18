@@ -1,0 +1,295 @@
+body {
+    font-family: 'Quicksand', sans-serif;
+    background-color: white;
+    overflow-x: hidden;
+}
+
+#profile {
+    height: 100%; /* 100% Full-height */
+    width: 67px;  /* width - change this with JavaScript */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Stay on top */
+    top: 0; /* Stay at the top */
+    left: 0;
+    overflow-x: hidden; /* Disable horizontal scroll */
+    transition: 0.5s; /* 0.5 second transition effect to slide in the sidenav */
+    color: white;
+    background-color: rgba(0, 0, 0);
+}
+
+.title {
+    text-align: left;
+    font-family: 'Major Mono Display', monospace;
+    text-shadow: 0.1em 0.08em 0.5px rgba(255, 255, 255, 0.25);
+    font-size: 30pt;
+    font-weight: 900;
+    padding-left: 10px;
+}
+
+#title {
+    position: absolute;
+    opacity: 0;
+    transition: 1s;
+    transition-delay: 0.2s;
+    font-weight: lighter;
+}
+
+.title, .title a:visited {
+    color: white;
+    text-decoration: none;
+}
+
+.sub-heading {
+    display: inline;
+    margin-left: -22px;
+    font-family: 'Quicksand', sans-serif;
+    font-weight: lighter !important;
+    font-size: medium;
+    padding: 0px;
+}
+
+.logo {
+    width: 100%;
+    height: 67px;
+    background-color: black;
+    box-shadow: 0 4px 2px -2px #87CEEB;
+}
+
+.logo img {
+    position: absolute;
+    right: 0;
+}
+
+#side-menu {
+    opacity: 0;
+    transition: opacity 0.4s;
+}
+
+#profile li {
+    display: block;
+    text-align: center;
+    padding: 10px 0;
+    transition: 0.5s;
+}
+
+#profile a {
+    text-decoration: none;
+}
+
+#profile li a {
+    display: block;
+    transition: 0.5s;
+}
+
+#profile li:hover {
+    background-color: #87CEEB;
+    box-shadow: 0 0 0 2px white inset;
+    text-decoration: none;
+}
+
+#profile li:hover a {
+    color: black;
+    background-color: transparent;
+    font-weight: bold;
+}
+
+#profile .active {
+    background-color: #87CEEB;
+    box-shadow: 0 0 0 2px transparent inset;
+    text-decoration: none;
+}
+
+#profile .active a {
+    color: black;
+    font-weight: bolder;
+}
+
+#profile button {
+    font-family: 'Quicksand', sans-serif;
+    background-color: transparent;
+    font-size: 14.5pt;
+    color: white;
+    box-shadow: none;
+    border: 2px solid transparent;
+    border-radius: 25px;
+    padding: 10px 22px 12px;
+    transition: 0.5s;
+    text-decoration: underline;
+}
+
+#profile button:hover {
+    box-shadow: none;
+    border: 2px solid #87CEEB;
+    border-radius: 25px;
+    background-color: #87CEEB;
+    color: black;
+    font-weight: bold;
+}
+
+#profile .button:hover {
+    background-color: transparent;
+    box-shadow: none;
+}
+
+nav a:visited {
+    color: white;
+}
+
+.wrapper {
+    padding-top: 64px;
+    margin-left: 67px;
+    height: 100%;
+    transition: 0.5s;
+}
+
+.content {
+    width: 1700px;
+    height: 749px;
+    transition: 0.5s;
+    margin: 30px auto;
+    color: black;
+    #background-color: rgba(250, 250, 250);
+    box-shadow: 0 0 3px 0.5px black;
+    border-radius: 25px;
+    padding: 10px;
+}
+
+.summary {
+    margin: 10px 0;
+    border-right: 1px solid rgba(100, 100, 100);
+}
+
+li {
+    display: inline;
+    text-decoration: none;
+}
+
+li a {
+    font-size: 14.5pt;
+}
+
+header * {
+    text-decoration: none;
+}
+
+body, nav * {
+    padding: 0;
+    margin: 0;
+}
+
+header {
+    grid-template-rows: min-content;
+    grid-template-columns: 5% 1fr 2fr 5%;
+    display: grid;
+    background-color: white;
+    box-shadow: 0 4px 2px -2px #87CEEB;
+    padding: 11.5px 0;
+    transition: margin-left 0.5s;
+}
+
+header h2 {
+    margin-top: 0;
+    margin-bottom: 0;
+    transition: 0.5s;
+    grid-column-start: 2;
+    justify-self: center;
+    align-self: center;
+    font-weight: lighter;
+    font-size: xx-large;
+}
+
+header a:visited {
+    color: black;
+}
+
+.sticky {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: white;
+    box-shadow: 0 4px 2px -2px #87CEEB;
+}
+
+.menu {
+    width:100%;
+    grid-column-start: 3;
+    justify-self: center;
+    align-self: center;
+    transition: margin-right 0.5s;
+}
+
+.menu ul {
+    color: white;
+    text-align: center;
+}
+
+.menu li {
+    text-decoration: none;
+    margin: 0 60px;
+}
+
+.menu li a {
+    border: 1px solid transparent;
+    text-align: center;
+    transition: background-color 0.5s, color 0.5s, border 0.5s, font-weight 0.5s;
+    font-size: 16pt;
+    border-radius: 25px;
+    padding: 9px 50px 12px;
+}
+
+.menu li a:hover {
+    color: white;
+    background-color: #87CEEB;
+}
+
+.menu .active {
+    color: white;
+    background-color: #87CEEB;
+}
+
+.special {
+    border: 2px solid #87CEEB;
+    border-radius: 25px;
+    padding: 5px 11px 7px;
+}
+
+.special:hover {
+    background-color: #87CEEB;
+    color: black;
+}
+
+.underline {
+    box-shadow: inset 0 -2px 0 black, inset 0 -3px 0 white;
+}
+
+footer {
+    margin-top:auto;
+}
+
+.footer {
+    padding: 20px 0;
+    width: 100%;
+    display: grid;
+    grid-template: 1fr / 1fr 1fr;
+    border-top: 2px solid rgba(170, 170, 170);
+    #position: absolute;
+    #bottom: 0;
+    background-color: white;
+}
+
+.footer * {
+    margin: 0;
+}
+
+.footer h4 {
+    justify-self: center;
+}
+
+.footer span {
+    justify-self: center;
+    font-weight: bolder;
+}
+
+.footer span a {
+    padding: 0 8px;
+}
