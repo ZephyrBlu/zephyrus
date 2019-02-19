@@ -151,7 +151,7 @@ li {
     font-weight: 900;
 }
 
-.title, .title a, .title a:visited, .menu a {
+.title, .title a, a:visited, .menu a {
     color: black;
 }
 

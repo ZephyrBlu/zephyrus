@@ -30,7 +30,7 @@ def premium(request):
         'title': title,
         'active': active
     }
-    return render(request, 'site_structure/index.html', context)
+    return render(request, 'site_structure/premium.html', context)
 
 
 def about(request):

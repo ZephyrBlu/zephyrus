@@ -1,12 +1,12 @@
 .wrapper {
     width: 1200px;
-    height: 750px;
     margin: 0 auto;
 }
 
 .content {
     padding-top: 50px;
     text-align: center;
+    height: 710px;
 }
 
 h1 {
@@ -22,24 +22,22 @@ form {
     font-weight: bold;
 }
 
-form button {
-    margin-right: 90px;
-    margin-left: 20px;
-}
-
 input {
+    padding: 10px 0 10px 5px;
     margin-left: 15px;
+    margin-bottom: 5px;
+    margin-right: 50px;
 }
 
 input[type=email], input[type=password] {
-    padding: 5px;
-    margin-bottom: 12px;
-    margin-right: 50px;
     border-radius: 25px;
     border: 1px solid rgb(120, 120, 120);
 }
 
 button {
+    margin-right: 78px;
+    margin-left: 20px;
+    margin-top: 10px;
     border: none;
     border-radius: 25px;
     font-family: 'Quicksand', sans-serif;
@@ -47,7 +45,7 @@ button {
     font-weight: bold;
     text-align: center;
     background-color: #87CEEB;
-    padding: 12px 22px;
+    padding: 12px 35px;
     transition: 0.5s;
 }
 
