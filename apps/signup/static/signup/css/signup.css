@@ -1,10 +1,10 @@
 .wrapper {
     width: 1200px;
-    height: 750px;
     margin: 0 auto;
 }
 
 .content {
+    height: 710px;
     padding-top: 50px;
     text-align: center;
 }
@@ -22,13 +22,13 @@ form {
 }
 
 input {
+    padding: 10px 0 10px 5px;
     margin-left: 15px;
+    margin-bottom: 20px;
+    margin-right: 50px;
 }
 
 input[type=email], input[type=password] {
-    padding: 5px;
-    margin-bottom: 12px;
-    margin-right: 50px;
     border-radius: 25px;
     border: 1px solid rgb(120, 120, 120);
 }
@@ -46,8 +46,8 @@ input[name=password2] {
 }
 
 input[type=submit] {
-    margin-right: 80px;
-    margin-top: 20px;
+    margin-right: 72px;
+    margin-top: 10px;
     border: none;
     border-radius: 25px;
     font-family: 'Quicksand', sans-serif;
@@ -55,7 +55,7 @@ input[type=submit] {
     font-weight: bold;
     text-align: center;
     background-color: #87CEEB;
-    padding: 12px 22px;
+    padding: 12px 35px;
     transition: 0.5s;
 }
 
