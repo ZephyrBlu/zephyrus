@@ -26,13 +26,25 @@
 
 {% block content %}
     <div class='hero'>
-        <h1><span class='highlight'>powerful</span> and <span class='highlight'>easy</span><br> replay analysis</h1>
-        <h3><i>get feedback on your gameplay <span class='underline'>now</span></i></h3>
-        <button>Sign Up</button>
-        <img class='video' src="{% static 'site_structure/sc2-rectangle.jpg' %}">
-        <h2>For StarCraft II</h2>
+        <h1><span class='highlight'>StarCraft II is complicated</span><br>We help you make sense of it</h1>
+        <section class='banner'>
+            <span>Start uploading replays now</span>
+            <button>Get Started</button>
+        </section>
+        <img class='video' src="{% static 'site_structure/illustration.svg' %}">
     </div>
-    <hr>
+    <div class='solution'>
+        <h2 class='thick-highlight'>Understand your play</h2>
+        <p>
+            You upload replays, then we analyze them and provide you with <b class='underline'>relevant</b>, <b class='underline'>specific</b>
+            <br>
+             and <b class='underline'>practical</b> feedback to help
+            you better understand how the match played out
+        </p>
+        <span>- Relevant</span>
+        <span>- Specific</span>
+        <span>- Practical</span>
+    </div>
     <div class='benefits'>
         <img class='item1' src="https://via.placeholder.com/300" class='col1'>
         <section class='item2' class='col2'>
@@ -50,7 +62,6 @@
             <p>Check out how far you've progressed your skills and how quickly you've done it</p>
         </section>
     </div>
-    <hr>
     <div class='features'>
         <h2>Features</h2>
         <h3 class='item1'>Macro Analysis</h3>
@@ -59,7 +70,6 @@
         <h3 class='item4'>Unique Metrics<br><small><small>Coming soon</small></small></h3>
         <a class='feature-link' href="">See all ></a>
     </div>
-    <hr>
     <div class='signup'>
         <h2>Start uploading replays now</h2>
         <button>Sign up</button>

@@ -97,12 +97,10 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
-html {
-  scroll-behavior: smooth;
-}
-
 body {
     font-family: 'Quicksand', sans-serif;
+    background-color: hsl(206, 88%, 98%);
+    color: hsl(240, 100%, 6%);
 }
 
 li {
@@ -151,8 +149,8 @@ li {
     font-weight: 900;
 }
 
-.title, .title a, a:visited, .menu a {
-    color: black;
+a:visited {
+    color: hsl(240, 100%, 6%);
 }
 
 .sub-heading {
@@ -195,16 +193,16 @@ li a {
 
 li a:hover {
     color: white;
-    background-color: #87CEEB;
+    background-color: hsl(198, 68%, 47%);
 }
 
 .special {
-    border: 2px solid #87CEEB;
+    border: 2px solid hsl(198, 68%, 47%);
 }
 
 .special:hover {
     color: white;
-    background-color: #87CEEB;
+    background-color: hsl(198, 68%, 47%);
 }
 
 .menu .active {
