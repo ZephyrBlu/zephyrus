@@ -4,6 +4,7 @@
 
 {% block stylesheet %}
     <link rel="stylesheet" href="{% static 'site_structure/css/landing.css' %}">
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
 {% endblock %}
 
 {% block nav %}
@@ -27,52 +28,75 @@
 {% block content %}
     <div class='hero'>
         <h1><span class='highlight'>StarCraft II is complicated</span><br>We help you make sense of it</h1>
-        <section class='banner'>
+        <div class='banner'>
             <span>Start uploading replays now</span>
             <button>Get Started</button>
-        </section>
-        <img class='video' src="{% static 'site_structure/illustration.svg' %}">
+        </div>
+        <img class='video' src="{% static 'site_structure/racesfit.svg' %}" alt="Starcraft II Race Logos">
+    </div>
+    <div id='bottom-banner'>
+        <div class='arrow bounce'>
+        </div>
     </div>
     <div class='solution'>
         <h2 class='thick-highlight'>Understand your play</h2>
-        <p>
-            You upload replays, then we analyze them and provide you with <b class='underline'>relevant</b>, <b class='underline'>specific</b>
+        <p class='description'>
+            You upload replays, then we analyze them and provide you with <span class='underline'>relevant</span>, <span class='underline'>specific</span>
             <br>
-             and <b class='underline'>practical</b> feedback to help
+             and <span class='underline'>practical</span> feedback to help
             you better understand how the match played out
         </p>
-        <span>- Relevant</span>
-        <span>- Specific</span>
-        <span>- Practical</span>
+        <div class='feature-list'>
+            <span class='feature f1'>
+                <b class='feature-name'>Resource Management</b>
+                <span class='feature-content'>
+                    How well are you spending your resources?
+                    Resource Management covers spending efficiency, spending breakdown and economy & army production
+                </span>
+                <img src="https://img.icons8.com/dusk/80/000000/mind-map.png" alt="Person thinking">
+            </span>
+            <span class='feature f2'>
+                <b class='feature-name'>Army Efficiency</b>
+                <span class='feature-content'>
+                    Are you utilizing your army effectively?
+                    Army Efficiency covers unit cost effectiveness, army composition
+                    and trading efficiency
+                </span>
+                <img src="https://img.icons8.com/dusk/100/000000/combo-chart.png" alt="Graph">
+            </span>
+            <span class='feature f3'>
+                <b class='feature-name'>Multitasking</b>
+                <span class='feature-content'>
+                    Is your attention in the right place at the right time?
+                    Multitasking covers speed, context switching, hotkey usage and camera positioning
+                </span>
+                <img src="https://img.icons8.com/dusk/100/000000/workflow.png" alt="Small flowchart">
+            </span>
+        </div>
     </div>
-    <div class='benefits'>
-        <img class='item1' src="https://via.placeholder.com/300" class='col1'>
-        <section class='item2' class='col2'>
-            <h3>Save time</h3>
-            <p>Let us do the hard work interpreting replays, so you can spend more time practising</p>
-        </section>
-        <section class='item3' class='col1'>
-            <h3>Learn more</h3>
-            <p>We can help you understand your gameplay and what areas you need to improve</p>
-        </section>
-        <img class='item4' src="https://via.placeholder.com/300" class='col2'>
-        <img class='item5' src="https://via.placeholder.com/300" class='col1'>
-        <section class='item6' class='col2'>
-            <h3>See your progress</h3>
-            <p>Check out how far you've progressed your skills and how quickly you've done it</p>
-        </section>
+    <div class='progress'>
+        <h2 class='thick-highlight'>Track your progress</h2>
+        <div class='f1'>
+            <b class='feature-name'>Multiple Metrics</b>
+            <br>
+            <p class='feature-content'>
+                View multiple performance metrics and see how they
+                improve and interact with each other over time
+            </p>
+        </div>
+        <div class='f2'>
+            <b class='feature-name'>Play Sessions</b>
+            <br>
+            <p class='feature-content'>
+                See your performance in daily/weekly play sessions
+                and check how it measures up to your average performance
+            </p>
+        </div>
+        <svg width=700 height=700><rect width=700 height=700 style="fill:hsl(206, 88%, 98%)"></rect></svg>
     </div>
-    <div class='features'>
-        <h2>Features</h2>
-        <h3 class='item1'>Macro Analysis</h3>
-        <h3 class='item2'>Progress Tracking<br><small><small>Coming soon</small></small></h3>
-        <h3 class='item3'>Session Feedback<br><small><small>Coming soon</small></small></h3>
-        <h3 class='item4'>Unique Metrics<br><small><small>Coming soon</small></small></h3>
-        <a class='feature-link' href="">See all ></a>
-    </div>
-    <div class='signup'>
-        <h2>Start uploading replays now</h2>
-        <button>Sign up</button>
+    <div class='banner end'>
+        <span>Start uploading replays now</span>
+        <button>Get Started</button>
     </div>
 {% endblock %}
 
@@ -80,6 +104,7 @@
     <script>
 
         var header_placeholder = document.getElementById("placeholder")
+        var arrow = document.getElementById("bottom-banner")
 
         // When the user scrolls the page, execute myFunction
         window.onscroll = function() {myFunction()};
@@ -91,7 +116,15 @@
 
         // Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
         function myFunction() {
-          if (window.pageYOffset > 500) {
+          if (window.pageYOffset > 0) {
+            arrow.style.animationName = 'fadeout';
+            arrow.style.animationDuration = '0.2s';
+            arrow.style.opacity = '0';
+          } else if (window.pageYOffset == 0) {
+            arrow.style.animationName = 'fadein';
+            arrow.style.animationDuration = '0.2s';
+            arrow.style.opacity = '1';
+          } if (window.pageYOffset > 500) {
             header_placeholder.style.animationName = 'fadein';
             header_placeholder.style.animationDuration = '0.3s';
             header_placeholder.style.opacity = '1';

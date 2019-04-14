@@ -103,6 +103,10 @@ body {
     color: hsl(240, 100%, 6%);
 }
 
+.content {
+    display: inline-block;
+}
+
 li {
     display: inline;
     text-decoration: none;
@@ -122,7 +126,7 @@ header {
     grid-template-columns: min-content min-content 1fr;
     display: grid;
     padding-top: 30px;
-    margin-bottom: 30px;
+    #margin-bottom: 30px;
 }
 
 header li {
@@ -144,8 +148,8 @@ li {
     align-self: center;
     text-align: left;
     font-family: 'Major Mono Display', monospace;
-    text-shadow: 0.1em 0.08em 0.5px rgba(0, 0, 0, 0.25);
-    font-size: 30pt;
+    text-shadow: 0.1em 0.08em 0.5px rgba(0, 0, 0, 0.2);
+    font-size: 40px;
     font-weight: 900;
 }
 
@@ -168,7 +172,7 @@ a:visited {
 }
 
 #header .title, #header .sub-heading {
-    border-bottom: 1px solid rgba(170, 170, 170);
+    #border-bottom: 1px solid rgba(170, 170, 170);
 }
 
 .menu {
@@ -181,14 +185,13 @@ a:visited {
 }
 
 li a {
-    padding: 5px;
     border: 2px solid transparent;
     text-align: center;
     transition: background-color 0.5s, color 0.5s, border 0.5s;
-    font-size: 16pt;
+    font-size: 22px;
     font-weight: 500;
     border-radius: 25px;
-    padding: 10px 18px 12px;
+    padding: 8px 18px 10px;
 }
 
 li a:hover {
