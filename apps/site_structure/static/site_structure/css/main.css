@@ -100,7 +100,7 @@ textarea {
 body {
     font-family: 'Quicksand', sans-serif;
     background-color: hsl(206, 88%, 98%);
-    color: hsl(240, 100%, 6%);
+    color: hsl(240, 100%, 4%);
 }
 
 .content {
@@ -122,11 +122,37 @@ body, nav * {
 }
 
 header {
+    -moz-osx-font-smoothing: grayscale;   /* Firefox */
+    -webkit-font-smoothing: antialiased; /* WebKit  */
+
+    -ms-grid-columns: min-content;
+    -ms-grid-rows: min-content min-content 1fr;
+
+    grid-template-rows: -webkit-min-content;
+
     grid-template-rows: min-content;
+    -ms-grid-columns: -webkit-min-content -webkit-min-content 1fr;
+    -ms-grid-columns: min-content min-content 1fr;
+    grid-template-columns: -webkit-min-content -webkit-min-content 1fr;
     grid-template-columns: min-content min-content 1fr;
+    display: -ms-grid;
     display: grid;
     padding-top: 30px;
-    #margin-bottom: 30px;
+}
+
+header > *:nth-child(1) {
+    -ms-grid-row: 1;
+    -ms-grid-column: 1;
+}
+
+header > *:nth-child(2) {
+    -ms-grid-row: 1;
+    -ms-grid-column: 2;
+}
+
+header > *:nth-child(3) {
+    -ms-grid-row: 1;
+    -ms-grid-column: 3;
 }
 
 header li {
@@ -144,11 +170,14 @@ li {
 }
 
 .title {
-    justify-self: start;
-    align-self: center;
+    -ms-grid-column-align: start;
+        justify-self: start;
+    -ms-flex-item-align: center;
+        -ms-grid-row-align: center;
+        align-self: center;
     text-align: left;
     font-family: 'Major Mono Display', monospace;
-    text-shadow: 0.1em 0.08em 0.5px rgba(0, 0, 0, 0.2);
+    text-shadow: 0.1em 0.08em 0.5px rgba(0, 0, 0, 0.20);
     font-size: 40px;
     font-weight: 900;
 }
@@ -164,20 +193,21 @@ a:visited {
     padding-right: 3px;
     #font-size: normal;
 
-    align-self: flex-end;
+    -ms-flex-item-align: end;
+
+        align-self: flex-end;
     justify-self: flex-start;
     #padding: 0 3px;
 
     font-weight: bolder !important;
 }
 
-#header .title, #header .sub-heading {
-    #border-bottom: 1px solid rgba(170, 170, 170);
-}
-
 .menu {
-    justify-self: end;
-    align-self: center;
+    -ms-grid-column-align: end;
+        justify-self: end;
+    -ms-flex-item-align: center;
+        -ms-grid-row-align: center;
+        align-self: center;
 }
 
 .menu li {
@@ -187,11 +217,13 @@ a:visited {
 li a {
     border: 2px solid transparent;
     text-align: center;
+    -webkit-transition: background-color 0.5s, color 0.5s, border 0.5s;
+    -o-transition: background-color 0.5s, color 0.5s, border 0.5s;
     transition: background-color 0.5s, color 0.5s, border 0.5s;
     font-size: 22px;
     font-weight: 500;
     border-radius: 25px;
-    padding: 8px 18px 10px;
+    padding: 10px 22px 12px;
 }
 
 li a:hover {
@@ -216,8 +248,11 @@ li a:hover {
 .footer {
     padding: 20px 0;
     width: 100%;
+    display: -ms-grid;
     display: grid;
     grid-template: 1fr / 1fr 1fr;
+    -ms-grid-rows: 1fr;
+    -ms-grid-columns: 1fr 1fr;
     border-top: 2px solid rgba(170, 170, 170);
 }
 
@@ -226,16 +261,44 @@ li a:hover {
 }
 
 .footer h4 {
-    justify-self: center;
+    -ms-grid-column-align: center;
+        justify-self: center;
 }
 
 .footer span {
-    justify-self: center;
+    -ms-grid-column-align: center;
+        justify-self: center;
     font-weight: bolder;
 }
 
 .footer span a {
     padding: 0 8px;
+}
+
+@media only screen and (max-width: 1400px) {
+    #header {
+        margin-left: 3vw;
+        padding-top: 2vw;
+    }
+}
+
+
+@media only screen and (max-width: 768px) {
+    .title {
+        font-size: 6vw;
+    }
+
+    .sub-heading {
+        font-size: 3vw;
+        padding-bottom: 0.2vh;
+        padding-left: 0.3vh;
+        padding-right: 1vh;
+    }
+
+    #header {
+        margin-left: 3vw;
+        padding-top: 2vw;
+    }
 }
 
 /* ==========================================================================
@@ -330,6 +393,7 @@ li a:hover {
 
 @media print,
        (-webkit-min-device-pixel-ratio: 1.25),
+       (-o-min-device-pixel-ratio: 5/4),
        (min-resolution: 1.25dppx),
        (min-resolution: 120dpi) {
     /* Style adjustments for high resolution devices */
