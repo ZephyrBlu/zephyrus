@@ -1,8 +1,8 @@
 from django.db import models
-from apps.upload_file.models import ReplayInfo
+from apps.user_profile.models import AuthenticatedReplay
 from rest_framework import serializers
 
 class ReplaySerializer(serializers.ModelSerializer):
     class Meta:
-        model = ReplayInfo
-        fields = ('player1', 'player2')
+        model = AuthenticatedReplay
+        fields = ('user_in_game_name', 'opponent_in_game_name', 'account', 'game_map')

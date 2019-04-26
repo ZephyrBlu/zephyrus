@@ -21,7 +21,7 @@ def authentication_requests(request):
         if 'code' in request.GET:
             token_url = f'{api_url}oauth/token'
             auth_code = request.GET.get('code')
-            redirect_uri = 'https://127.0.0.1:8000/authorize'
+            redirect_uri = 'https://127.0.0.1:8000/profile/authorize'
             client_id = '7868b58312e647819a2785e0ec7eeba1'
             client_secret = 'Ln4sR352JK2rlXUQ8HezmD97DPQ1Cc0C'
             data = {
@@ -52,7 +52,7 @@ def authentication_requests(request):
             auth_url = f'{api_url}oauth/authorize'
             response_type = 'code'
             client_id = '7868b58312e647819a2785e0ec7eeba1'
-            redirect_uri = 'https://127.0.0.1:8000/authorize'
+            redirect_uri = 'https://127.0.0.1:8000/profile/authorize'
             scope = 'sc2.profile'
             # state = <random string>
             url = f'{auth_url}?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}'
@@ -69,7 +69,7 @@ def battlenet_authorized(user):
 
 
 # implement class based view for profile sections
-# @user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
+@user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
 def overview(request):
     profile_active = 'overview'
     info = 'This is the User Profile page'
