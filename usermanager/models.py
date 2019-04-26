@@ -48,7 +48,7 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         _('email'),
         max_length=150,
         unique=True,
-        primary_key=True,
+        null=False,
         help_text=_('Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.'),
         validators=[email_validator],
         error_messages={
@@ -85,3 +85,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+    def __iter__(self):
+        return (x for x in [self.username, self.password])
