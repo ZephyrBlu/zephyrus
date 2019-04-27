@@ -29,6 +29,7 @@ def upload_form(request):
                 user = request.user
 
                 errors, meta_data, player_info, summary_info = parse_replay(file)
+                print(errors, meta_data, player_info, summary_info)
                 if errors is not None:
                     # error has occurred during parsing
                     pass
