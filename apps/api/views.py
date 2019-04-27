@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
-from apps.user_profile.models import AuthenticatedReplay, BattlenetAccount
+from apps.user_profile.models import AuthenticatedReplay, UnauthenticatedReplay, BattlenetAccount
 from allauth.account.models import EmailAddress
 from .models import ReplaySerializer
 
@@ -47,6 +47,28 @@ class LatestReplay(APIView):
         replay = AuthenticatedReplay.objects.filter(battlenet_account_id=battle_net_id).latest('uploaded_at')
         serializer = ReplaySerializer(replay)
         return Response(serializer.data)
+
+
+def verify_replays(request):
+    user = request.user
+    user_id = EmailAddress.objects.get(email=user.email)
+
+    authenticated_accounts = BattlenetAccount.objects.filter(user_account_id=user_id)
+    unauthenticated_replays = UnauthenticatedReplay.object.filter(user_account_id=user_id)
+
+    for account in authenticated_accounts:
+        for replay in unauthenticated_replays:
+            if account.id == replay.player1_battlenet_id:
+                authenticated_replay = AuthenticatedReplay(
+                    file_hash=replay.file_hash,
+                    battlenet_account=replay.account,
+                    user_in_game_name='NEED TO ADD DATA TO UNAUTHENTICATED REPLAY TABLE',
+                    opponent_in_game_name='NEED TO ADD DATA TO UNAUTHENTICATED REPLAY TABLE',
+                    played_at=replay.played_at,
+                    game_map=replay.game_map,
+                    )
+                authenticated_replay.save()
+                replay.delete()
 
 
 class CustomAuthToken(ObtainAuthToken):
