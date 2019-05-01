@@ -70,6 +70,8 @@ def verify_replays(request):
                 authenticated_replay.save()
                 replay.delete()
 
+                # Add bucket object renaming script in here
+
 
 class CustomAuthToken(ObtainAuthToken):
 
