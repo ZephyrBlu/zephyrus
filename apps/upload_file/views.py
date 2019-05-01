@@ -65,6 +65,7 @@ def upload_form(request):
                                     opponent_in_game_name=opponent_in_game_name,
                                     played_at=meta_data['time_played_at'],
                                     game_map=meta_data['game_map'],
+                                    region=player_info['player1']['region_id'],
                                 )
                                 replay.save()
 
@@ -91,6 +92,7 @@ def upload_form(request):
                             player2_profile_id=player_profile_ids[1],
                             played_at=meta_data['time_played_at'],
                             game_map=meta_data['game_map'],
+                            region=player_info['player1']['region_id'],
                         )
                         replay.save()
 

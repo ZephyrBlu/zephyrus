@@ -20,6 +20,7 @@ class AuthenticatedReplay(models.Model):
     played_at = models.DateTimeField()
     game_map = models.CharField(max_length=100)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    region_id = models.IntegerField()
 
 
 # for replays uploaded to an account that are not linked
@@ -34,3 +35,4 @@ class UnauthenticatedReplay(models.Model):
     played_at = models.DateTimeField()
     game_map = models.CharField(max_length=100)
     uploaded_at = models.DateTimeField(auto_now_add=True)
+    region_id = models.IntegerField()
