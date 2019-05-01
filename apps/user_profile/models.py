@@ -12,7 +12,7 @@ class BattlenetAccount(models.Model):
 
 # for replays associated with an authenticated battlenet account
 class AuthenticatedReplay(models.Model):
-    file_hash = models.CharField(primary_key=True, max_length=200)
+    file_hash = models.CharField(max_length=200)
     battlenet_account = models.ForeignKey(BattlenetAccount, on_delete=models.CASCADE)
     # timeline = JSONField()
     user_in_game_name = models.CharField(max_length=50)
@@ -27,7 +27,7 @@ class AuthenticatedReplay(models.Model):
 # to any of the authenticated battlenet accounts
 # authenticated and unauthenticated replays are mutually exclusive
 class UnauthenticatedReplay(models.Model):
-    file_hash = models.CharField(primary_key=True, max_length=200)
+    file_hash = models.CharField(max_length=200)
     user_account = models.ForeignKey(EmailAddress, to_field='email', on_delete=models.CASCADE)
     # timeline = JSONField()
     player1_profile_id = models.CharField(max_length=20)
