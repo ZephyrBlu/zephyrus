@@ -7,7 +7,7 @@ class BattlenetAccount(models.Model):
     id = models.CharField(unique=True, null=False, max_length=100)
     battletag = models.CharField(primary_key=True, max_length=100)
     user_account = models.ForeignKey(EmailAddress, to_field='email', on_delete=models.CASCADE)
-    profiles = JSONField()
+    region_profiles = JSONField()
 
 
 # for replays associated with an authenticated battlenet account
