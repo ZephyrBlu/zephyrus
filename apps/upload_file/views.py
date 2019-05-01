@@ -29,7 +29,6 @@ def upload_form(request):
                 user = request.user
 
                 errors, meta_data, player_info, summary_info = parse_replay(file)
-                print(errors, meta_data, player_info, summary_info)
                 if errors is not None:
                     # error has occurred during parsing
                     pass
@@ -47,46 +46,49 @@ def upload_form(request):
                 if not auth_replay_query and not unauth_replay_query:
                     user_battlenet_accounts = BattlenetAccount.objects.filter(user_account=EmailAddress.objects.get(user=user))
                     for account in user_battlenet_accounts:
-                        if account.id in player_info:
-                            bucket_path = f'{user.email}/{account.battletag}/{filename}'
+                        for profile in account.profiles.values():
+                            if int(profile['profile_id']) in player_info['player1'].values() or int(profile['profile_id']) in player_info['player2'].values():
+                                bucket_path = f'{user.email}/{account.battletag}/{filename}'
 
-                            user_in_game_name = None
-                            opponent_in_game_name = None
-                            for player, info in player_info.items():
-                                if info['battlenet_id'] == account.id:
-                                    user_in_game_name = info['in_game_name']
-                                else:
-                                    opponent_in_game_name = info['in_game_name']
+                                user_in_game_name = None
+                                opponent_in_game_name = None
+                                for info in player_info.values():
+                                    if info['profile_id'] == int(profile['profile_id']):
+                                        user_in_game_name = info['in_game_name']
+                                    else:
+                                        opponent_in_game_name = info['in_game_name']
 
-                            replay = AuthenticatedReplay(
-                                file_hash=file_hash,
-                                battlenet_account=account,
-                                user_in_game_name=user_in_game_name,
-                                opponent_in_game_name=opponent_in_game_name,
-                                played_at=meta_data['time_played_at'],
-                                game_map=meta_data['game_map'],
-                            )
-                            replay.save()
+                                replay = AuthenticatedReplay(
+                                    file_hash=file_hash,
+                                    battlenet_account=account,
+                                    user_in_game_name=user_in_game_name,
+                                    opponent_in_game_name=opponent_in_game_name,
+                                    played_at=meta_data['time_played_at'],
+                                    game_map=meta_data['game_map'],
+                                )
+                                replay.save()
 
-                            file_contents = file.open(mode='rb')
-                            current_replay = default_storage.open(bucket_path, 'w')
-                            current_replay.write(file_contents.read())
-                            current_replay.close()
-                            uploaded = True
+                                file_contents = file.open(mode='rb')
+                                current_replay = default_storage.open(bucket_path, 'w')
+                                current_replay.write(file_contents.read())
+                                current_replay.close()
+                                uploaded = True
+                                break
+                        if uploaded is True:
                             break
 
                     if uploaded is False:
                         bucket_path = f'{user.email}/{filename}'
 
-                        player_battlenet_ids = []
+                        player_profile_ids = []
                         for player, info in player_info.items():
-                            player_battlenet_ids.append(info['battlenet_id'])
+                            player_profile_ids.append(info['profile_id'])
 
                         replay = UnauthenticatedReplay(
                             file_hash=file_hash,
                             user_account=EmailAddress.objects.get(user=user),
-                            player1_battlenet_id=player_battlenet_ids[0],
-                            player2_battlenet_id=player_battlenet_ids[1],
+                            player1_profile_id=player_profile_ids[0],
+                            player2_profile_id=player_profile_ids[1],
                             played_at=meta_data['time_played_at'],
                             game_map=meta_data['game_map'],
                         )
