@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import user_passes_test
 import requests
 
 
-api_url = 'https://us.battle.net/'
+oauth_api_url = 'https://us.battle.net/'
 
 
 def updated_profile(request):
@@ -19,7 +19,7 @@ def need_authorization(request):
 def authentication_requests(request):
     if request.method == 'GET':
         if 'code' in request.GET:
-            token_url = f'{api_url}oauth/token'
+            token_url = f'{oauth_api_url}oauth/token'
             auth_code = request.GET.get('code')
             redirect_uri = 'https://127.0.0.1:8000/profile/authorize'
             client_id = '7868b58312e647819a2785e0ec7eeba1'
@@ -34,22 +34,39 @@ def authentication_requests(request):
             info = requests.post(token_url, data=data)
             access_token = info.json()['access_token']
 
-            user_info_url = f'{api_url}oauth/userinfo'
+            user_info_url = f'{oauth_api_url}oauth/userinfo'
             headers = {'Authorization': f'Bearer {access_token}'}
             json_info = requests.get(user_info_url, headers=headers)
             user_info = json_info.json()
             current_account = EmailAddress.objects.get(email=request.user.email)
 
+            user_id = user_info['id']
+            profile_data_url = f'https://us.api.blizzard.com/sc2/player/{user_id}?access_token={access_token}'
+            profile_data = requests.get(profile_data_url)
+            profile_data = profile_data.json()
+
+            regions = {1: 'NA', 2: 'EU', 3: 'KR'}
+            profiles = {}
+
+            for profile in profile_data:
+                profiles[profile['regionId']] = {
+                    'profile_name': profile['name'],
+                    'region_name': regions[profile['regionId']],
+                    'profile_id': profile['profileId'],
+                    'realm_id': profile['realmId']
+                }
+
             authorized_account = BattlenetAccount(
-                id=user_info['id'],
+                id=user_id,
                 battletag=user_info['battletag'],
-                user_account=current_account
+                user_account=current_account,
+                profiles=profiles
             )
             authorized_account.save()
             return redirect('/upload/')
 
         else:
-            auth_url = f'{api_url}oauth/authorize'
+            auth_url = f'{oauth_api_url}oauth/authorize'
             response_type = 'code'
             client_id = '7868b58312e647819a2785e0ec7eeba1'
             redirect_uri = 'https://127.0.0.1:8000/profile/authorize'
@@ -69,7 +86,7 @@ def battlenet_authorized(user):
 
 
 # implement class based view for profile sections
-@user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
+# @user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
 def overview(request):
     profile_active = 'overview'
     info = 'This is the User Profile page'
@@ -88,7 +105,7 @@ def overview(request):
     return render(request, 'user_profile/profile.html', context)
 
 
-@user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
+# @user_passes_test(battlenet_authorized, login_url='/profile/authorization/', redirect_field_name=None)
 def analysis(request):
     profile_active = 'analysis'
     info = 'This is the User Profile page'
