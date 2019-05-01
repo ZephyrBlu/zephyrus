@@ -7,6 +7,7 @@ class BattlenetAccount(models.Model):
     id = models.CharField(unique=True, null=False, max_length=100)
     battletag = models.CharField(primary_key=True, max_length=100)
     user_account = models.ForeignKey(EmailAddress, to_field='email', on_delete=models.CASCADE)
+    profiles = JSONField()
 
 
 # for replays associated with an authenticated battlenet account
@@ -28,8 +29,8 @@ class UnauthenticatedReplay(models.Model):
     file_hash = models.CharField(primary_key=True, max_length=200)
     user_account = models.ForeignKey(EmailAddress, to_field='email', on_delete=models.CASCADE)
     # timeline = JSONField()
-    player1_battlenet_id = models.CharField(max_length=20)
-    player2_battlenet_id = models.CharField(max_length=20)
+    player1_profile_id = models.CharField(max_length=20)
+    player2_profile_id = models.CharField(max_length=20)
     played_at = models.DateTimeField()
     game_map = models.CharField(max_length=100)
     uploaded_at = models.DateTimeField(auto_now_add=True)
