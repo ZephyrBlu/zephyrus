@@ -42,11 +42,23 @@ def upload_form(request):
                 uploaded = False
                 auth_replay_query = AuthenticatedReplay.objects.filter(file_hash=file_hash)
                 unauth_replay_query = UnauthenticatedReplay.objects.filter(file_hash=file_hash)
+                user_account = EmailAddress.objects.get(user=user)
+                user_battlenet_accounts = BattlenetAccount.objects.filter(user_account=user_account)
 
-                if not auth_replay_query and not unauth_replay_query:
-                    user_battlenet_accounts = BattlenetAccount.objects.filter(user_account=EmailAddress.objects.get(user=user))
+                duplicate_replay = False
+                if auth_replay_query or unauth_replay_query:
+                    for battlenet_account in user_battlenet_accounts:
+                        for replay in auth_replay_query:
+                            if replay.battlenet_account == battlenet_account:
+                                duplicate_replay = True
+
+                        for replay in unauth_replay_query:
+                            if replay.battlenet_account == battlenet_account:
+                                duplicate_replay = True
+
+                if duplicate_replay is False:
                     for account in user_battlenet_accounts:
-                        for profile in account.profiles.values():
+                        for profile in account.region_profiles.values():
                             if int(profile['profile_id']) in player_info['player1'].values() or int(profile['profile_id']) in player_info['player2'].values():
                                 bucket_path = f'{user.email}/{account.battletag}/{filename}'
 
@@ -65,7 +77,7 @@ def upload_form(request):
                                     opponent_in_game_name=opponent_in_game_name,
                                     played_at=meta_data['time_played_at'],
                                     game_map=meta_data['game_map'],
-                                    region=player_info['player1']['region_id'],
+                                    region_id=player_info['player1']['region_id'],
                                 )
                                 replay.save()
 
@@ -92,7 +104,7 @@ def upload_form(request):
                             player2_profile_id=player_profile_ids[1],
                             played_at=meta_data['time_played_at'],
                             game_map=meta_data['game_map'],
-                            region=player_info['player1']['region_id'],
+                            region_id=player_info['player1']['region_id'],
                         )
                         replay.save()
 

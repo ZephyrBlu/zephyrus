@@ -60,7 +60,7 @@ def authentication_requests(request):
                 id=user_id,
                 battletag=user_info['battletag'],
                 user_account=current_account,
-                profiles=profiles
+                region_profiles=profiles
             )
             authorized_account.save()
             return redirect('/upload/')
