@@ -1,1 +1,0 @@
-.timeline{grid-area:a;display:grid;grid-template-rows:1fr 1fr}.summary{grid-area:b;display:grid;grid-template-rows:1fr 1fr}.analysis{grid-area:c;display:grid;grid-template-rows:1fr 1fr 1fr}.content{display:grid;grid-template-rows:1fr 1fr;grid-template-columns:1fr 2fr;grid-template-areas:"b a" "b c"}.content div{border:2px solid #000;margin:5px}

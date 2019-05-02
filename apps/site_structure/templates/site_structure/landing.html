@@ -29,15 +29,15 @@
     <div class='hero'>
         <h1><span class='highlight'>StarCraft II is complicated</span><br>We help you make sense of it</h1>
         <div class='banner'>
-            <span>Start uploading replays now</span>
-            <button>Get Started</button>
+            <span>Register your interest on Discord</span>
+            <br>
+            <a href='https://www.signupanywhere.com/signup/4vi8vyd9'>Click here for E-mail instead</a>
+            <br>
+            <button><a href='https://discord.gg/Bdb5zFV'>Join Server</a></button>
         </div>
-        <img class='video' src="{% static 'site_structure/racesfit.svg' %}" alt="Starcraft II Race Logos">
+        <img class='video' src="{% static 'site_structure/racesfit.svg' %}">
     </div>
-    <div id='bottom-banner'>
-        <div class='arrow bounce'>
-        </div>
-    </div>
+
     <div class='solution'>
         <h2 class='thick-highlight'>Understand your play</h2>
         <p class='description'>
@@ -53,7 +53,7 @@
                     How well are you spending your resources?
                     Resource Management covers spending efficiency, spending breakdown and economy & army production
                 </span>
-                <img src="https://img.icons8.com/dusk/80/000000/mind-map.png" alt="Person thinking">
+                <img src="https://img.icons8.com/nolan/100/000000/mind-map.png" alt="Person thinking">
             </span>
             <span class='feature f2'>
                 <b class='feature-name'>Army Efficiency</b>
@@ -62,18 +62,19 @@
                     Army Efficiency covers unit cost effectiveness, army composition
                     and trading efficiency
                 </span>
-                <img src="https://img.icons8.com/dusk/100/000000/combo-chart.png" alt="Graph">
+                <img src="https://img.icons8.com/nolan/100/000000/combo-chart.png" alt="Graph">
             </span>
             <span class='feature f3'>
                 <b class='feature-name'>Multitasking</b>
                 <span class='feature-content'>
                     Is your attention in the right place at the right time?
-                    Multitasking covers speed, context switching, hotkey usage and camera positioning
+                    Multitasking covers context switching, hotkey usage and camera positioning
                 </span>
-                <img src="https://img.icons8.com/dusk/100/000000/workflow.png" alt="Small flowchart">
+                <img src="https://img.icons8.com/nolan/100/000000/workflow.png" alt="Small flowchart">
             </span>
         </div>
     </div>
+
     <div class='progress'>
         <h2 class='thick-highlight'>Track your progress</h2>
         <div class='f1'>
@@ -92,11 +93,81 @@
                 and check how it measures up to your average performance
             </p>
         </div>
-        <img src="graph-crop-new.png" alt="Graph">
+        <img src="{% static 'site_structure/graph-new.png' %}" alt="Graph">
+        <!-- <div id='plotly'>
+            <img id='export'>
+        </div>
+        <script>
+            var d3 = Plotly.d3;
+            var img_png= d3.select('#export');
+
+            // Plotting the Graph
+
+            var trace={x:[0,1,2,3,4,5,6,7,8,9],y:[4246,3999,4198,4161,4362,4317,4254,4119,4352,4616],type:"scatter", name:'MMR'};
+            var trace2={x:[0,1,2,3,4,5,6,7,8,9],y:[55,53,45,40,38,43,42,35,32,28],type:"scatter",yaxis: 'y2', name:'Supply Block'};
+            var data = [trace, trace2];
+            var layout = {
+                            title : "MMR vs Supply Block",
+                            font: {
+                                color: 'hsl(0, 0%, 85%)',
+                            },
+                            paper_bgcolor: 'rgba(0,0,0,0)',
+                            plot_bgcolor: 'rgba(0,0,0,0)',
+                            color: 'rgba(0,0,0,0)',
+                            yaxis: {
+                                showgrid: false,
+                                zerolinecolor: 'rgba(0,0,0,0)',
+                                title: 'MMR'
+                            },
+                            yaxis2: {
+                                overlaying: 'y',
+                                showgrid: false,
+                                zerolinecolor: 'rgba(0,0,0,0)',
+                                side: 'right',
+                                title: 'Supply Block'
+                              },
+                            xaxis: {
+                                showgrid: false,
+                                zerolinecolor: 'rgba(0,0,0,0)',
+                                title: 'Days Played'
+                            },
+                            colorway: ['hsl(198, 90%, 32%)', 'hsl(0, 0%, 75%)']
+                        };
+            Plotly.plot(
+               'plotly',
+               data,
+               layout)
+
+            // static image in jpg format
+
+            .then(
+                function(gd)
+                 {
+                  Plotly.toImage(gd,{height:472,width:800})
+                     .then(
+                         function(url)
+                     {
+                         img_png.attr("src", url);
+                         return Plotly.toImage(gd,{format:'png',height:472,width:800});
+                     }
+                     )
+                });
+        </script> -->
     </div>
+
+    <div class='join'>
+        <h2 class='thick-highlight'>Join the Beta</h2>
+        <p class='feature-content'>
+            We're currently in the process of launching a closed Beta. Join
+            our Discord server to stay up to date with development so you can
+            get access to, give feedback on and suggest new features for Zephyrus
+            as soon as we launch!
+        </p>
+    </div>
+
     <div class='banner end'>
-        <span>Start uploading replays now</span>
-        <button>Get Started</button>
+        <span>Register your interest on Discord</span>
+        <button><a href='https://discord.gg/Bdb5zFV'>Join Server</a></button>
     </div>
 {% endblock %}
 

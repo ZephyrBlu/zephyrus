@@ -8,10 +8,9 @@
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-  <link rel="manifest" href="site.webmanifest">
-  <link rel="icon" href="icon.PNG">
-  <!-- Place favicon.ico in the root directory -->
   {% load static %}
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="icon" href="{% static 'site_structure/icon.PNG' %}">
   <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400, 500|Lato" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
   {% block stylesheet %}{% endblock %}
@@ -41,6 +40,10 @@
                 </nav>
             </header>
 
+        <div id='bottom-banner'>
+            <div class='arrow bounce'>
+            </div>
+        </div>
         <div class='content' id='content'>
         {% else %}
             <div id='root'>
