@@ -73,10 +73,11 @@ def upload_form(request):
                                 replay = AuthenticatedReplay(
                                     file_hash=file_hash,
                                     battlenet_account=account,
+                                    match_summary=summary_info,
                                     user_in_game_name=user_in_game_name,
                                     opponent_in_game_name=opponent_in_game_name,
                                     played_at=meta_data['time_played_at'],
-                                    game_map=meta_data['game_map'],
+                                    map=meta_data['game_map'],
                                     region_id=player_info['player1']['region_id'],
                                 )
                                 replay.save()
@@ -100,10 +101,11 @@ def upload_form(request):
                         replay = UnauthenticatedReplay(
                             file_hash=file_hash,
                             user_account=EmailAddress.objects.get(user=user),
+                            match_summary=summary_info,
                             player1_profile_id=player_profile_ids[0],
                             player2_profile_id=player_profile_ids[1],
                             played_at=meta_data['time_played_at'],
-                            game_map=meta_data['game_map'],
+                            map=meta_data['game_map'],
                             region_id=player_info['player1']['region_id'],
                         )
                         replay.save()
