@@ -65,7 +65,7 @@ def verify_replays(request):
                     user_in_game_name='NEED TO ADD DATA TO UNAUTHENTICATED REPLAY TABLE',
                     opponent_in_game_name='NEED TO ADD DATA TO UNAUTHENTICATED REPLAY TABLE',
                     played_at=replay.played_at,
-                    game_map=replay.game_map,
+                    map=replay.game_map,
                     )
                 authenticated_replay.save()
                 replay.delete()
