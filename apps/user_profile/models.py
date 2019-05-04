@@ -14,6 +14,7 @@ class BattlenetAccount(models.Model):
 class AuthenticatedReplay(models.Model):
     file_hash = models.CharField(max_length=200)
     battlenet_account = models.ForeignKey(BattlenetAccount, on_delete=models.CASCADE)
+    opponent_profile_id = models.CharField(max_length=20)
     # timeline = JSONField()
     match_summary = JSONField()
     user_in_game_name = models.CharField(max_length=50)
