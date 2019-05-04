@@ -69,10 +69,12 @@ def upload_form(request):
                                         user_in_game_name = info['in_game_name']
                                     else:
                                         opponent_in_game_name = info['in_game_name']
+                                        opponent_profile_id = info['profile_id']
 
                                 replay = AuthenticatedReplay(
                                     file_hash=file_hash,
                                     battlenet_account=account,
+                                    opponent_profile_id=opponent_profile_id,
                                     match_summary=summary_info,
                                     user_in_game_name=user_in_game_name,
                                     opponent_in_game_name=opponent_in_game_name,
