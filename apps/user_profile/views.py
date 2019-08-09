@@ -13,7 +13,7 @@ def updated_profile(request):
 
 
 def need_authorization(request):
-    return render(request, 'user_profile/profile.html', {'active': 'profile'})
+    return render(request, 'user_profile/authorization.html', {'active': 'profile'})
 
 
 def authentication_requests(request):
@@ -49,11 +49,11 @@ def authentication_requests(request):
             profiles = {}
 
             for profile in profile_data:
-                profiles[profile['regionId']] = {
+                profiles[int(profile['regionId'])] = {
                     'profile_name': profile['name'],
                     'region_name': regions[profile['regionId']],
-                    'profile_id': profile['profileId'],
-                    'realm_id': profile['realmId']
+                    'profile_id': int(profile['profileId']),
+                    'realm_id': int(profile['realmId'])
                 }
 
             authorized_account = BattlenetAccount(
