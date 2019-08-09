@@ -47,7 +47,6 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'sslserver',
     'django_extensions',
-    # 'oauth2_provider',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -66,6 +65,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+# SESSION_COOKIE_DOMAIN=".zephyrus.gg"
 
 SITE_ID = 1
 
