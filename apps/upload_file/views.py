@@ -3,9 +3,9 @@ from django.shortcuts import render, redirect
 from .forms import ReplayFileForm
 from django.core.validators import FileExtensionValidator
 from django.core.files.storage import default_storage
-from apps.processreplays.views import parse_replay
+from apps.process_replays.views import parse_replay
 from allauth.account.models import EmailAddress
-from apps.user_profile.models import BattlenetAccount, AuthenticatedReplay, UnauthenticatedReplay
+from apps.user_profile.models import BattlenetAccount, Replay
 
 
 def sha256sum(f):
@@ -28,97 +28,57 @@ def upload_form(request):
 
                 user = request.user
 
-                errors, meta_data, player_info, summary_info = parse_replay(file)
-                if errors is not None:
-                    # error has occurred during parsing
-                    pass
+                players, summary_stats, metadata = parse_replay(file)
 
                 file_hash = sha256sum(file)
                 file.name = f'{file_hash}.SC2Replay'
                 filename = file.name
 
-                # user_info = None
-                # opponent_info = None
-                uploaded = False
-                auth_replay_query = AuthenticatedReplay.objects.filter(file_hash=file_hash)
-                unauth_replay_query = UnauthenticatedReplay.objects.filter(file_hash=file_hash)
+                replay_query = Replay.objects.filter(file_hash=file_hash)
                 user_account = EmailAddress.objects.get(user=user)
                 user_battlenet_accounts = BattlenetAccount.objects.filter(user_account=user_account)
 
+                match_region = players[1].region_id
+
                 duplicate_replay = False
-                if auth_replay_query or unauth_replay_query:
-                    for battlenet_account in user_battlenet_accounts:
-                        for replay in auth_replay_query:
-                            if replay.battlenet_account == battlenet_account:
-                                duplicate_replay = True
+                if replay_query:
+                    duplicate_replay = True
 
-                        for replay in unauth_replay_query:
-                            if replay.battlenet_account == battlenet_account:
-                                duplicate_replay = True
+                if not duplicate_replay:
+                    profile_ids = [players[1].profile_id, players[2].profile_id]
+                    kwargs = {f'region_profiles__{match_region}__profile_id__in': profile_ids}
+                    if user_battlenet_accounts:
+                        print(user_battlenet_accounts)
+                        print(user_battlenet_accounts[0].region_profiles)
+                        print(match_region)
+                        print(profile_ids)
+                        player_battlenet_account = user_battlenet_accounts.get(**kwargs)
+                    else:
+                        player_battlenet_account = None
 
-                if duplicate_replay is False:
-                    for account in user_battlenet_accounts:
-                        for profile in account.region_profiles.values():
-                            if int(profile['profile_id']) in player_info['player1'].values() or int(profile['profile_id']) in player_info['player2'].values():
-                                bucket_path = f'{user.email}/{account.battletag}/{filename}'
-
-                                user_in_game_name = None
-                                opponent_in_game_name = None
-                                for info in player_info.values():
-                                    if info['profile_id'] == int(profile['profile_id']):
-                                        user_in_game_name = info['in_game_name']
-                                    else:
-                                        opponent_in_game_name = info['in_game_name']
-                                        opponent_profile_id = info['profile_id']
-
-                                replay = AuthenticatedReplay(
-                                    file_hash=file_hash,
-                                    battlenet_account=account,
-                                    opponent_profile_id=opponent_profile_id,
-                                    match_summary=summary_info,
-                                    user_in_game_name=user_in_game_name,
-                                    opponent_in_game_name=opponent_in_game_name,
-                                    played_at=meta_data['time_played_at'],
-                                    map=meta_data['game_map'],
-                                    region_id=player_info['player1']['region_id'],
-                                )
-                                replay.save()
-
-                                file_contents = file.open(mode='rb')
-                                current_replay = default_storage.open(bucket_path, 'w')
-                                current_replay.write(file_contents.read())
-                                current_replay.close()
-                                uploaded = True
-                                break
-                        if uploaded is True:
-                            break
-
-                    if uploaded is False:
+                    if player_battlenet_account:
+                        bucket_path = f'{user.email}/{player_battlenet_account.battletag}/{filename}'
+                    else:
                         bucket_path = f'{user.email}/{filename}'
 
-                        player_profile_ids = []
-                        for player, info in player_info.items():
-                            player_profile_ids.append(info['profile_id'])
+                    replay = Replay(
+                        file_hash=file_hash,
+                        user_account=user_account,
+                        battlenet_account=player_battlenet_account,
+                        match_summary=summary_stats,
+                        played_at=metadata['time_played_at'],
+                        map=metadata['map'],
+                        region_id=match_region,
+                    )
+                    replay.save()
 
-                        replay = UnauthenticatedReplay(
-                            file_hash=file_hash,
-                            user_account=EmailAddress.objects.get(user=user),
-                            match_summary=summary_info,
-                            player1_profile_id=player_profile_ids[0],
-                            player2_profile_id=player_profile_ids[1],
-                            played_at=meta_data['time_played_at'],
-                            map=meta_data['game_map'],
-                            region_id=player_info['player1']['region_id'],
-                        )
-                        replay.save()
-
-                        file_contents = file.open(mode='rb')
-                        current_replay = default_storage.open(bucket_path, 'w')
-                        current_replay.write(file_contents.read())
-                        current_replay.close()
+                    file_contents = file.open(mode='rb')
+                    current_replay = default_storage.open(bucket_path, 'w')
+                    current_replay.write(file_contents.read())
+                    current_replay.close()
                 else:
+                    # redirect to appropriate replay page
                     pass
-
             return redirect('/profile/')
     else:
         info = 'This is the upload page'
