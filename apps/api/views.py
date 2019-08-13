@@ -7,6 +7,7 @@ from apps.user_profile.models import Replay, BattlenetAccount
 from allauth.account.models import EmailAddress
 from .models import ReplaySerializer
 import requests
+import json
 
 
 class ExternalLogin(APIView):
@@ -14,8 +15,9 @@ class ExternalLogin(APIView):
     permission_classes = []
 
     def post(self, request):
-        username = request.POST['username']
-        password = request.POST['password']
+        data = json.loads(request.body)
+        username = data['username']
+        password = data['password']
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
