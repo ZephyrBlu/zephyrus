@@ -18,7 +18,7 @@ def sha256sum(f):
 
 
 def upload_form(request):
-    if request.method == 'POST':
+    if request.user.is_authenticated and request.method == 'POST':
         form = ReplayFileForm(request.POST, request.FILES)
         replay_files = request.FILES.getlist('file')
         if form.is_valid():
@@ -48,10 +48,6 @@ def upload_form(request):
                     profile_ids = [players[1].profile_id, players[2].profile_id]
                     kwargs = {f'region_profiles__{match_region}__profile_id__in': profile_ids}
                     if user_battlenet_accounts:
-                        print(user_battlenet_accounts)
-                        print(user_battlenet_accounts[0].region_profiles)
-                        print(match_region)
-                        print(profile_ids)
                         player_battlenet_account = user_battlenet_accounts.get(**kwargs)
                     else:
                         player_battlenet_account = None
