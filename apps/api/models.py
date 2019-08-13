@@ -7,6 +7,7 @@ class ReplaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Replay
         fields = (
+            'file_hash',
             'match_summary',
             'battlenet_account',
             'map',
