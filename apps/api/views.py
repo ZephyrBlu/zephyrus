@@ -1,15 +1,51 @@
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseNotFound
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import TokenAuthentication, BaseAuthentication
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import BasePermission, IsAuthenticated
 from apps.user_profile.models import Replay, BattlenetAccount
 from allauth.account.models import EmailAddress
-from rest_framework.authtoken.models import Token
 from .models import ReplaySerializer
 import requests
 import json
+
+
+class IsOptionsAuthentication(BaseAuthentication):
+    """
+    Allows preflight requests to complete
+    Used for CORS requests in development
+    """
+    def authenticate(self, request):
+        if request.method == 'OPTIONS':
+            return None
+        else:
+            raise AuthenticationFailed
+
+
+class IsOptionsPermission(BasePermission):
+    """
+    Allows preflight requests to complete
+    Used for CORS requests in development
+    """
+    def has_permission(self, request, view):
+        if request.method == 'OPTIONS':
+            return True
+        else:
+            return False
+
+
+class IsPostPermission(BasePermission):
+    """
+    Allows preflight requests to complete
+    Used for CORS requests in development
+    """
+    def has_permission(self, request, view):
+        if request.method == 'POST':
+            return True
+        else:
+            return False
 
 
 class ExternalLogin(APIView):
