@@ -83,15 +83,22 @@ class ExternalLogin(APIView):
             return response
 
 
-@api_view(['GET'])
-@authentication_classes([])
-@permission_classes([])
-def external_logout(request):
-    print(request.user)
-    logout(request)
-    response = Response({'response': 'Successfully logged out'})
-    response['Access-Control-Allow-Origin'] = '*'
-    return response
+class ExternalLogout(APIView):
+    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def get(self, request):
+        logout(request)
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
 
 
 # returns particular replay based on pk ID in database
