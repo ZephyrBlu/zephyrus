@@ -50,11 +50,12 @@ class IsPostPermission(BasePermission):
 
 class ExternalLogin(APIView):
     authentication_classes = []
-    permission_classes = []
+    permission_classes = [IsOptionsPermission | IsPostPermission]
 
     def options(self, request):
-        response = Response({'response': 'success'})
-        response['Access-Control-Allow-Origin'] = '*'
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
         return response
 
     def post(self, request):
@@ -62,24 +63,23 @@ class ExternalLogin(APIView):
         username = data['username']
         password = data['password']
         user = authenticate(request, username=username, password=password)
-        print(user)
-        print(user.is_authenticated)
 
         if user is not None:
             login(request, user)
-            print(user.last_login)
-            print(vars(request))
             data = {'username': username, 'password': password}
-            token = requests.post(
+            token_response = requests.post(
                 url="http://127.0.0.1:8000/api/token/",
                 data=data
             )
-            response = Response(token.json())
-            response['Access-Control-Allow-Origin'] = '*'
-            return response
+            if token_response.status_code != 200:
+                return Response(status=token_response.status_code)
+            else:
+                response = Response(token_response.json())
+                response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+                return response
         else:
-            response = Response({'response': 'Login details invalid'})
-            response['Access-Control-Allow-Origin'] = '*'
+            response = HttpResponseBadRequest()
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             return response
 
 
@@ -103,9 +103,10 @@ class ExternalLogout(APIView):
 
 # returns particular replay based on pk ID in database
 class AccountReplays(APIView):
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
 
-    def get(self, request, format=None):
+    def get(self, request):
         user = request.user
         user_id = EmailAddress.objects.get(email=user.email)
 
@@ -120,31 +121,25 @@ class AccountReplays(APIView):
 
 # returns particular replay based on pk ID in database
 class BattlenetAccountReplays(APIView):
-    permission_classes = ([]) #IsAuthenticated,)
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
 
     def options(self, request):
-        print(vars(request))
-        print(request.user)
-        print(request.user.is_authenticated)
-        response = Response({'response': 'successful preflight'})
-        response['Access-Control-Allow-Origin'] = '*'
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
-    def post(self, request, format=None):
-        print(request.body)
-        request_token = json.loads(request.body)['auth']
-        print(request_token)
-        user_token = Token.objects.get(key=request_token)
-        print(user_token)
-        user = EmailAddress.objects.get(id=user_token.user_id)
-        print(vars(user))
-        print(user.last_login)
-
-        user_id = user.email
+    def get(self, request):
+        user = request.user
+        user_id = EmailAddress.objects.get(email=user.email)
         battle_net_id = BattlenetAccount.objects.get(user_account_id=user_id)
 
         if not battle_net_id:
-            return HttpResponseNotFound
+            response = HttpResponseNotFound
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
 
         replay_queryset = Replay.objects.filter(battlenet_account_id=battle_net_id)
         serialized_replays = []
@@ -153,43 +148,9 @@ class BattlenetAccountReplays(APIView):
             serialized_replays.append(serializer.data)
 
         response = Response(serialized_replays)
-        response['Access-Control-Allow-Origin'] = '*'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
         return response
-
-    def get(self, request, format=None):
-        print(request.user)
-        print(request.user.is_authenticated)
-        print(request.auth)
-        user = request.user
-        user_id = EmailAddress.objects.get(email=user.email)
-        battle_net_id = BattlenetAccount.objects.get(user_account_id=user_id)
-
-        if not battle_net_id:
-            return HttpResponseNotFound
-
-        replay_queryset = Replay.objects.filter(battlenet_account_id=battle_net_id)
-        serialized_replays = []
-        for replay in list(replay_queryset):
-            serializer = ReplaySerializer(replay)
-            serialized_replays.append(serializer.data)
-
-        response = Response(serialized_replays)
-        response['Access-Control-Allow-Origin'] = '*'
-        return response
-
-
-# returns last uploaded replay
-class LatestReplay(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request, format=None):
-        user = request.user
-        user_id = EmailAddress.objects.get(email=user.email)
-        battle_net_id = BattlenetAccount.objects.get(user_account_id=user_id)
-
-        replay = Replay.objects.filter(battlenet_account_id=battle_net_id).latest('uploaded_at')
-        serializer = ReplaySerializer(replay)
-        return Response(serializer.data)
 
 
 # def verify_replays(request):
