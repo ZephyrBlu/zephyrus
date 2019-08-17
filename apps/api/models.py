@@ -8,9 +8,11 @@ class ReplaySerializer(serializers.ModelSerializer):
         model = Replay
         fields = (
             'file_hash',
+            'players',
             'match_summary',
             'battlenet_account',
             'map',
             'played_at',
-            'region_id'
+            'region_id',
+            'win'
         )
