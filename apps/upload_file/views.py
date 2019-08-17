@@ -30,6 +30,10 @@ def upload_form(request):
 
                 players, summary_stats, metadata = parse_replay(file)
 
+                player_summary = {}
+                player_summary[1] = vars(players[1])
+                player_summary[2] = vars(players[2])
+
                 file_hash = sha256sum(file)
                 file.name = f'{file_hash}.SC2Replay'
                 filename = file.name
@@ -51,20 +55,28 @@ def upload_form(request):
                         player_battlenet_account = user_battlenet_accounts.get(**kwargs)
                     else:
                         player_battlenet_account = None
-
                     if player_battlenet_account:
                         bucket_path = f'{user.email}/{player_battlenet_account.battletag}/{filename}'
+
+                        player_profile_id = player_battlenet_account.region_profiles[str(match_region)]['profile_id']
+                        if players[metadata['winner']].profile_id == player_profile_id:
+                            win = True
+                        else:
+                            win = False
                     else:
+                        win = None
                         bucket_path = f'{user.email}/{filename}'
 
                     replay = Replay(
                         file_hash=file_hash,
                         user_account=user_account,
                         battlenet_account=player_battlenet_account,
+                        players=player_summary,
                         match_summary=summary_stats,
                         played_at=metadata['time_played_at'],
                         map=metadata['map'],
                         region_id=match_region,
+                        win=win
                     )
                     replay.save()
 
