@@ -28,7 +28,8 @@ class Replay(models.Model):
         on_delete=models.CASCADE
     )
     players = JSONField()
-    match_summary = JSONField()
+    match_data = JSONField()
+    match_length = models.IntegerField()
     played_at = models.DateTimeField()
     map = models.CharField(max_length=100)
     uploaded_at = models.DateTimeField(auto_now_add=True)
