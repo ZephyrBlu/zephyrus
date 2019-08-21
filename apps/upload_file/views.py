@@ -30,6 +30,9 @@ def upload_form(request):
 
                 players, summary_stats, metadata = parse_replay(file)
 
+                if players is None:
+                    continue
+
                 player_summary = {}
                 player_summary[1] = vars(players[1])
                 player_summary[2] = vars(players[2])
