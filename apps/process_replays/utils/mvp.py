@@ -24,6 +24,11 @@ def convert_time(windows_time):
     return replay_datetime
 
 
+def calc_sq(*, unspent_resources, collection_rate):
+    sq = math.ceil(35 * (0.00137 * collection_rate - math.log(unspent_resources if unspent_resources > 0 else 1)) + 240)
+    return sq
+
+
 def get_ids(player_info, events):
     # get player name and race
     # workingSetSlotId correlates to playerIDs
@@ -132,6 +137,7 @@ def setup(filename):
     contents = archive.read_file('replay.tracker.events')
     details = archive.read_file('replay.details')
     gameInfo = archive.read_file('replay.game.events')
+    init_data = archive.read_file('replay.initData')
 
     metadata = json.loads(archive.read_file('replay.gamemetadata.json'))
 
@@ -139,6 +145,7 @@ def setup(filename):
     game_events = protocol.decode_replay_game_events(gameInfo)
     player_info = protocol.decode_replay_details(details)
     tracker_events = protocol.decode_replay_tracker_events(contents)
+    detailed_info = protocol.decode_replay_initdata(init_data)
 
     # all info is returned as generators
     #
@@ -154,12 +161,12 @@ def setup(filename):
             game_length = event['_gameloop']
             break
 
-    return events, player_info, metadata, game_length, protocol
+    return events, player_info, detailed_info, metadata, game_length, protocol
 
 
 def main(filename):
     try:
-        events, player_info, metadata, game_length, protocol = setup(filename)
+        events, player_info, detailed_info, metadata, game_length, protocol = setup(filename)
         players, metadata_export = get_ids(player_info, events)
     except ValueError as error:
         print('A ValueError occured:', error)
@@ -193,13 +200,18 @@ def main(filename):
         'workers_produced': {1: 0, 2: 0},
         'workers_lost': {1: 0, 2: 0},
         'inject_count': {1: 0, 2: 0},
+        'sq': {1: 0, 2: 0}
     }
 
     metadata_export['game_length'] = math.floor(game_length/22.4)
 
+    mmr_data = detailed_info['m_syncLobbyState']['m_userInitialData'] # ['m_scaledRating']
+
     ranked_game = False
+    player1_mmr = mmr_data[0]['m_scaledRating']
+    player2_mmr = mmr_data[1]['m_scaledRating']
     for p in metadata['Players']: 
-        if 'MMR' in p:
+        if player1_mmr and player2_mmr:
             ranked_game = True
         else:
             ranked_game = False
@@ -211,12 +223,15 @@ def main(filename):
         player_id = player['PlayerID']
 
         summary_stats['apm'][player_id] = player['APM']
-        if ranked_game:
-            summary_stats['mmr'][player_id] = player['MMR']
+
+        if mmr_data[player_id-1]['m_scaledRating']:
+            summary_stats['mmr'][player_id] = mmr_data[player_id-1]['m_scaledRating']
+        else:
+            summary_stats['mmr'][player_id] = 0
 
     if ranked_game:
-        summary_stats['mmr_diff'][1] = metadata['Players'][0]['MMR']-metadata['Players'][1]['MMR']
-        summary_stats['mmr_diff'][2] = metadata['Players'][1]['MMR']-metadata['Players'][0]['MMR']
+        summary_stats['mmr_diff'][1] = player1_mmr-player2_mmr
+        summary_stats['mmr_diff'][2] = player2_mmr-player1_mmr
 
     unspent_resources = {
         'minerals': {1: [], 2: []},
@@ -253,6 +268,10 @@ def main(filename):
                 summary_stats['avg_resource_collection_rate']['minerals'][event['m_playerId']] = round(sum(player_minerals_collection)/len(player_minerals_collection), 1)
                 summary_stats['avg_resource_collection_rate']['gas'][event['m_playerId']] = round(sum(player_gas_collection)/len(player_gas_collection), 1)
 
+                total_collection_rate = summary_stats['avg_resource_collection_rate']['minerals'][event['m_playerId']] + summary_stats['avg_resource_collection_rate']['gas'][event['m_playerId']]
+                total_avg_unspent = summary_stats['avg_unspent_resources']['minerals'][event['m_playerId']] + summary_stats['avg_unspent_resources']['gas'][event['m_playerId']]
+                player_sq = calc_sq(unspent_resources=total_avg_unspent, collection_rate=total_collection_rate)
+                summary_stats['sq'][event['m_playerId']] = player_sq
 
                 current_workers = event['m_stats']['m_scoreValueWorkersActiveCount']
                 workers_produced = summary_stats['workers_produced'][event['m_playerId']]
