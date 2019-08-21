@@ -8,6 +8,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from apps.user_profile.models import Replay, BattlenetAccount
 from allauth.account.models import EmailAddress
 from .models import ReplaySerializer
+from .utils.trends import main as analyze_trends
 import requests
 import json
 
@@ -149,6 +150,35 @@ class BattlenetAccountReplays(APIView):
 
         serialized_replays.sort(key=lambda x: x['played_at'], reverse=True)
         response = Response(serialized_replays)
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class Stats(APIView):
+    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def get(self, request):
+        user = request.user
+        user_id = EmailAddress.objects.get(email=user.email)
+        battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
+
+        account_replays = Replay.objects.filter(battlenet_account=battlenet_account)
+
+        battlenet_id_list = []
+        for region_id, info in battlenet_account.region_profiles.items():
+            battlenet_id_list.append(info['profile_id'])
+
+        trend_data = analyze_trends(account_replays, battlenet_id_list)
+
+        response = Response(json.dumps(trend_data))
         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
