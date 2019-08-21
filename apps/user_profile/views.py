@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from allauth.account.models import EmailAddress
 from apps.user_profile.models import BattlenetAccount
 from django.contrib.auth.decorators import user_passes_test
+from .secret import CLIENT_ID, CLIENT_SECRET
 import requests
 
 
@@ -22,14 +23,12 @@ def authentication_requests(request):
             token_url = f'{oauth_api_url}oauth/token'
             auth_code = request.GET.get('code')
             redirect_uri = 'https://127.0.0.1:8000/profile/authorize'
-            client_id = '7868b58312e647819a2785e0ec7eeba1'
-            client_secret = 'Ln4sR352JK2rlXUQ8HezmD97DPQ1Cc0C'
             data = {
                     'grant_type': 'authorization_code',
                     'code': auth_code,
                     'redirect_uri': redirect_uri,
-                    'client_id': client_id,
-                    'client_secret': client_secret
+                    'client_id': CLIENT_ID,
+                    'client_secret': CLIENT_SECRET
                     }
             info = requests.post(token_url, data=data)
             access_token = info.json()['access_token']
