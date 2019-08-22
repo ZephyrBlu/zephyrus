@@ -1,4 +1,65 @@
 .wrapper {
-    width: 1000px;
+    width: 1200px;
     margin: 0 auto;
+}
+
+.content {
+    height: 710px;
+    padding-top: 50px;
+    text-align: center;
+}
+
+h1 {
+    width: max-content;
+    margin: 0 auto 30px;
+    padding-left: 90px;
+}
+
+form {
+    text-align: right;
+    width: 380px;
+    margin: 0 auto;
+}
+
+input {
+    padding: 10px 0 10px 5px;
+    margin-left: 15px;
+    margin-bottom: 20px;
+    margin-right: 50px;
+}
+
+input[type=email], input[type=password] {
+    border-radius: 25px;
+    border: 1px solid rgb(120, 120, 120);
+}
+
+label {
+    font-weight: bold;
+}
+
+label[for=id_email], label[for=id_password1] {
+    margin-left: 50px;
+}
+
+input[name=password2] {
+    margin-right: 50px;
+}
+
+input[type=submit] {
+    margin-right: 72px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 25px;
+    font-family: 'Quicksand', sans-serif;
+    font-size: 14pt;
+    font-weight: bold;
+    text-align: center;
+    background-color: #87CEEB;
+    padding: 12px 35px;
+    transition: 0.5s;
+}
+
+input[type=submit]:hover {
+    transform: scale(1.08);
+    box-shadow: 0 0 6px 1px black;
 }
