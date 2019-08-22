@@ -28,8 +28,7 @@ def calc_sq(*, unspent_resources, collection_rate):
     sq = math.ceil(35 * (0.00137 * collection_rate - math.log(unspent_resources if unspent_resources > 0 else 1)) + 240)
     return sq
 
-
-def get_ids(player_info, events):
+async def get_ids(player_info, events):
     # get player name and race
     # workingSetSlotId correlates to playerIDs
     players = {}
@@ -122,7 +121,7 @@ def get_ids(player_info, events):
     return players, metadata
 
 
-def setup(filename):
+async def setup(filename):
     archive = mpyq.MPQArchive(filename)
     
     # getting correct game version and protocol
@@ -164,10 +163,10 @@ def setup(filename):
     return events, player_info, detailed_info, metadata, game_length, protocol
 
 
-def main(filename):
+async def main(filename):
     try:
-        events, player_info, detailed_info, metadata, game_length, protocol = setup(filename)
-        players, metadata_export = get_ids(player_info, events)
+        events, player_info, detailed_info, metadata, game_length, protocol = await setup(filename)
+        players, metadata_export = await get_ids(player_info, events)
     except ValueError as error:
         print('A ValueError occured:', error)
         text = 'unreadable header'
@@ -205,7 +204,9 @@ def main(filename):
 
     metadata_export['game_length'] = math.floor(game_length/22.4)
 
-    mmr_data = detailed_info['m_syncLobbyState']['m_userInitialData'] # ['m_scaledRating']
+    mmr_data = detailed_info['m_syncLobbyState']['m_userInitialData']
+    if not mmr_data[1]['m_scaledRating'] or mmr_data[2]['m_scaledRating']:
+        return None, None, None
 
     ranked_game = False
     player1_mmr = mmr_data[0]['m_scaledRating']
