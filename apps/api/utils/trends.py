@@ -150,23 +150,26 @@ def main(account_replays, battlenet_id_list):
             loss_diff_gas = win_loss_medians['loss'][stat]['gas'] - values['gas']
 
             win_loss_difference['win'][stat] = {
-                'minerals': ceil(win_diff_min),
-                'gas': ceil(win_diff_gas)
+                'minerals': ceil(win_diff_min/win_loss_medians['win'][stat]['minerals']*100),
+                'gas': ceil(win_diff_gas/win_loss_medians['win'][stat]['gas']*100)
             }
             win_loss_difference['loss'][stat] = {
-                'minerals': ceil(loss_diff_min),
-                'gas': ceil(loss_diff_gas)
+                'minerals': ceil(loss_diff_min/win_loss_medians['loss'][stat]['minerals']*100),
+                'gas': ceil(loss_diff_gas/win_loss_medians['loss'][stat]['gas']*100)
             }
         else:
             win_diff = win_loss_medians['win'][stat] - values
             loss_diff = win_loss_medians['loss'][stat] - values
 
-            if values == 0:
-                win_loss_difference['win'][stat] = 0
-                win_loss_difference['loss'][stat] = 0
+            if win_loss_medians['win'][stat] != 0:
+                win_loss_difference['win'][stat] = ceil(win_diff/win_loss_medians['win'][stat]*100)
             else:
-                win_loss_difference['win'][stat] = win_diff
-                win_loss_difference['loss'][stat] = loss_diff
+                win_loss_difference['win'][stat] = 0
+
+            if win_loss_medians['loss'][stat] != 0:
+                win_loss_difference['loss'][stat] = ceil(loss_diff/win_loss_medians['loss'][stat]*100)
+            else:
+                win_loss_difference['loss'][stat] = 0
 
     trends['win_diff'] = win_loss_difference['win']
     trends['loss_diff'] = win_loss_difference['loss']
