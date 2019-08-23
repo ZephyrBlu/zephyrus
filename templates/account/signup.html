@@ -7,9 +7,7 @@
 {% endblock %}
 
 {% block content %}
-    <h1>Sign up</h1>
-
-    <form method="post">
+    <form class="signup" method="post">
         {% csrf_token %}
         {{ form }}
         <input type="submit" name="next" value="Sign Up">
