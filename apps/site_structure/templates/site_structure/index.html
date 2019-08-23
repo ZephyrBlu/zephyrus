@@ -1,6 +1,6 @@
 <!doctype html>
 <html class="no-js" lang="">
-
+{% load i18n %}
 <head>
   <meta charset="utf-8">
   <meta http-equiv="x-ua-compatible" content="ie=edge">
@@ -11,7 +11,7 @@
   {% load static %}
   <link rel="manifest" href="site.webmanifest">
   <link rel="icon" href="{% static 'site_structure/icon.PNG' %}">
-  <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Quicksand:400, 500|Lato" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Raleway:400|Roboto" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
   {% block stylesheet %}{% endblock %}
 </head>
@@ -20,53 +20,27 @@
   <!--[if lte IE 9]>
     <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
   <![endif]-->
-    {% block nav %}
-    {% endblock %}
     <div class='wrapper' id='wrapper'>
-        {% if active != 'profile' %}
             <header id='header'>
-                <a class='title' href="{% url 'site_structure:home' %}">zephyrus</a>
-                <h4 class='sub-heading'>beta</h4>
-                <nav class="menu">
+                <div class="PageInfo">
+                    <h2 class="PageInfo__site-name">zephyrus</h2>
+                    <h3 class="PageInfo__info">StarCraft II &nbsp;/&nbsp; {{ active|title }}</h3>
+                </div>
+                <h1 class="PageHeader__page-title">{{ active|title }}</h1>
+                <nav class="ProfileNav">
                     <ul>
-                        <li><a {% if active == 'upload' %} class="active" {% endif %} href="{% url 'upload:upload_form' %}">upload</a></li>
-                        <li><a {% if active == 'profile' %} class="active" {% endif %} href="{% url 'user_profile:overview' %}">profile</a></li>
-                        <li><a {% if active == 'about' %} class="active" {% endif %} href="{% url 'site_structure:about' %}">about</a></li>
-                        <li><a {% if active == 'contact' %} class="active" {% endif %} href="{% url 'site_structure:contact' %}">contact</a></li>
-                        <li><a {% if active == 'premium' %} class="active" {% endif %} href="{% url 'site_structure:premium' %}">zephyr</a></li>
-                        <li><a {% if active == 'signup' %} class="active" {% endif %} class='special' href="{% url 'signup:signup' %}">sign up</a></li>
-                        <li><a {% if active == 'login' %} class="active" {% endif %} class='special' href="{% url 'login:login' %}">login</a></li>
+                        <li><a class="ProfileNav__link {% if active == 'upload' %} ProfileNav__link--active {% endif %}" href="http://localhost:5000">Stats</a></li>
+                        <li><a class="ProfileNav__link {% if active == 'signup' %} ProfileNav__link--active {% endif %}" href="{% url 'signup:signup' %}">Sign up</a></li>
+                        <li><a class="ProfileNav__link {% if active == 'authorization' %} ProfileNav__link--active {% endif %}" href="">Link Battlenet</a></li>
+                        <li><a class="ProfileNav__link login-button {% if active == 'login' %} ProfileNav__link--active {% endif %}"  href="http://localhost:5000">Login</a></li>
                     </ul>
                 </nav>
             </header>
-
-        <div id='bottom-banner'>
-            <div class='arrow bounce'>
-            </div>
-        </div>
         <div class='content' id='content'>
-        {% else %}
-            <div id='root'>
-        {% endif %}
         {% block content %}
         {% endblock %}
         </div>
     </div>
-        {% block js %}
-        {% endblock %}
-    <footer>
-        <div class='footer'>
-            <h4>© Luke Holroyd 2019</h4>
-            <span class='info'><a>Privacy Policy</a> | <a>Terms of Service</a></span>
-        </div>
-    </footer>
-
-  <!-- Google Analytics: change UA-XXXXX-Y to be your site's ID. -->
-  <script>
-    window.ga = function () { ga.q.push(arguments) }; ga.q = []; ga.l = +new Date;
-    ga('create', 'UA-XXXXX-Y', 'auto'); ga('send', 'pageview')
-  </script>
-  <script src="https://www.google-analytics.com/analytics.js" async defer></script>
 </body>
 
 </html>
