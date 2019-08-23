@@ -38,8 +38,6 @@ INSTALLED_APPS = [
     'usermanager.apps.UsermanagerConfig',
     'apps.signup.apps.SignupConfig',
     'apps.site_structure.apps.SiteStructureConfig',
-    'apps.upload_file.apps.UploadFileConfig',
-    'apps.login.apps.LoginConfig',
     'apps.user_profile.apps.UserProfileConfig',
     'apps.api.apps.ApiConfig',
 
@@ -172,7 +170,7 @@ AUTHENTICATION_BACKENDS = (
 
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'sc2-replays'
+GS_BUCKET_NAME = 'sc2-replays-dev'
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-3e7a6f1bc4e5.json')
 GS_PROJECT_ID = 'reflected-codex-228006'
 # GS_DEFAULT_ACL = 'publicRead'
@@ -184,11 +182,12 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 ACCOUNT_ADAPTER = 'zephyrus.users.adapter.CustomAccountAdapter'
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
 ACCOUNT_EMAIL_REQUIRED = True
+# ACCOUNT_EMAIL_VERIFICATION = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
 
-LOGIN_REDIRECT_URL = '/home/'
-ACCOUNT_LOGOUT_REDIRECT_URL = '/home/'
+LOGIN_REDIRECT_URL = 'http://localhost:5000/'
+ACCOUNT_LOGOUT_REDIRECT_URL = '/signup/'
