@@ -5,6 +5,7 @@ from .views import (
     ExternalLogin,
     BattlenetAccountReplays,
     Stats,
+    UploadReplays,
 )  # verify_replays
 
 
@@ -15,4 +16,5 @@ urlpatterns = [
     path('logout/', ExternalLogout.as_view(), name='external_logout'),
     path('token/', views.obtain_auth_token),
     path('stats/', Stats.as_view(), name='user_stats'),
+    path('upload/', UploadReplays.as_view(), name='replay_upload'),
 ]
