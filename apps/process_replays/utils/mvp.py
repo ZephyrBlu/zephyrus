@@ -28,7 +28,8 @@ def calc_sq(*, unspent_resources, collection_rate):
     sq = math.ceil(35 * (0.00137 * collection_rate - math.log(unspent_resources if unspent_resources > 0 else 1)) + 240)
     return sq
 
-async def get_ids(player_info, events):
+
+def get_ids(player_info, events):
     # get player name and race
     # workingSetSlotId correlates to playerIDs
     players = {}
@@ -121,7 +122,7 @@ async def get_ids(player_info, events):
     return players, metadata
 
 
-async def setup(filename):
+def setup(filename):
     archive = mpyq.MPQArchive(filename)
     
     # getting correct game version and protocol
@@ -163,22 +164,19 @@ async def setup(filename):
     return events, player_info, detailed_info, metadata, game_length, protocol
 
 
-async def main(filename):
+def main(filename):
     try:
-        events, player_info, detailed_info, metadata, game_length, protocol = await setup(filename)
-        players, metadata_export = await get_ids(player_info, events)
+        events, player_info, detailed_info, metadata, game_length, protocol = setup(filename)
+        players, metadata_export = get_ids(player_info, events)
     except ValueError as error:
-        print('A ValueError occured:', error)
-        text = 'unreadable header'
-        return (error, text), None
+        print('A ValueError occured (Unreadable header):', error)
+        return None, None, None
     except ImportError as error:
-        print('An ImportError occured:', error)
-        text = 'unsupported protocol'
-        return (error, text), None
+        print('An ImportError occured (Unsupported protocol):', error)
+        return None, None, None
     except KeyError as error:
-        print('A KeyError error occured:', error)
-        text = 'unreadable file info'
-        return (error, text)
+        print('A KeyError error occured (Unreadable file info):', error)
+        return None, None, None
 
     summary_stats = {
         'mmr': {1: 0, 2: 0},
