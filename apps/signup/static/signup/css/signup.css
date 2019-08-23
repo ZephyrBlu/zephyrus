@@ -1,23 +1,23 @@
 .wrapper {
-    width: 1200px;
     margin: 0 auto;
 }
 
 .content {
-    height: 710px;
-    padding-top: 50px;
+    margin-top: 100px;
+    height: max-content;
     text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
 }
 
-h1 {
-    width: max-content;
-    margin: 0 auto 30px;
-    padding-left: 90px;
-}
-
-form {
+.signup {
     text-align: right;
     width: 380px;
+    padding-top: 30px;
+    padding-left: 25px;
+    background-color: hsl(240, 50%, 10%);
+    border-radius: 25px;
     margin: 0 auto;
 }
 
@@ -29,12 +29,8 @@ input {
 }
 
 input[type=email], input[type=password] {
-    border-radius: 25px;
-    border: 1px solid rgb(120, 120, 120);
-}
-
-label {
-    font-weight: bold;
+    border-radius: 5px;
+    border: none;
 }
 
 label[for=id_email], label[for=id_password1] {
@@ -46,20 +42,21 @@ input[name=password2] {
 }
 
 input[type=submit] {
-    margin-right: 72px;
+    position: relative;
+    right: 21%;
     margin-top: 10px;
     border: none;
-    border-radius: 25px;
-    font-family: 'Quicksand', sans-serif;
-    font-size: 14pt;
-    font-weight: bold;
+    border-radius: 15px;
+    font-family: 'Roboto', sans-serif;
     text-align: center;
-    background-color: #87CEEB;
     padding: 12px 35px;
-    transition: 0.5s;
+    background-color: hsl(240, 80%, 7.5%);
+    color: hsl(0, 0%, 85%);
+    border: 1px solid hsl(0, 0%, 47%);
+    transition: 0.3s;
 }
 
 input[type=submit]:hover {
-    transform: scale(1.08);
-    box-shadow: 0 0 6px 1px black;
+    cursor: pointer;
+    background-color: hsl(210, 68%, 47%);
 }

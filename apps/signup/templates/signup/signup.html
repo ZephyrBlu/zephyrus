@@ -1,10 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'site_structure/index.html' %}
+
+{% load i18n %}
+
+{% block content %}
+
+<form class="signup" id="signup_form" method="post" action="{% url 'allauth.account:account_signup' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  {% if redirect_field_value %}
+  <input type="hidden" name="login" value="http://localhost:5000/" />
+  {% endif %}
+  <button type="submit">{% trans "Sign Up" %} &raquo;</button>
+</form>
+
+{% endblock %}
