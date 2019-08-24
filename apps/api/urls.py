@@ -1,5 +1,5 @@
 from rest_framework.authtoken import views
-from django.urls import path
+from django.urls import path, include
 from .views import (
     ExternalLogout,
     ExternalLogin,
@@ -17,4 +17,5 @@ urlpatterns = [
     path('token/', views.obtain_auth_token),
     path('stats/', Stats.as_view(), name='user_stats'),
     path('upload/', UploadReplays.as_view(), name='replay_upload'),
+    path('authorize/', include('user_profile.urls')),
 ]
