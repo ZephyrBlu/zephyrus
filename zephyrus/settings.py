@@ -25,12 +25,21 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 APPEND_SLASH = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.zephyrus.gg']
 
+CSRF_COOKIE_SECURE = True
+
+SESSION_COOKIE_SECURE = True
+
+SECURE_BROWSER_XSS_FILTER = True
+
+SECURE_SSL_REDIRECT = True
+
+X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 
@@ -170,7 +179,7 @@ AUTHENTICATION_BACKENDS = (
 
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'sc2-replays-dev'
+GS_BUCKET_NAME = 'sc2-replays'
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-3e7a6f1bc4e5.json')
 GS_PROJECT_ID = 'reflected-codex-228006'
 
@@ -188,5 +197,5 @@ ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
 
-LOGIN_REDIRECT_URL = 'http://localhost:5000/'
+LOGIN_REDIRECT_URL = 'https://app.zephyrus.gg/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/signup/'
