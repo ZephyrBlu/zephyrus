@@ -21,5 +21,5 @@ class MySignupView(SignupView):
         self.user = form.save(self.request)
         username = form.cleaned_data['email']
         password = form.cleaned_data['password1']
-        requests.post("http://127.0.0.1:8000/api/token/", data={"username": username, "password": password})
-        return redirect('http://localhost:5000/')
+        requests.post("https://zephyrus.gg/api/token/", data={"username": username, "password": password})
+        return redirect('https://app.zephyrus.gg/')

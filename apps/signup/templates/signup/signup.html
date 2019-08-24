@@ -8,7 +8,7 @@
   {% csrf_token %}
   {{ form.as_p }}
   {% if redirect_field_value %}
-  <input type="hidden" name="login" value="http://localhost:5000/" />
+  <input type="hidden" name="login" value="https://app.zephyrus.gg/" />
   {% endif %}
   <button type="submit">{% trans "Sign Up" %} &raquo;</button>
 </form>
