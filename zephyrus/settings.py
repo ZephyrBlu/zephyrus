@@ -173,7 +173,6 @@ DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = 'sc2-replays-dev'
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-3e7a6f1bc4e5.json')
 GS_PROJECT_ID = 'reflected-codex-228006'
-# GS_DEFAULT_ACL = 'publicRead'
 
 
 # MEDIA_URL = '/media/'

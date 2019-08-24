@@ -6,8 +6,9 @@ from .views import (
     BattlenetAccountReplays,
     Stats,
     UploadReplays,
+    BattlenetAuthorization,
+    CheckBattlenetAccount,
 )
-from apps.user_profile.views import battlenet_authorization
 
 
 app_name = 'api'
@@ -18,5 +19,6 @@ urlpatterns = [
     path('token/', views.obtain_auth_token),
     path('stats/', Stats.as_view(), name='user_stats'),
     path('upload/', UploadReplays.as_view(), name='replay_upload'),
-    path('authorize/', battlenet_authorization),
+    path('authorize/', BattlenetAuthorization.as_view(), name='battlenet_authorization'),
+    path('check/', CheckBattlenetAccount.as_view(), name='ping-battlenet-account')
 ]

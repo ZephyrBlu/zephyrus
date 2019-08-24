@@ -10,6 +10,7 @@ from allauth.account.models import EmailAddress
 from .models import ReplaySerializer
 from django.core.files import File
 from apps.process_replays.views import process_file
+from apps.user_profile.views import battlenet_authorization
 from .utils.trends import main as analyze_trends
 import requests
 import io
@@ -223,3 +224,47 @@ def sha256sum(f):
         h.update(mv[:n])
     return h.hexdigest()
 
+
+class BattlenetAuthorization(APIView):
+    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def get(self, request):
+        battlenet_authorization(request)
+
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class CheckBattlenetAccount(APIView):
+    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def get(self, request):
+        user = request.user
+
+        battlenet_accounts = BattlenetAccount.objects.filter(user_account=user.email)
+
+        if battlenet_accounts.exists():
+            response = Response()
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Headers'] = 'authorization'
+        else:
+            response = HttpResponseNotFound()
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
