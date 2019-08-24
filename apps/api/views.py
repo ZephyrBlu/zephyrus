@@ -60,7 +60,7 @@ class ExternalLogin(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
         return response
 
@@ -74,18 +74,18 @@ class ExternalLogin(APIView):
             login(request, user)
             data = {'username': username, 'password': password}
             token_response = requests.post(
-                url="http://127.0.0.1:8000/api/token/",
+                url="https://zephyrus.gg/api/token/",
                 data=data
             )
             if token_response.status_code != 200:
                 return Response(status=token_response.status_code)
             else:
                 response = Response(token_response.json())
-                response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+                response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
                 return response
         else:
             response = HttpResponseBadRequest()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
             return response
 
 
@@ -95,14 +95,14 @@ class ExternalLogout(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
     def get(self, request):
         logout(request)
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -132,7 +132,7 @@ class BattlenetAccountReplays(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -143,7 +143,7 @@ class BattlenetAccountReplays(APIView):
 
         if not battle_net_id:
             response = HttpResponseNotFound
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
@@ -155,7 +155,7 @@ class BattlenetAccountReplays(APIView):
 
         serialized_replays.sort(key=lambda x: x['played_at'], reverse=True)
         response = Response(serialized_replays)
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -166,7 +166,7 @@ class Stats(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -184,7 +184,7 @@ class Stats(APIView):
         trend_data = analyze_trends(account_replays, battlenet_id_list)
 
         response = Response(json.dumps(trend_data))
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -195,7 +195,7 @@ class UploadReplays(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -211,7 +211,7 @@ class UploadReplays(APIView):
         process_file(replay_file, request, file_hash)
 
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -231,7 +231,7 @@ class BattlenetAuthorization(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -239,7 +239,7 @@ class BattlenetAuthorization(APIView):
         battlenet_authorization(request)
 
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -250,7 +250,7 @@ class CheckBattlenetAccount(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -261,10 +261,10 @@ class CheckBattlenetAccount(APIView):
 
         if battlenet_accounts.exists():
             response = Response()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
             response['Access-Control-Allow-Headers'] = 'authorization'
         else:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
             response['Access-Control-Allow-Headers'] = 'authorization'
         return response

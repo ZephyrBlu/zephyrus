@@ -12,7 +12,7 @@ def battlenet_authorization(request):
     if 'code' in request.GET:
         token_url = f'{oauth_api_url}/oauth/token'
         auth_code = request.GET.get('code')
-        redirect_uri = 'https://127.0.0.1:8000/api/authorize/'
+        redirect_uri = 'https://zephyrus.gg/api/authorize/'
         data = {
             'grant_type': 'authorization_code',
             'code': auth_code,
@@ -56,7 +56,7 @@ def battlenet_authorization(request):
         auth_url = f'{oauth_api_url}/oauth/authorize'
         response_type = 'code'
         client_id = CLIENT_ID
-        redirect_uri = 'https://127.0.0.1:8000/api/authorize/'
+        redirect_uri = 'https://zephyrus.gg/api/authorize/'
         scope = 'sc2.profile'
         url = f'{auth_url}?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}'
         return redirect(url)
