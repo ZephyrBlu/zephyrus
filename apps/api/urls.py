@@ -6,7 +6,8 @@ from .views import (
     BattlenetAccountReplays,
     Stats,
     UploadReplays,
-)  # verify_replays
+)
+from apps.user_profile.views import battlenet_authorization
 
 
 app_name = 'api'
@@ -17,5 +18,5 @@ urlpatterns = [
     path('token/', views.obtain_auth_token),
     path('stats/', Stats.as_view(), name='user_stats'),
     path('upload/', UploadReplays.as_view(), name='replay_upload'),
-    path('authorize/', include('user_profile.urls')),
+    path('authorize/', battlenet_authorization),
 ]

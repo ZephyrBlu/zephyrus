@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect
 from allauth.account.models import EmailAddress
 from apps.user_profile.models import BattlenetAccount
 from .secret import CLIENT_ID, CLIENT_SECRET
@@ -8,16 +8,12 @@ import requests
 oauth_api_url = 'https://us.battle.net'
 
 
-def need_authorization(request):
-    return render(request, 'user_profile/authorization.html', {'active': 'profile'})
-
-
-def authentication_requests(request):
+def battlenet_authorization(request):
     if request.method == 'GET':
         if 'code' in request.GET:
             token_url = f'{oauth_api_url}/oauth/token'
             auth_code = request.GET.get('code')
-            redirect_uri = 'https://127.0.0.1:8000/profile/authorize'
+            redirect_uri = 'https://127.0.0.1:8000/api/authorize'
             data = {
                 'grant_type': 'authorization_code',
                 'code': auth_code,
@@ -63,7 +59,7 @@ def authentication_requests(request):
             auth_url = f'{oauth_api_url}/oauth/authorize'
             response_type = 'code'
             client_id = CLIENT_ID
-            redirect_uri = 'https://127.0.0.1:8000/profile/authorize'
+            redirect_uri = 'https://127.0.0.1:8000/api/authorize'
             scope = 'sc2.profile'
             url = f'{auth_url}?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}'
             return redirect(url)
