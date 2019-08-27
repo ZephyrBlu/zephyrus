@@ -10,7 +10,7 @@
 
   {% load static %}
   <link rel="manifest" href="site.webmanifest">
-  <link rel="icon" href="{% static 'site_structure/icon.PNG' %}">
+  <link rel="icon" href="{% static 'site_structure/favicon.ico' %}">
   <link href="https://fonts.googleapis.com/css?family=Major+Mono+Display|Raleway:400|Roboto" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'site_structure/css/main.css' %}">
   {% block stylesheet %}{% endblock %}
@@ -29,9 +29,9 @@
                 <h1 class="PageHeader__page-title">{{ active|title }}</h1>
                 <nav class="ProfileNav">
                     <ul>
-                        <li><a class="ProfileNav__link {% if active == 'upload' %} ProfileNav__link--active {% endif %}" href="https://app.zephyrus.gg">Stats</a></li>
+                        <li><a class="ProfileNav__link" href="https://stats.zephyrus.gg">Stats</a></li>
                         <li><a class="ProfileNav__link {% if active == 'signup' %} ProfileNav__link--active {% endif %}" href="{% url 'signup:signup' %}">Sign up</a></li>
-                        <li><a class="ProfileNav__link login-button {% if active == 'login' %} ProfileNav__link--active {% endif %}"  href="https://app.zephyrus.gg">Login</a></li>
+                        <li><a class="ProfileNav__link login-button"  href="https://app.zephyrus.gg">Login</a></li>
                     </ul>
                 </nav>
             </header>
