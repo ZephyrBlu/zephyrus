@@ -1,18 +1,21 @@
 from django.contrib.auth import authenticate, login, logout
+from django.shortcuts import redirect
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication, BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import BasePermission, IsAuthenticated
+from rest_framework.authtoken.models import Token
+# from rest_framework.authtoken.views import ObtainAuthToken
 from apps.user_profile.models import Replay, BattlenetAccount
 from allauth.account.models import EmailAddress
 from .models import ReplaySerializer
 from django.core.files import File
 from apps.process_replays.views import process_file
-from apps.user_profile.views import battlenet_authorization
-from .utils.trends import main as analyze_trends
+from apps.user_profile.secret import CLIENT_ID, CLIENT_SECRET
 import requests
+from .utils.trends import main as analyze_trends
 import io
 import hashlib
 import json
@@ -54,6 +57,20 @@ class IsPostPermission(BasePermission):
             return False
 
 
+# class CustomToken(ObtainAuthToken):
+#     def post(self, request,):
+#         serializer = self.serializer_class(
+#             data=request.data,
+#             context={'request': request}
+#         )
+#         serializer.is_valid(raise_exception=True)
+#         user = serializer.validated_data['user']
+#         token = Token.objects.get(user=user)
+#         response = Response({'token': token.key})
+#         response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+#         return response
+
+
 class ExternalLogin(APIView):
     authentication_classes = []
     permission_classes = [IsOptionsPermission | IsPostPermission]
@@ -72,20 +89,16 @@ class ExternalLogin(APIView):
 
         if user is not None:
             login(request, user)
-            data = {'username': username, 'password': password}
-            token_response = requests.post(
-                url="http://127.0.0.1:8000/api/token/",
-                data=data
-            )
-            if token_response.status_code != 200:
-                return Response(status=token_response.status_code)
-            else:
-                response = Response(token_response.json())
-                response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
-                return response
+            token = Token.objects.get(user=user)
+
+            response = Response({'token': token.key})
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
+            return response
         else:
             response = HttpResponseBadRequest()
             response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
             return response
 
 
@@ -139,10 +152,11 @@ class BattlenetAccountReplays(APIView):
     def get(self, request):
         user = request.user
         user_id = EmailAddress.objects.get(email=user.email)
-        battle_net_id = BattlenetAccount.objects.get(user_account_id=user_id)
 
-        if not battle_net_id:
-            response = HttpResponseNotFound
+        if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
+            battle_net_id = BattlenetAccount.objects.get(user_account_id=user_id)
+        else:
+            response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
@@ -161,7 +175,7 @@ class BattlenetAccountReplays(APIView):
 
 
 class Stats(APIView):
-    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
     def options(self, request):
@@ -173,9 +187,22 @@ class Stats(APIView):
     def get(self, request):
         user = request.user
         user_id = EmailAddress.objects.get(email=user.email)
-        battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
+
+        if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
+            battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
+        else:
+            response = HttpResponseNotFound()
+            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
 
         account_replays = Replay.objects.filter(battlenet_account=battlenet_account)
+
+        if len(account_replays) <= 0:
+            response = HttpResponseNotFound()
+            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
 
         battlenet_id_list = []
         for region_id, info in battlenet_account.region_profiles.items():
@@ -196,7 +223,7 @@ class UploadReplays(APIView):
     def options(self, request):
         response = Response()
         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
-        response['Access-Control-Allow-Headers'] = 'authorization'
+        response['Access-Control-Allow-Headers'] = 'authorization, content-type'
         return response
 
     def post(self, request):
@@ -212,7 +239,7 @@ class UploadReplays(APIView):
 
         response = Response()
         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
-        response['Access-Control-Allow-Headers'] = 'authorization'
+        response['Access-Control-Allow-Headers'] = 'authorization, content-type'
         return response
 
 
@@ -225,7 +252,10 @@ def sha256sum(f):
     return h.hexdigest()
 
 
-class BattlenetAuthorization(APIView):
+oauth_api_url = 'https://us.battle.net'
+
+
+class BattlenetAuthorizationUrl(APIView):
     authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -236,7 +266,74 @@ class BattlenetAuthorization(APIView):
         return response
 
     def get(self, request):
-        battlenet_authorization(request)
+        auth_url = f'{oauth_api_url}/oauth/authorize'
+
+        response_type = 'code'
+        client_id = CLIENT_ID
+        redirect_uri = 'https://app.zephyrus.gg'
+        scope = 'sc2.profile'
+        url = f'{auth_url}?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}'
+
+        response = Response({'url': url})
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class SetBattlenetAccount(APIView):
+    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def post(self, request):
+        auth_code = json.loads(request.body)['authCode']
+        token_url = f'{oauth_api_url}/oauth/token'
+        redirect_uri = 'https://app.zephyrus.gg'
+        data = {
+            'grant_type': 'authorization_code',
+            'code': auth_code,
+            'redirect_uri': redirect_uri,
+            'client_id': CLIENT_ID,
+            'client_secret': CLIENT_SECRET
+        }
+        info = requests.post(token_url, data=data)
+        access_token = info.json()['access_token']
+
+        user_info_url = f'{oauth_api_url}/oauth/userinfo'
+        headers = {'Authorization': f'Bearer {access_token}'}
+        json_info = requests.get(user_info_url, headers=headers)
+        user_info = json_info.json()
+
+        current_account = EmailAddress.objects.get(email=request.user.email)
+
+        user_id = user_info['id']
+        profile_data_url = f'https://us.api.blizzard.com/sc2/player/{user_id}?access_token={access_token}'
+        profile_data = requests.get(profile_data_url)
+        profile_data = profile_data.json()
+
+        regions = {1: 'NA', 2: 'EU', 3: 'KR'}
+        profiles = {}
+
+        for profile in profile_data:
+            profiles[int(profile['regionId'])] = {
+                'profile_name': profile['name'],
+                'region_name': regions[profile['regionId']],
+                'profile_id': int(profile['profileId']),
+                'realm_id': int(profile['realmId'])
+            }
+
+        authorized_account = BattlenetAccount(
+            id=user_id,
+            battletag=user_info['battletag'],
+            user_account=current_account,
+            region_profiles=profiles
+        )
+        authorized_account.save()
 
         response = Response()
         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
@@ -259,7 +356,7 @@ class CheckBattlenetAccount(APIView):
 
         battlenet_accounts = BattlenetAccount.objects.filter(user_account=user.email)
 
-        if battlenet_accounts.exists():
+        if len(battlenet_accounts) > 0:
             response = Response()
             response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'authorization'
