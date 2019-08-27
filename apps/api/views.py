@@ -67,7 +67,7 @@ class IsPostPermission(BasePermission):
 #         user = serializer.validated_data['user']
 #         token = Token.objects.get(user=user)
 #         response = Response({'token': token.key})
-#         response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+#         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
 #         return response
 
 
@@ -77,7 +77,7 @@ class ExternalLogin(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
         return response
 
@@ -108,14 +108,14 @@ class ExternalLogout(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
     def get(self, request):
         logout(request)
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -145,7 +145,7 @@ class BattlenetAccountReplays(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -169,7 +169,7 @@ class BattlenetAccountReplays(APIView):
 
         serialized_replays.sort(key=lambda x: x['played_at'], reverse=True)
         response = Response(serialized_replays)
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -180,7 +180,7 @@ class Stats(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -192,7 +192,7 @@ class Stats(APIView):
             battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
         else:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
@@ -200,7 +200,7 @@ class Stats(APIView):
 
         if len(account_replays) <= 0:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
@@ -211,7 +211,7 @@ class Stats(APIView):
         trend_data = analyze_trends(account_replays, battlenet_id_list)
 
         response = Response(json.dumps(trend_data))
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -261,7 +261,7 @@ class BattlenetAuthorizationUrl(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -270,12 +270,12 @@ class BattlenetAuthorizationUrl(APIView):
 
         response_type = 'code'
         client_id = CLIENT_ID
-        redirect_uri = 'https://app.zephyrus.gg'
+        redirect_uri = 'http://localhost:5000'
         scope = 'sc2.profile'
         url = f'{auth_url}?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}'
 
         response = Response({'url': url})
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -286,14 +286,14 @@ class SetBattlenetAccount(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
     def post(self, request):
         auth_code = json.loads(request.body)['authCode']
         token_url = f'{oauth_api_url}/oauth/token'
-        redirect_uri = 'https://app.zephyrus.gg'
+        redirect_uri = 'http://localhost:5000'
         data = {
             'grant_type': 'authorization_code',
             'code': auth_code,
@@ -336,7 +336,7 @@ class SetBattlenetAccount(APIView):
         authorized_account.save()
 
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -347,7 +347,7 @@ class CheckBattlenetAccount(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -358,10 +358,10 @@ class CheckBattlenetAccount(APIView):
 
         if len(battlenet_accounts) > 0:
             response = Response()
-            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'authorization'
         else:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'https://app.zephyrus.gg'
+            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'authorization'
         return response
