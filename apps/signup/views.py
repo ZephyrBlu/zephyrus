@@ -1,6 +1,7 @@
 from django.shortcuts import redirect
 from allauth.account.views import SignupView
-import requests
+from django.contrib.auth import authenticate
+from rest_framework.authtoken.models import Token
 
 
 class MySignupView(SignupView):
@@ -21,5 +22,7 @@ class MySignupView(SignupView):
         self.user = form.save(self.request)
         username = form.cleaned_data['email']
         password = form.cleaned_data['password1']
-        requests.post("https://zephyrus.gg/api/token/", data={"username": username, "password": password})
+
+        user = authenticate(self.request, username=username, password=password)
+        Token.objects.get_or_create(user=user)
         return redirect('https://app.zephyrus.gg/')
