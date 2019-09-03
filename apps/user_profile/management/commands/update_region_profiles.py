@@ -16,7 +16,7 @@ class Command(BaseCommand):
         user_accounts = list(BattlenetAccount.objects.all())
 
         for account in user_accounts:
-            for region, info in account.region_profiles:
+            for region, info in account.region_profiles.items():
                 if type(info['profile_id']) is not list:
                     info['profile_id'] = [info['profile_id']]
 
