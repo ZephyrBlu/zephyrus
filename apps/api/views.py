@@ -206,7 +206,7 @@ class Stats(APIView):
 
         battlenet_id_list = []
         for region_id, info in battlenet_account.region_profiles.items():
-            battlenet_id_list.append(info['profile_id'])
+            battlenet_id_list.extend(info['profile_id'])
 
         trend_data = analyze_trends(account_replays, battlenet_id_list)
 
