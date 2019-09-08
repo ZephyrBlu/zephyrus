@@ -12,7 +12,16 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from google.oauth2 import service_account
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 from .secret.master import *
+
+
+sentry_sdk.init(
+    dsn="https://d7cd9e8715324988af494047b4267d5f@sentry.io/1554506",
+    integrations=[DjangoIntegration()]
+)
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
