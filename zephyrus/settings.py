@@ -12,15 +12,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from google.oauth2 import service_account
-import sentry_sdk
-from sentry_sdk.integrations.django import DjangoIntegration
 from .secret.master import *
-
-
-sentry_sdk.init(
-    dsn="https://d7cd9e8715324988af494047b4267d5f@sentry.io/1554506",
-    integrations=[DjangoIntegration()]
-)
 
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -34,19 +26,19 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-APPEND_SLASH = True
-
-CSRF_COOKIE_SECURE = True
-
-SESSION_COOKIE_SECURE = True
-
-SECURE_BROWSER_XSS_FILTER = True
-
-SECURE_SSL_REDIRECT = True
-
-X_FRAME_OPTIONS = 'DENY'
+# APPEND_SLASH = True
+#
+# CSRF_COOKIE_SECURE = True
+#
+# SESSION_COOKIE_SECURE = True
+#
+# SECURE_BROWSER_XSS_FILTER = True
+#
+# SECURE_SSL_REDIRECT = True
+#
+# X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 
@@ -62,7 +54,6 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'sslserver',
-    'django_extensions',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -186,7 +177,7 @@ AUTHENTICATION_BACKENDS = (
 
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'sc2-replays'
+GS_BUCKET_NAME = 'sc2-replays-dev'
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-3e7a6f1bc4e5.json')
 GS_PROJECT_ID = 'reflected-codex-228006'
 
