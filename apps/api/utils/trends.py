@@ -1,5 +1,5 @@
 from statistics import median
-from math import ceil
+from math import ceil, floor
 from copy import deepcopy
 import datetime
 
@@ -161,7 +161,24 @@ def main(account_replays, battlenet_id_list):
 
         trends['win_diff'] = win_loss_difference['win']
         trends['loss_diff'] = win_loss_difference['loss']
-        trends['date'] = datetime.datetime.fromtimestamp(week).strftime('%Y-%m-%d')
+
+        days = datetime.timedelta(
+            seconds=datetime.datetime.timestamp(datetime.datetime.now())-week
+        ).days
+        weeks = int(round(days / 7, 0))
+        months = int(floor(weeks / 4))
+        if months >= 6 and weeks > 0:
+            continue
+        elif months == 6:
+            trends['date'] = '6mo ago'
+        elif months > 0:
+            if weeks-(months*4) == 0:
+                trends['date'] = f'{months}m'
+            else:
+                trends['date'] = f'{months} *{weeks-(months*4)}/4*'
+        else:
+            trends['date'] = f'{weeks}w'
+
         trends['count'] = len(replays)
         winrate = round((len(win_loss_values['win']['sq']) / len(replays)) * 100, 1)
         trends['winrate'] = winrate
