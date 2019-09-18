@@ -19,12 +19,10 @@ def main(account_replays, battlenet_id_list):
         if current_week <= current_date <= current_week + one_week:
             weekly_data[current_week].append(r)
         else:
-            current_week += one_week
+            while current_date > current_week + one_week:
+                current_week += one_week
 
             weekly_data[current_week] = [r]
-
-    # for k, v in weekly_data.items():
-    #     print(k, len(v))
 
     weekly_trends = []
     for week, replays in weekly_data.items():
