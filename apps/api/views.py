@@ -163,11 +163,13 @@ class BattlenetAccountReplays(APIView):
 
         replay_queryset = Replay.objects.filter(battlenet_account_id=battle_net_id)
         serialized_replays = []
-        for replay in list(replay_queryset):
+        replay_queryset = list(replay_queryset)
+        replay_queryset.sort(key=lambda x: x.played_at, reverse=True)
+        limited_queryset = replay_queryset[:99]
+        for replay in limited_queryset:
             serializer = ReplaySerializer(replay)
             serialized_replays.append(serializer.data)
 
-        serialized_replays.sort(key=lambda x: x['played_at'], reverse=True)
         response = Response(serialized_replays)
         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
         response['Access-Control-Allow-Headers'] = 'authorization'
