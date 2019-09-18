@@ -32,7 +32,7 @@ class Command(BaseCommand):
                 current_replay = default_storage.open(bucket_path, 'rb')
             except Exception as error:
                 raise CommandError(f'No replay exists in the storage bucket at path: {bucket_path}')
-            
+
             if options['details']:
                 self.stdout.write(f'File opened')
 
@@ -40,7 +40,7 @@ class Command(BaseCommand):
 
             if not summary_stats:
                 raise CommandError(f'There was an error when parsing replay {r.file_hash}')
-            
+
             if options['details']:
                 self.stdout.write(f'File parsed')
 

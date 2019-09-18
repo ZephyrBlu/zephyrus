@@ -30,20 +30,24 @@ def process_file(replay_file, request, file_hash):
         duplicate_replay = True
 
     if not duplicate_replay:
-        profile_ids = [players[1].profile_id, players[2].profile_id]
-        kwargs = {f'region_profiles__{match_region}__profile_id__in': profile_ids}
+        kwargs = [
+            {f'region_profiles__{match_region}__profile_id__contains': players[1].profile_id},
+            {f'region_profiles__{match_region}__profile_id__contains': players[2].profile_id}
+        ]
         if user_battlenet_accounts:
-            try:
-                player_battlenet_account = user_battlenet_accounts.get(**kwargs)
-            except ObjectDoesNotExist:
-                player_battlenet_account = None
+            for k in kwargs:
+                try:
+                    player_battlenet_account = user_battlenet_accounts.get(**k)
+                    break
+                except ObjectDoesNotExist:
+                    player_battlenet_account = None
         else:
             player_battlenet_account = None
         if player_battlenet_account:
             bucket_path = f'{user.email}/{player_battlenet_account.battletag}/{filename}'
 
             player_profile_id = player_battlenet_account.region_profiles[str(match_region)]['profile_id']
-            if players[metadata['winner']].profile_id == player_profile_id:
+            if players[metadata['winner']].profile_id in player_profile_id:
                 win = True
             else:
                 win = False

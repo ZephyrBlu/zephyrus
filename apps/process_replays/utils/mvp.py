@@ -431,5 +431,7 @@ def main(filename):
 
     for player_id, player in players.items():
         player.calc_pac(summary_stats, game_length)
+        del player.__dict__['pac_list']
+        del player.__dict__['current_pac']
 
     return players, summary_stats, metadata_export
