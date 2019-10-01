@@ -6,7 +6,7 @@ import datetime
 
 def main(account_replays, battlenet_id_list):
     account_replays = list(account_replays)
-    account_replays.sort(key=lambda r: r.played_at)
+    account_replays.sort(key=lambda r: r.played_at, reverse=True)
     weekly_data = {}
 
     one_week = 604800
@@ -16,11 +16,11 @@ def main(account_replays, battlenet_id_list):
     for r in account_replays:
         current_date = int(r.played_at.timestamp())
 
-        if current_week <= current_date <= current_week + one_week:
+        if current_week > current_date > current_week - one_week:
             weekly_data[current_week].append(r)
         else:
-            while current_date > current_week + one_week:
-                current_week += one_week
+            while current_date < current_week - one_week:
+                current_week -= one_week
 
             weekly_data[current_week] = [r]
 
@@ -109,9 +109,6 @@ def main(account_replays, battlenet_id_list):
         trends['total_median'] = stat_medians
         trends['total_MAD'] = stat_MAD
 
-        # for stat, values in stat_medians.items():
-        #     print(stat, values)
-
         win_loss_medians = {'win': {}, 'loss': {}}
         win_loss_MAD = {'win': {}, 'loss': {}}
         for result, info in win_loss_values.items():
@@ -182,6 +179,7 @@ def main(account_replays, battlenet_id_list):
         trends['winrate'] = winrate
         weekly_trends.append(trends)
 
+    weekly_trends = weekly_trends[::-1]
     weekly_trend_diff = []
     for i in range(1, len(weekly_trends)):
         week = weekly_trends[i]

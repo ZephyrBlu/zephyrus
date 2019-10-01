@@ -1,5 +1,4 @@
 from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import redirect
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -7,7 +6,6 @@ from rest_framework.authentication import TokenAuthentication, BaseAuthenticatio
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.authtoken.models import Token
-# from rest_framework.authtoken.views import ObtainAuthToken
 from apps.user_profile.models import Replay, BattlenetAccount
 from allauth.account.models import EmailAddress
 from .models import ReplaySerializer
@@ -19,6 +17,10 @@ from .utils.trends import main as analyze_trends
 import io
 import hashlib
 import json
+import copy
+import datetime
+from math import floor
+from .keys.master import API_KEY
 
 
 class IsOptionsAuthentication(BaseAuthentication):
@@ -57,20 +59,6 @@ class IsPostPermission(BasePermission):
             return False
 
 
-# class CustomToken(ObtainAuthToken):
-#     def post(self, request,):
-#         serializer = self.serializer_class(
-#             data=request.data,
-#             context={'request': request}
-#         )
-#         serializer.is_valid(raise_exception=True)
-#         user = serializer.validated_data['user']
-#         token = Token.objects.get(user=user)
-#         response = Response({'token': token.key})
-#         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
-#         return response
-
-
 class ExternalLogin(APIView):
     authentication_classes = []
     permission_classes = [IsOptionsPermission | IsPostPermission]
@@ -91,7 +79,10 @@ class ExternalLogin(APIView):
             login(request, user)
             token = Token.objects.get(user=user)
 
-            response = Response({'token': token.key})
+            response = Response({
+                'token': token.key,
+                'api_key': API_KEY,
+            })
             response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
             return response
@@ -162,13 +153,57 @@ class BattlenetAccountReplays(APIView):
             return response
 
         replay_queryset = Replay.objects.filter(battlenet_account_id=battle_net_id)
+
         serialized_replays = []
         replay_queryset = list(replay_queryset)
         replay_queryset.sort(key=lambda x: x.played_at, reverse=True)
-        limited_queryset = replay_queryset[:99]
+        limited_queryset = replay_queryset[:100]
+
         for replay in limited_queryset:
+            date = replay.played_at
+            days = datetime.timedelta(
+                seconds=datetime.datetime.timestamp(datetime.datetime.now()) - datetime.datetime.timestamp(date)
+            ).days
+            if days != -1:
+                weeks = int(round(days / 7, 0))
+                months = int(floor(weeks / 4))
+            else:
+                weeks = 0
+                months = 0
+
+            if months > 0:
+                if weeks - (months * 4) == 0:
+                    date_diff = f'{months}m'
+                else:
+                    date_diff = f'{months}m'  # *{weeks - (months * 4)}/4*'
+            elif weeks > 0:
+                date_diff = f'{weeks}w'
+            else:
+                if days == -1:
+                    date_diff = 'Today'
+                elif days == 1:
+                    date_diff = 'Yesterday'
+                else:
+                    date_diff = f'{days}d'
+
             serializer = ReplaySerializer(replay)
-            serialized_replays.append(serializer.data)
+            serializer = copy.deepcopy(serializer.data)
+            serializer['played_at'] = date_diff
+
+            new_serializer = {}
+            for stat, info in serializer.items():
+                if stat == 'match_data':
+                    new_serializer['match_data'] = {}
+                    for name, values in info.items():
+                        if type(values) is dict and 'minerals' in values:
+                            for resource, value in values.items():
+                                new_serializer[stat][f'{name}_{resource}'] = value
+                        else:
+                            new_serializer[stat][name] = values
+                else:
+                    new_serializer[stat] = info
+            serializer = new_serializer
+            serialized_replays.append(serializer)
 
         response = Response(serialized_replays)
         response['Access-Control-Allow-Origin'] = 'http://localhost:5000'

@@ -6,9 +6,10 @@ from rest_framework import serializers
 class ReplaySerializer(serializers.ModelSerializer):
     class Meta:
         model = Replay
-        fields = (
+        fields = [
             'file_hash',
             'players',
+            'user_match_id',
             'match_data',
             'match_length',
             'battlenet_account',
@@ -16,4 +17,4 @@ class ReplaySerializer(serializers.ModelSerializer):
             'played_at',
             'region_id',
             'win'
-        )
+        ]

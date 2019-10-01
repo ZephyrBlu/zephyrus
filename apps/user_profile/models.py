@@ -28,6 +28,7 @@ class Replay(models.Model):
         on_delete=models.CASCADE
     )
     players = JSONField()
+    user_match_id = models.IntegerField(null=True)
     match_data = JSONField()
     match_length = models.IntegerField()
     played_at = models.DateTimeField()
