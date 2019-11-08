@@ -120,15 +120,15 @@ class Command(BaseCommand):
             if options:
                 self.stdout.write(f'Replay saved to database')
 
+            current_timeline = timeline_storage.open(timeline_filename, 'w')
+            current_timeline.write(gzip.compress(json.dumps(timeline).encode('utf-8')))
+            current_timeline.blob.content_encoding = 'gzip'
+            current_timeline.close()
+
             if bucket_path and not all_replays:
                 current_replay = default_storage.open(bucket_path, 'w')
                 current_replay.write(file_contents.read())
                 current_replay.close()
-
-                current_timeline = timeline_storage.open(timeline_filename, 'w')
-                current_timeline.write(gzip.compress(json.dumps(timeline).encode('utf-8')))
-                current_timeline.blob.content_encoding = 'gzip'
-                current_timeline.close()
 
                 if options:
                     self.stdout.write(f'Replay saved to bucket\n\n')

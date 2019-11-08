@@ -25,7 +25,7 @@ def process_file(replay_file, request, file_hash):
     timeline = {'timeline': timeline}
 
     filename = replay_file.name
-    timeline_filename = f'{replay_file.name[:-10]}.json'
+    timeline_filename = f'{replay_file.name[:-10]}.json.gz'
 
     replay_query = Replay.objects.filter(file_hash=file_hash)
     user_account = EmailAddress.objects.get(user=user)
