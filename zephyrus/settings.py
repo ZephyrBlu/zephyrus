@@ -173,9 +173,14 @@ LOGGING = {
     'loggers': {
         'root': {
             'handlers': ['console'],
-            'level': 'ERROR',
+            'level': 'INFO',
             'propagate': True,
         },
+        'apps': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': True,
+        }
     },
 }
 

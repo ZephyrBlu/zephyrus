@@ -190,19 +190,19 @@ def main(account_replays, battlenet_id_list):
             if calculated_stats not in ['count', 'date']:
                 if calculated_stats == 'total_median':
                     for stat, values in raw_stats.items():
-                            if values > 0 and week['count'] >= 5:
-                                if prev_week['total_median'][stat] > 0:
-                                    diff = round(((week['total_median'][stat] / prev_week['total_median'][stat]) - 1) * 100, 1)
-                                else:
-                                    diff = 0
-                                if diff > 50:
-                                    current_trends[stat] = (week['total_median'][stat], 50)
-                                elif diff < -50:
-                                    current_trends[stat] = (week['total_median'][stat], -50)
-                                else:
-                                    current_trends[stat] = (week['total_median'][stat], diff)
+                        if values > 0 and week['count'] >= 5:
+                            if prev_week['total_median'][stat] > 0:
+                                diff = round(((week['total_median'][stat] / prev_week['total_median'][stat]) - 1) * 100, 1)
                             else:
-                                current_trends[stat] = (week['total_median'][stat], 0)
+                                diff = 0
+                            if diff > 50:
+                                current_trends[stat] = (week['total_median'][stat], 50)
+                            elif diff < -50:
+                                current_trends[stat] = (week['total_median'][stat], -50)
+                            else:
+                                current_trends[stat] = (week['total_median'][stat], diff)
+                        else:
+                            current_trends[stat] = (week['total_median'][stat], 0)
 
         current_trends['count'] = week['count']
         current_trends['date'] = week['date']

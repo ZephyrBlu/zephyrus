@@ -7,7 +7,11 @@ from django.core.exceptions import ObjectDoesNotExist
 import json
 import gzip
 from storages.backends.gcloud import GoogleCloudStorage
+<<<<<<< HEAD
 from zephyrus.settings import TIMELINE_STORAGE
+=======
+from zephyrus.settings import TIMELINE_STORAGE, FAILED_STORAGE
+>>>>>>> d7481c2... Prod bug fixes + logging
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,6 +24,14 @@ def process_file(replay_file, request, file_hash):
 
     if players is None:
         logger.critical(f'{user.email}, {file_hash}: Replay was aborted')
+
+        failed_storage = GoogleCloudStorage(bucket_name=FAILED_STORAGE)
+        failed_replay_path = f'{user.email}/{replay_file.name}'
+
+        file_contents = replay_file.open(mode='rb')
+        current_replay = failed_storage.open(failed_replay_path, 'w')
+        current_replay.write(file_contents.read())
+        current_replay.close()
         return 'error'
 
     timeline_storage = GoogleCloudStorage(bucket_name=TIMELINE_STORAGE)
