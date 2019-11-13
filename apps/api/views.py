@@ -8,6 +8,7 @@ from rest_framework.permissions import BasePermission, IsAuthenticated
 from rest_framework.authtoken.models import Token
 from apps.user_profile.models import Replay, BattlenetAccount
 from allauth.account.models import EmailAddress
+from allauth.account.utils import send_email_confirmation
 from .models import ReplaySerializer
 from django.core.files import File
 from apps.process_replays.views import process_file
@@ -77,6 +78,7 @@ class ExternalLogin(APIView):
 
         if user is not None:
             login(request, user)
+            send_email_confirmation(request, user)
             token = Token.objects.get(user=user)
 
             response = Response({

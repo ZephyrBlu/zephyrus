@@ -26,5 +26,6 @@ allauth_patterns = ([
 urlpatterns = [
     path('api/', include('apps.api.urls')),
     path('signup/', include('apps.signup.urls', namespace='signup')),
+    path('confirm/<str:key>', allauth_views.confirm_email, name="account_confirm_email"),
     path('/', include(allauth_patterns)),
 ]
