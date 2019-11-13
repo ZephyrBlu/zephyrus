@@ -147,14 +147,14 @@ class BattlenetAccountReplays(APIView):
         user_id = EmailAddress.objects.get(email=user.email)
 
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-            battle_net_id = BattlenetAccount.objects.get(user_account_id=user_id)
+            battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
-        replay_queryset = Replay.objects.filter(battlenet_account_id=battle_net_id)
+        replay_queryset = Replay.objects.filter(battlenet_account_id=battlenet_account)
 
         serialized_replays = []
         replay_queryset = list(replay_queryset)

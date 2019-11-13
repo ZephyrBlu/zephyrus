@@ -13,11 +13,12 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 from google.oauth2 import service_account
 from .secret.master import *
+import socket
 
+SITE_ID = 1
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
@@ -26,7 +27,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECRET_KEY = ''
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 # APPEND_SLASH = True
 #
@@ -72,8 +73,6 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
-
-SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -195,13 +194,16 @@ ACCOUNT_SIGNUP_PASSWORD_ENTER_TWICE = True
 ACCOUNT_SESSION_REMEMBER = True
 ACCOUNT_AUTHENTICATION_METHOD = 'email'
 ACCOUNT_UNIQUE_EMAIL = True
+
+DEFAULT_FROM_EMAIL = 'hello@zephyrus.gg'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[zephyrus.gg] '
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'http://localhost:5000/login'
 
-EMAIL_HOST='smtp.mailgun.com'
-EMAIL_HOST_USER='hello@zephyrus.gg'
+EMAIL_HOST = socket.gethostbyname('smtp.mailgun.com')
+EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_TIMEOUT = 30
 
 LOGIN_REDIRECT_URL = 'http://localhost:5000/'
 ACCOUNT_LOGOUT_REDIRECT_URL = '/signup/'
