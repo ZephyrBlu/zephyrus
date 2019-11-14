@@ -99,9 +99,7 @@ textarea {
 
 body {
     font-family: 'Roboto', sans-serif;
-    # background-color: hsl(206, 88%, 98%);
-    # color: hsl(240, 100%, 4%);
-    background-color: hsl(240, 80%, 7.5%);
+    background-color: #030317;
     color: hsl(0, 0%, 85%);
     font-weight: 400;
 }
@@ -130,8 +128,8 @@ body, nav * {
 
 header {
     grid-area: header;
-    background-color: hsl(240, 80%, 5%);
-    height: 120px;
+    background-color: #02020e;
+    height: 90px;
     display: grid;
     grid-template-areas: 'page-info page-title nav';
     grid-template-columns: 1fr 1fr 1fr;

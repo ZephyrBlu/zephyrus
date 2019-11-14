@@ -26,7 +26,8 @@ class Command(BaseCommand):
 
             if options['details']:
                 self.stdout.write(f'User: {user.email}')
-                self.stdout.write(f'Battlenet Account: {r.battlenet_account.battletag}')
+                if r.battlenet_account:
+                    self.stdout.write(f'Battlenet Account: {r.battlenet_account.battletag}')
                 self.stdout.write(f'File Hash: {r.file_hash}')
             try:
                 current_replay = default_storage.open(bucket_path, 'rb')

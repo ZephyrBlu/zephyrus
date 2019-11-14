@@ -108,7 +108,7 @@ class ExternalLogout(APIView):
     def get(self, request):
         logout(request)
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -309,7 +309,7 @@ class BattlenetAuthorizationUrl(APIView):
 
         response_type = 'code'
         client_id = CLIENT_ID
-        redirect_uri = 'http://localhost:5000'
+        redirect_uri = FRONTEND_URL
         scope = 'sc2.profile'
         url = f'{auth_url}?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}'
 
@@ -359,12 +359,15 @@ class SetBattlenetAccount(APIView):
         profiles = {}
 
         for profile in profile_data:
-            profiles[int(profile['regionId'])] = {
-                'profile_name': profile['name'],
-                'region_name': regions[profile['regionId']],
-                'profile_id': int(profile['profileId']),
-                'realm_id': int(profile['realmId'])
-            }
+            if int(profile['regionId']) in profiles:
+                profiles[int(profile['regionId'])]['profile_id'].append(int(profile['profileId']))
+            else:
+                profiles[int(profile['regionId'])] = {
+                    'profile_name': profile['name'],
+                    'region_name': regions[profile['regionId']],
+                    'profile_id': [int(profile['profileId'])],
+                    'realm_id': int(profile['realmId'])
+                }
 
         authorized_account = BattlenetAccount(
             id=user_id,
