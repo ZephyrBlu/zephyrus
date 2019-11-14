@@ -21,7 +21,7 @@ import json
 import copy
 import datetime
 from math import floor
-from .keys.master import API_KEY
+from zephyrus.settings import API_KEY, FRONTEND_URL
 
 
 class IsOptionsAuthentication(BaseAuthentication):
@@ -66,7 +66,7 @@ class ExternalLogin(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
         return response
 
@@ -85,12 +85,12 @@ class ExternalLogin(APIView):
                 'token': token.key,
                 'api_key': API_KEY,
             })
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
             return response
         else:
             response = HttpResponseBadRequest()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
             return response
 
@@ -101,7 +101,7 @@ class ExternalLogout(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -138,7 +138,7 @@ class BattlenetAccountReplays(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -150,7 +150,7 @@ class BattlenetAccountReplays(APIView):
             battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
         else:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
@@ -208,7 +208,7 @@ class BattlenetAccountReplays(APIView):
             serialized_replays.append(serializer)
 
         response = Response(serialized_replays)
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -219,7 +219,7 @@ class Stats(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -231,7 +231,7 @@ class Stats(APIView):
             battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
         else:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
@@ -239,7 +239,7 @@ class Stats(APIView):
 
         if len(account_replays) <= 0:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
@@ -250,7 +250,7 @@ class Stats(APIView):
         trend_data = analyze_trends(account_replays, battlenet_id_list)
 
         response = Response(json.dumps(trend_data))
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -261,7 +261,7 @@ class UploadReplays(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization, content-type'
         return response
 
@@ -277,7 +277,7 @@ class UploadReplays(APIView):
         process_file(replay_file, request, file_hash)
 
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization, content-type'
         return response
 
@@ -300,7 +300,7 @@ class BattlenetAuthorizationUrl(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -314,7 +314,7 @@ class BattlenetAuthorizationUrl(APIView):
         url = f'{auth_url}?response_type={response_type}&client_id={client_id}&redirect_uri={redirect_uri}&scope={scope}'
 
         response = Response({'url': url})
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -325,14 +325,14 @@ class SetBattlenetAccount(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
     def post(self, request):
         auth_code = json.loads(request.body)['authCode']
         token_url = f'{oauth_api_url}/oauth/token'
-        redirect_uri = 'http://localhost:5000'
+        redirect_uri = FRONTEND_URL
         data = {
             'grant_type': 'authorization_code',
             'code': auth_code,
@@ -375,7 +375,7 @@ class SetBattlenetAccount(APIView):
         authorized_account.save()
 
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -386,7 +386,7 @@ class CheckBattlenetAccount(APIView):
 
     def options(self, request):
         response = Response()
-        response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
@@ -397,10 +397,10 @@ class CheckBattlenetAccount(APIView):
 
         if len(battlenet_accounts) > 0:
             response = Response()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
         else:
             response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = 'http://localhost:5000'
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
         return response

@@ -2,6 +2,7 @@ from django.shortcuts import redirect
 from allauth.account.views import SignupView
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
+from zephyrus.settings import FRONTEND_URL
 
 
 class MySignupView(SignupView):
@@ -25,4 +26,4 @@ class MySignupView(SignupView):
 
         user = authenticate(self.request, username=username, password=password)
         Token.objects.get_or_create(user=user)
-        return redirect('http://localhost:5000/')
+        return redirect(FRONTEND_URL)

@@ -15,7 +15,12 @@ Including another URLconf
 """
 # from django.contrib import admin
 from django.urls import path, include
+from django.shortcuts import redirect
 from allauth.account import views as allauth_views
+
+
+def to_signup(request):
+    return redirect('/signup/')
 
 
 allauth_patterns = ([
@@ -24,6 +29,7 @@ allauth_patterns = ([
 
 
 urlpatterns = [
+    path('', to_signup),
     path('api/', include('apps.api.urls')),
     path('signup/', include('apps.signup.urls', namespace='signup')),
     path('confirm/<str:key>', allauth_views.confirm_email, name="account_confirm_email"),

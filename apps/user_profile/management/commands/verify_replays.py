@@ -6,6 +6,7 @@ from allauth.account.models import EmailAddress
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from storages.backends.gcloud import GoogleCloudStorage
+from zephyrus.settings import TIMELINE_STORAGE
 import json
 import gzip
 
@@ -43,7 +44,7 @@ class Command(BaseCommand):
             self.stdout.write('Error')
             return
 
-        timeline_storage = GoogleCloudStorage(bucket_name='sc2-timelines-dev')
+        timeline_storage = GoogleCloudStorage(bucket_name=TIMELINE_STORAGE)
         player_summary = {}
         player_summary[1] = vars(players[1])
         player_summary[2] = vars(players[2])

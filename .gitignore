@@ -1,4 +1,4 @@
-zephyrus/secret/
+env_settings/
 apps/api/keys/
 apps/user_profile/secret.py
 apps/process_replays/utils/replay_parser_production.py

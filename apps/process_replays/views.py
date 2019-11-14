@@ -7,6 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 import json
 import gzip
 from storages.backends.gcloud import GoogleCloudStorage
+from zephyrus.settings import TIMELINE_STORAGE
 
 
 def process_file(replay_file, request, file_hash):
@@ -17,7 +18,7 @@ def process_file(replay_file, request, file_hash):
     if players is None:
         return
 
-    timeline_storage = GoogleCloudStorage(bucket_name='sc2-timelines-dev')
+    timeline_storage = GoogleCloudStorage(bucket_name=TIMELINE_STORAGE)
     player_summary = {}
     player_summary[1] = vars(players[1])
     player_summary[2] = vars(players[2])

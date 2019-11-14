@@ -12,8 +12,9 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from google.oauth2 import service_account
-from .secret.master import *
 import socket
+from .env_settings.base import *
+from .env_settings.master import *
 
 SITE_ID = 1
 
@@ -25,21 +26,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # SECURITY WARNING: keep the secret key used in production secret!
 # SECRET_KEY = ''
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
-
-# APPEND_SLASH = True
-#
-# CSRF_COOKIE_SECURE = True
-#
-# SESSION_COOKIE_SECURE = True
-#
-# SECURE_BROWSER_XSS_FILTER = True
-#
-# SECURE_SSL_REDIRECT = True
-#
-# X_FRAME_OPTIONS = 'DENY'
 
 # Application definition
 
@@ -176,7 +162,7 @@ AUTHENTICATION_BACKENDS = (
 
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
-GS_BUCKET_NAME = 'sc2-replays-dev'
+GS_BUCKET_NAME = REPLAY_STORAGE
 GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-f579da64eb8e.json')
 GS_PROJECT_ID = 'reflected-codex-228006'
 
@@ -197,7 +183,7 @@ ACCOUNT_UNIQUE_EMAIL = True
 
 DEFAULT_FROM_EMAIL = 'hello@zephyrus.gg'
 ACCOUNT_EMAIL_SUBJECT_PREFIX = '[zephyrus.gg] '
-ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = 'http://localhost:5000/login'
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = FRONTEND_URL
 
 EMAIL_HOST = socket.gethostbyname('smtp.mailgun.com')
 EMAIL_PORT = 587
@@ -205,5 +191,5 @@ EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_TIMEOUT = 30
 
-LOGIN_REDIRECT_URL = 'http://localhost:5000/'
+LOGIN_REDIRECT_URL = FRONTEND_URL
 ACCOUNT_LOGOUT_REDIRECT_URL = '/signup/'
