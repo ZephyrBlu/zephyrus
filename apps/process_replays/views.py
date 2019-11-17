@@ -16,7 +16,7 @@ def process_file(replay_file, request, file_hash):
     players, timeline, summary_stats, metadata = parse_replay(replay_file)
 
     if players is None:
-        return
+        return 'error'
 
     timeline_storage = GoogleCloudStorage(bucket_name=TIMELINE_STORAGE)
     player_summary = {}
@@ -37,6 +37,8 @@ def process_file(replay_file, request, file_hash):
     duplicate_replay = False
     if replay_query:
         duplicate_replay = True
+
+    print(duplicate_replay)
 
     if not duplicate_replay:
         kwargs = [
@@ -80,12 +82,15 @@ def process_file(replay_file, request, file_hash):
             win=win
         )
         replay.save()
+        print('replay saved')
 
+        print(bucket_path)
         file_contents = replay_file.open(mode='rb')
         current_replay = default_storage.open(bucket_path, 'w')
         current_replay.write(file_contents.read())
         current_replay.close()
 
+        print(timeline_filename)
         current_timeline = timeline_storage.open(timeline_filename, 'w')
         current_timeline.write(gzip.compress(json.dumps(timeline).encode('utf-8')))
         current_timeline.blob.content_encoding = 'gzip'

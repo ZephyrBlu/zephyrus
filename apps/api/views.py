@@ -1,5 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseServerError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication, BaseAuthentication
@@ -274,11 +274,16 @@ class UploadReplays(APIView):
 
         replay_file.name = f'{file_hash}.SC2Replay'
         replay_file.seek(0)
-        process_file(replay_file, request, file_hash)
+        error = process_file(replay_file, request, file_hash)
 
-        response = Response()
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization, content-type'
+        if error == 'error':
+            response = HttpResponseServerError()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization, content-type'
+        else:
+            response = Response()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization, content-type'
         return response
 
 
