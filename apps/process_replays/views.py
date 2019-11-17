@@ -28,9 +28,9 @@ def process_file(replay_file, request, file_hash):
     filename = replay_file.name
     timeline_filename = f'{replay_file.name[:-10]}.json.gz'
 
-    replay_query = Replay.objects.filter(file_hash=file_hash)
     user_account = EmailAddress.objects.get(user=user)
     user_battlenet_accounts = BattlenetAccount.objects.filter(user_account=user_account)
+    replay_query = Replay.objects.filter(file_hash=file_hash, user_account_id=user_account.email)
 
     match_region = players[1].region_id
 
