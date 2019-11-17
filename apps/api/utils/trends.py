@@ -144,12 +144,12 @@ def main(account_replays, battlenet_id_list):
             win_diff = win_loss_medians['win'][stat] - values
             loss_diff = win_loss_medians['loss'][stat] - values
 
-            if win_loss_medians['win'][stat] != 0:
+            if win_loss_medians['win'][stat] != 0 and stat_medians[stat] !=0:
                 win_loss_difference['win'][stat] = ceil(win_diff/stat_medians[stat]*100)
             else:
                 win_loss_difference['win'][stat] = 0
 
-            if win_loss_medians['loss'][stat] != 0:
+            if win_loss_medians['loss'][stat] != 0 and stat_medians[stat] !=0:
                 win_loss_difference['loss'][stat] = ceil(loss_diff/stat_medians[stat]*100)
             else:
                 win_loss_difference['loss'][stat] = 0
