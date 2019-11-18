@@ -8,6 +8,9 @@ import json
 import gzip
 from storages.backends.gcloud import GoogleCloudStorage
 from zephyrus.settings import TIMELINE_STORAGE
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def process_file(replay_file, request, file_hash):
@@ -16,6 +19,7 @@ def process_file(replay_file, request, file_hash):
     players, timeline, summary_stats, metadata = parse_replay(replay_file)
 
     if players is None:
+        logger.critical(f'{user.email}, f{file_hash}: Replay was aborted')
         return 'error'
 
     timeline_storage = GoogleCloudStorage(bucket_name=TIMELINE_STORAGE)

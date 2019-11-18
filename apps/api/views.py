@@ -22,6 +22,9 @@ import copy
 import datetime
 from math import floor
 from zephyrus.settings import API_KEY, FRONTEND_URL
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class IsOptionsAuthentication(BaseAuthentication):
@@ -267,10 +270,12 @@ class UploadReplays(APIView):
 
     def post(self, request):
         file_data = request.body
+
         f = io.BufferedReader(io.BytesIO(file_data))
         replay_file = File(f)
 
         file_hash = sha256sum(replay_file)
+        logger.error(f'Server hash: {file_hash}')
 
         replay_file.name = f'{file_hash}.SC2Replay'
         replay_file.seek(0)
