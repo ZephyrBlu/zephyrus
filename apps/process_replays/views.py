@@ -19,7 +19,7 @@ def process_file(replay_file, request, file_hash):
     players, timeline, summary_stats, metadata = parse_replay(replay_file)
 
     if players is None:
-        logger.critical(f'{user.email}, f{file_hash}: Replay was aborted')
+        logger.critical(f'{user.email}, {file_hash}: Replay was aborted')
         return 'error'
 
     timeline_storage = GoogleCloudStorage(bucket_name=TIMELINE_STORAGE)
@@ -30,7 +30,7 @@ def process_file(replay_file, request, file_hash):
     timeline = {'timeline': timeline}
 
     filename = replay_file.name
-    timeline_filename = f'{replay_file.name[:-10]}.json.gz'
+    timeline_filename = f'{filename[:-10]}.json.gz'
 
     user_account = EmailAddress.objects.get(user=user)
     user_battlenet_accounts = BattlenetAccount.objects.filter(user_account=user_account)
@@ -41,8 +41,6 @@ def process_file(replay_file, request, file_hash):
     duplicate_replay = False
     if replay_query:
         duplicate_replay = True
-
-    print(duplicate_replay)
 
     if not duplicate_replay:
         kwargs = [
@@ -86,15 +84,12 @@ def process_file(replay_file, request, file_hash):
             win=win
         )
         replay.save()
-        print('replay saved')
 
-        print(bucket_path)
         file_contents = replay_file.open(mode='rb')
         current_replay = default_storage.open(bucket_path, 'w')
         current_replay.write(file_contents.read())
         current_replay.close()
 
-        print(timeline_filename)
         current_timeline = timeline_storage.open(timeline_filename, 'w')
         current_timeline.write(gzip.compress(json.dumps(timeline).encode('utf-8')))
         current_timeline.blob.content_encoding = 'gzip'

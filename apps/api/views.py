@@ -271,11 +271,8 @@ class UploadReplays(APIView):
     def post(self, request):
         file_data = request.body
 
-        f = io.BufferedReader(io.BytesIO(file_data))
-        replay_file = File(f)
-
-        file_hash = sha256sum(replay_file)
-        logger.error(f'Server hash: {file_hash}')
+        file_hash = sha256sum(file_data)
+        replay_file = File(io.BufferedReader(io.BytesIO(file_data)))
 
         replay_file.name = f'{file_hash}.SC2Replay'
         replay_file.seek(0)
@@ -294,10 +291,7 @@ class UploadReplays(APIView):
 
 def sha256sum(f):
     h = hashlib.sha256()
-    b = bytearray(128 * 1024)
-    mv = memoryview(b)
-    for n in iter(lambda: f.readinto(mv), 0):
-        h.update(mv[:n])
+    h.update(f)
     return h.hexdigest()
 
 
