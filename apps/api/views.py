@@ -1,6 +1,8 @@
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseServerError
 from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework.decorators import action, api_view
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication, BaseAuthentication
 from rest_framework.exceptions import AuthenticationFailed
@@ -21,7 +23,7 @@ import json
 import copy
 import datetime
 from math import floor
-from zephyrus.settings import API_KEY, FRONTEND_URL
+from zephyrus.settings import TIMELINE_STORAGE, API_KEY, FRONTEND_URL
 import logging
 
 logger = logging.getLogger(__name__)
@@ -63,6 +65,19 @@ class IsPostPermission(BasePermission):
             return False
 
 
+def find_main_race(user):
+    account_replays = Replay.objects.filter(user_account_id=user.email).exclude(battlenet_account_id__isnull=True)
+    race_count = {'protoss': 0, 'terran': 0, 'zerg': 0}
+
+    for replay in account_replays:
+        user_race = replay.players[str(replay.user_match_id)]['race']
+        race_count[user_race.lower()] += 1
+    counts = list(race_count.values())
+    races = list(race_count.keys())
+    max_count_index = counts.index(max(counts))
+    return races[max_count_index]
+
+
 class ExternalLogin(APIView):
     authentication_classes = []
     permission_classes = [IsOptionsPermission | IsPostPermission]
@@ -83,10 +98,11 @@ class ExternalLogin(APIView):
             login(request, user)
             send_email_confirmation(request, user)
             token = Token.objects.get(user=user)
+            main_race = find_main_race(user)
 
             response = Response({
                 'token': token.key,
-                'api_key': API_KEY,
+                'main_race': main_race,
             })
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
@@ -134,6 +150,114 @@ class AccountReplays(APIView):
         return HttpResponse(serialized_replays)
 
 
+def filter_user_replays(request, race=None):
+    user = request.user
+    user_id = EmailAddress.objects.get(email=user.email)
+
+    if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
+        battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
+    else:
+        response = HttpResponseNotFound()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    replay_queryset = Replay.objects.filter(battlenet_account_id=battlenet_account)
+
+    serialized_replays = []
+    replay_queryset = list(replay_queryset)
+    replay_queryset.sort(key=lambda x: x.played_at, reverse=True)
+
+    if race:
+        races = ['protoss', 'terran', 'zerg']
+        if race not in races:
+            return None
+
+        race_replay_queryset = []
+        for replay in replay_queryset:
+            player_id = str(replay.user_match_id)
+            if race == replay.players[player_id]['race'].lower():
+                race_replay_queryset.append(replay)
+        replay_queryset = race_replay_queryset
+
+    limited_queryset = replay_queryset[:100]
+
+    for replay in limited_queryset:
+        date = replay.played_at
+        days = datetime.timedelta(
+            seconds=datetime.datetime.timestamp(datetime.datetime.now()) - datetime.datetime.timestamp(date)
+        ).days
+        if days != -1:
+            weeks = int(round(days / 7, 0))
+            months = int(floor(weeks / 4))
+        else:
+            weeks = 0
+            months = 0
+
+        if months > 0:
+            if weeks - (months * 4) == 0:
+                date_diff = f'{months}m'
+            else:
+                date_diff = f'{months}m'  # *{weeks - (months * 4)}/4*'
+        elif weeks > 0:
+            date_diff = f'{weeks}w'
+        else:
+            if days == -1:
+                date_diff = 'Today'
+            elif days == 1:
+                date_diff = 'Yesterday'
+            else:
+                date_diff = f'{days}d'
+
+        serializer = ReplaySerializer(replay)
+        serializer = copy.deepcopy(serializer.data)
+        serializer['played_at'] = date_diff
+
+        new_serializer = {}
+        for stat, info in serializer.items():
+            if stat == 'match_data':
+                new_serializer['match_data'] = {}
+                for name, values in info.items():
+                    if type(values) is dict and 'minerals' in values:
+                        for resource, value in values.items():
+                            new_serializer[stat][f'{name}_{resource}'] = value
+                    else:
+                        new_serializer[stat][name] = values
+            else:
+                new_serializer[stat] = info
+        serializer = new_serializer
+        serialized_replays.append(serializer)
+    return serialized_replays
+
+
+class RaceReplayViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    @action(
+        detail=False,
+        methods=['OPTIONS'],
+    )
+    def preflight(self, request, race):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def retrieve(self, request, race=None):
+        serialized_replays = filter_user_replays(request, race)
+
+        if serialized_replays is not None:
+            response = Response(serialized_replays)
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
+        response = HttpResponseBadRequest("Invalid race")
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
 # returns particular replay based on pk ID in database
 class BattlenetAccountReplays(APIView):
     authentication_classes = [TokenAuthentication]
@@ -146,6 +270,63 @@ class BattlenetAccountReplays(APIView):
         return response
 
     def get(self, request):
+        serialized_replays = filter_user_replays(request)
+
+        if serialized_replays is not None:
+            response = Response(serialized_replays)
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
+        response = HttpResponseBadRequest("Invalid race")
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class GetReplayTimeline(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request, file_hash):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def get(self, request, file_hash):
+        timeline_url = f'https://www.googleapis.com/storage/v1/b/{TIMELINE_STORAGE}/o/{file_hash}.json.gz?key={API_KEY}'
+
+        response = requests.get(timeline_url, headers={'Accept-Encoding': 'gzip'})
+        metadata = response.json()
+
+        response = Response({'timeline_url': metadata['mediaLink']})
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class RaceStatsViewSet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    @action(
+        detail=False,
+        methods=['OPTIONS'],
+    )
+    def preflight(self, request, race):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def retrieve(self, request, race=None):
+        races = ['protoss', 'terran', 'zerg']
+        if race not in races:
+            response = HttpResponseBadRequest()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
+
         user = request.user
         user_id = EmailAddress.objects.get(email=user.email)
 
@@ -157,60 +338,25 @@ class BattlenetAccountReplays(APIView):
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
-        replay_queryset = Replay.objects.filter(battlenet_account_id=battlenet_account)
+        account_replays = Replay.objects.filter(battlenet_account=battlenet_account)
 
-        serialized_replays = []
-        replay_queryset = list(replay_queryset)
-        replay_queryset.sort(key=lambda x: x.played_at, reverse=True)
-        limited_queryset = replay_queryset[:100]
+        if len(account_replays) <= 0:
+            response = HttpResponseNotFound()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
 
-        for replay in limited_queryset:
-            date = replay.played_at
-            days = datetime.timedelta(
-                seconds=datetime.datetime.timestamp(datetime.datetime.now()) - datetime.datetime.timestamp(date)
-            ).days
-            if days != -1:
-                weeks = int(round(days / 7, 0))
-                months = int(floor(weeks / 4))
-            else:
-                weeks = 0
-                months = 0
+        battlenet_id_list = []
+        for region_id, info in battlenet_account.region_profiles.items():
+            battlenet_id_list.extend(info['profile_id'])
 
-            if months > 0:
-                if weeks - (months * 4) == 0:
-                    date_diff = f'{months}m'
-                else:
-                    date_diff = f'{months}m'  # *{weeks - (months * 4)}/4*'
-            elif weeks > 0:
-                date_diff = f'{weeks}w'
-            else:
-                if days == -1:
-                    date_diff = 'Today'
-                elif days == 1:
-                    date_diff = 'Yesterday'
-                else:
-                    date_diff = f'{days}d'
+        trend_data = analyze_trends(account_replays, battlenet_id_list, race)
+        if trend_data:
+            serialized_data = json.dumps(trend_data)
+        else:
+            serialized_data = None
 
-            serializer = ReplaySerializer(replay)
-            serializer = copy.deepcopy(serializer.data)
-            serializer['played_at'] = date_diff
-
-            new_serializer = {}
-            for stat, info in serializer.items():
-                if stat == 'match_data':
-                    new_serializer['match_data'] = {}
-                    for name, values in info.items():
-                        if type(values) is dict and 'minerals' in values:
-                            for resource, value in values.items():
-                                new_serializer[stat][f'{name}_{resource}'] = value
-                        else:
-                            new_serializer[stat][name] = values
-                else:
-                    new_serializer[stat] = info
-            serializer = new_serializer
-            serialized_replays.append(serializer)
-
-        response = Response(serialized_replays)
+        response = Response(serialized_data)
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
