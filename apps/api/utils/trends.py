@@ -4,10 +4,22 @@ from copy import deepcopy
 import datetime
 
 
-def main(account_replays, battlenet_id_list):
+def main(account_replays, battlenet_id_list, race=None):
     account_replays = list(account_replays)
     account_replays.sort(key=lambda r: r.played_at, reverse=True)
+
+    if race:
+        race_replays = []
+        for replay in account_replays:
+            player_id = str(replay.user_match_id)
+            if race == replay.players[player_id]['race'].lower():
+                race_replays.append(replay)
+        account_replays = race_replays
+
     weekly_data = {}
+
+    if not account_replays:
+        return None
 
     one_week = 604800
     initial_date = int(account_replays[0].played_at.timestamp())
