@@ -157,10 +157,7 @@ def filter_user_replays(request, race=None):
     if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
         battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
     else:
-        response = HttpResponseNotFound()
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
+        return None
 
     replay_queryset = Replay.objects.filter(battlenet_account_id=battlenet_account)
 
@@ -252,7 +249,7 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
-        response = HttpResponseBadRequest("Invalid race")
+        response = HttpResponseBadRequest("No replays found or invalid race")
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
@@ -277,7 +274,7 @@ class BattlenetAccountReplays(APIView):
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
-        response = HttpResponseBadRequest("Invalid race")
+        response = HttpResponseBadRequest("No replays found or invalid race")
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
