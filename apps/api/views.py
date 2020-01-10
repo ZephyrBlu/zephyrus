@@ -1,84 +1,50 @@
-from django.contrib.auth import authenticate, login, logout
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseBadRequest, HttpResponseServerError
-from rest_framework.views import APIView
-from rest_framework import viewsets
-from rest_framework.decorators import action, api_view
-from rest_framework.response import Response
-from rest_framework.authentication import TokenAuthentication, BaseAuthentication
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.permissions import BasePermission, IsAuthenticated
-from rest_framework.authtoken.models import Token
-from apps.user_profile.models import Replay, BattlenetAccount
-from allauth.account.models import EmailAddress
-from allauth.account.utils import send_email_confirmation
-from .models import ReplaySerializer
-from django.core.files import File
-from apps.process_replays.views import process_file
-from apps.user_profile.secret import CLIENT_ID, CLIENT_SECRET
 import requests
-from .utils.trends import main as analyze_trends
 import io
 import hashlib
 import json
-import copy
-import datetime
-from math import floor
-from zephyrus.settings import TIMELINE_STORAGE, API_KEY, FRONTEND_URL
 import logging
+
+from django.contrib.auth import authenticate, login, logout
+from django.core.files import File
+from django.http import (
+    HttpResponseNotFound,
+    HttpResponseBadRequest,
+    HttpResponseServerError,
+)
+
+from rest_framework.views import APIView
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+
+from allauth.account.models import EmailAddress
+from allauth.account.utils import send_email_confirmation
+
+from zephyrus.settings import TIMELINE_STORAGE, API_KEY, FRONTEND_URL
+from apps.user_profile.models import Replay, BattlenetAccount
+from apps.process_replays.views import process_file
+from apps.user_profile.secret import CLIENT_ID, CLIENT_SECRET
+
+from .utils.trends import trends as analyze_trends
+from .utils.filter_user_replays import filter_user_replays
+from .utils.get_user_info import get_user_info
+from .permissions import IsOptionsPermission, IsPostPermission
+from .authentication import IsOptionsAuthentication
 
 logger = logging.getLogger(__name__)
 
 
-class IsOptionsAuthentication(BaseAuthentication):
-    """
-    Allows preflight requests to complete
-    Used for CORS requests in development
-    """
-    def authenticate(self, request):
-        if request.method == 'OPTIONS':
-            return None
-        else:
-            raise AuthenticationFailed
-
-
-class IsOptionsPermission(BasePermission):
-    """
-    Allows preflight requests to complete
-    Used for CORS requests in development
-    """
-    def has_permission(self, request, view):
-        if request.method == 'OPTIONS':
-            return True
-        else:
-            return False
-
-
-class IsPostPermission(BasePermission):
-    """
-    Allows preflight requests to complete
-    Used for CORS requests in development
-    """
-    def has_permission(self, request, view):
-        if request.method == 'POST':
-            return True
-        else:
-            return False
-
-
-def find_main_race(user):
-    account_replays = Replay.objects.filter(user_account_id=user.email).exclude(battlenet_account_id__isnull=True)
-    race_count = {'protoss': 0, 'terran': 0, 'zerg': 0}
-
-    for replay in account_replays:
-        user_race = replay.players[str(replay.user_match_id)]['race']
-        race_count[user_race.lower()] += 1
-    counts = list(race_count.values())
-    races = list(race_count.keys())
-    max_count_index = counts.index(max(counts))
-    return races[max_count_index]
-
-
 class ExternalLogin(APIView):
+    """
+    Handles user logins from the /login API endpoint
+
+    If a user does not have a verified email, a verification
+    email is sent.
+
+    The user's account information, Token and main race are sent in the response
+    """
     authentication_classes = []
     permission_classes = [IsOptionsPermission | IsPostPermission]
 
@@ -96,14 +62,9 @@ class ExternalLogin(APIView):
 
         if user is not None:
             login(request, user)
-            send_email_confirmation(request, user)
-            token = Token.objects.get(user=user)
-            main_race = find_main_race(user)
+            user_info = get_user_info(user)
 
-            response = Response({
-                'token': token.key,
-                'main_race': main_race,
-            })
+            response = Response(user_info)
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'cache-control, content-type'
             return response
@@ -115,6 +76,9 @@ class ExternalLogin(APIView):
 
 
 class ExternalLogout(APIView):
+    """
+    Handles user logouts from the /logout API endpoint
+    """
     authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -132,105 +96,10 @@ class ExternalLogout(APIView):
         return response
 
 
-# returns particular replay based on pk ID in database
-class AccountReplays(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated | IsOptionsPermission]
-
-    def get(self, request):
-        user = request.user
-        user_id = EmailAddress.objects.get(email=user.email)
-
-        replay_queryset = Replay.objects.filter(user_account=user_id)
-        serialized_replays = []
-        for replay in list(replay_queryset):
-            serializer = ReplaySerializer(replay)
-            serialized_replays.append(serializer.data)
-
-        return HttpResponse(serialized_replays)
-
-
-def filter_user_replays(request, race=None):
-    user = request.user
-    user_id = EmailAddress.objects.get(email=user.email)
-
-    if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-        battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
-    else:
-        response = HttpResponseNotFound()
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
-
-    replay_queryset = Replay.objects.filter(battlenet_account_id=battlenet_account)
-
-    serialized_replays = []
-    replay_queryset = list(replay_queryset)
-    replay_queryset.sort(key=lambda x: x.played_at, reverse=True)
-
-    if race:
-        races = ['protoss', 'terran', 'zerg']
-        if race not in races:
-            return None
-
-        race_replay_queryset = []
-        for replay in replay_queryset:
-            player_id = str(replay.user_match_id)
-            if race == replay.players[player_id]['race'].lower():
-                race_replay_queryset.append(replay)
-        replay_queryset = race_replay_queryset
-
-    limited_queryset = replay_queryset[:100]
-
-    for replay in limited_queryset:
-        date = replay.played_at
-        days = datetime.timedelta(
-            seconds=datetime.datetime.timestamp(datetime.datetime.now()) - datetime.datetime.timestamp(date)
-        ).days
-        if days != -1:
-            weeks = int(round(days / 7, 0))
-            months = int(floor(weeks / 4))
-        else:
-            weeks = 0
-            months = 0
-
-        if months > 0:
-            if weeks - (months * 4) == 0:
-                date_diff = f'{months}m'
-            else:
-                date_diff = f'{months}m'  # *{weeks - (months * 4)}/4*'
-        elif weeks > 0:
-            date_diff = f'{weeks}w'
-        else:
-            if days == -1:
-                date_diff = 'Today'
-            elif days == 1:
-                date_diff = 'Yesterday'
-            else:
-                date_diff = f'{days}d'
-
-        serializer = ReplaySerializer(replay)
-        serializer = copy.deepcopy(serializer.data)
-        serializer['played_at'] = date_diff
-
-        new_serializer = {}
-        for stat, info in serializer.items():
-            if stat == 'match_data':
-                new_serializer['match_data'] = {}
-                for name, values in info.items():
-                    if type(values) is dict and 'minerals' in values:
-                        for resource, value in values.items():
-                            new_serializer[stat][f'{name}_{resource}'] = value
-                    else:
-                        new_serializer[stat][name] = values
-            else:
-                new_serializer[stat] = info
-        serializer = new_serializer
-        serialized_replays.append(serializer)
-    return serialized_replays
-
-
 class RaceReplayViewSet(viewsets.ModelViewSet):
+    """
+    Returns all user replays played with the given race param
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -258,8 +127,10 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
         return response
 
 
-# returns particular replay based on pk ID in database
 class BattlenetAccountReplays(APIView):
+    """
+    Returns all the replays associated with a user's battlenet account
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -283,7 +154,12 @@ class BattlenetAccountReplays(APIView):
         return response
 
 
-class GetReplayTimeline(APIView):
+class FetchReplayTimeline(APIView):
+    """
+    Fetches the replay timeline related to the file hash param
+
+    Returns the download URL for the timeline file
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -306,6 +182,9 @@ class GetReplayTimeline(APIView):
 
 
 class RaceStatsViewSet(viewsets.ModelViewSet):
+    """
+    Returns the user's stats for the given race param
+    """
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -377,14 +256,18 @@ class Stats(APIView):
         user_id = EmailAddress.objects.get(email=user.email)
 
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-            battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
+            battlenet_account = BattlenetAccount.objects.get(
+                user_account_id=user_id
+            )
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
-        account_replays = Replay.objects.filter(battlenet_account=battlenet_account)
+        account_replays = Replay.objects.filter(
+            battlenet_account=battlenet_account
+        )
 
         if len(account_replays) <= 0:
             response = HttpResponseNotFound()
@@ -405,6 +288,16 @@ class Stats(APIView):
 
 
 class UploadReplays(APIView):
+    """
+    Handles replay uploads from the /upload API endpoint
+
+    Creates a File wrapper around uploaded replay file data,
+    then hashes the file to create a unique ID.
+
+    Then the replay file is processed and stored in a bucket, or if
+    processing is unsuccessful an error is returned and the replay is
+    stored in an alternate bucket for failed replays.
+    """
     authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -416,6 +309,11 @@ class UploadReplays(APIView):
 
     def post(self, request):
         file_data = request.body
+
+        def sha256sum(f):
+            h = hashlib.sha256()
+            h.update(f)
+            return h.hexdigest()
 
         file_hash = sha256sum(file_data)
         replay_file = File(io.BufferedReader(io.BytesIO(file_data)))
@@ -442,16 +340,15 @@ class UploadReplays(APIView):
         return response
 
 
-def sha256sum(f):
-    h = hashlib.sha256()
-    h.update(f)
-    return h.hexdigest()
-
-
 oauth_api_url = 'https://us.battle.net'
 
 
 class BattlenetAuthorizationUrl(APIView):
+    """
+    Handles initial OAuth flow for a user linking their battlenet account
+
+    Returns a redirect URL to begin the OAuth process
+    """
     authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -477,6 +374,13 @@ class BattlenetAuthorizationUrl(APIView):
 
 
 class SetBattlenetAccount(APIView):
+    """
+    Handles OAuth auth code --> token --> user info flow
+
+    Gathers extra user profile information to automatically match replays
+    NOTE: This functionality is currently broken due to Blizzard disabling
+    the SC2 Community APIs
+    """
     authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -503,34 +407,35 @@ class SetBattlenetAccount(APIView):
         user_info_url = f'{oauth_api_url}/oauth/userinfo'
         headers = {'Authorization': f'Bearer {access_token}'}
         json_info = requests.get(user_info_url, headers=headers)
+
         user_info = json_info.json()
 
         current_account = EmailAddress.objects.get(email=request.user.email)
 
         user_id = user_info['id']
-        profile_data_url = f'https://us.api.blizzard.com/sc2/player/{user_id}?access_token={access_token}'
-        profile_data = requests.get(profile_data_url)
-        profile_data = profile_data.json()
+        # profile_data_url = f'https://us.api.blizzard.com/sc2/player/{user_id}?access_token={access_token}'
+        # profile_data = requests.get(profile_data_url)
+        # profile_data = profile_data.json()
 
-        regions = {1: 'NA', 2: 'EU', 3: 'KR'}
-        profiles = {}
+        # regions = {1: 'NA', 2: 'EU', 3: 'KR'}
+        # profiles = {}
 
-        for profile in profile_data:
-            if int(profile['regionId']) in profiles:
-                profiles[int(profile['regionId'])]['profile_id'].append(int(profile['profileId']))
-            else:
-                profiles[int(profile['regionId'])] = {
-                    'profile_name': profile['name'],
-                    'region_name': regions[profile['regionId']],
-                    'profile_id': [int(profile['profileId'])],
-                    'realm_id': int(profile['realmId'])
-                }
+        # for profile in profile_data:
+        #     if int(profile['regionId']) in profiles:
+        #         profiles[int(profile['regionId'])]['profile_id'].append(int(profile['profileId']))
+        #     else:
+        #         profiles[int(profile['regionId'])] = {
+        #             'profile_name': profile['name'],
+        #             'region_name': regions[profile['regionId']],
+        #             'profile_id': [int(profile['profileId'])],
+        #             'realm_id': int(profile['realmId'])
+        #         }
 
         authorized_account = BattlenetAccount(
             id=user_id,
             battletag=user_info['battletag'],
             user_account=current_account,
-            region_profiles=profiles
+            region_profiles={}
         )
         authorized_account.save()
 
@@ -540,7 +445,10 @@ class SetBattlenetAccount(APIView):
         return response
 
 
-class CheckBattlenetAccount(APIView):
+class CheckUserInfo(APIView):
+    """
+    Handles checking if a user has at least 1 battlenet account linked
+    """
     authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
@@ -553,14 +461,11 @@ class CheckBattlenetAccount(APIView):
     def get(self, request):
         user = request.user
 
-        battlenet_accounts = BattlenetAccount.objects.filter(user_account=user.email)
+        # send_email_confirmation(request, user)
 
-        if len(battlenet_accounts) > 0:
-            response = Response()
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization'
-        else:
-            response = HttpResponseNotFound()
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization'
+        user_info = get_user_info(user)
+
+        response = Response(user_info)
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
         return response

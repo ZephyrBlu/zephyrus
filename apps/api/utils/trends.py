@@ -4,7 +4,7 @@ from copy import deepcopy
 import datetime
 
 
-def main(account_replays, battlenet_id_list, race=None):
+def trends(account_replays, battlenet_id_list, race=None):
     account_replays = list(account_replays)
     account_replays.sort(key=lambda r: r.played_at, reverse=True)
 
