@@ -1,6 +1,6 @@
 env_settings/
 apps/api/keys/
-apps/user_profile/secret.py
+apps/user_profile/secret/
 apps/process_replays/utils/replay_parser_production.py
 media/
 node_modules/

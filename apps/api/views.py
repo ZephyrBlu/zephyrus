@@ -25,11 +25,12 @@ from allauth.account.utils import send_email_confirmation
 from zephyrus.settings import TIMELINE_STORAGE, API_KEY, FRONTEND_URL
 from apps.user_profile.models import Replay, BattlenetAccount
 from apps.process_replays.views import process_file
-from apps.user_profile.secret import CLIENT_ID, CLIENT_SECRET
+from apps.user_profile.secret.master import CLIENT_ID, CLIENT_SECRET
 
 from .utils.trends import trends as analyze_trends
 from .utils.filter_user_replays import filter_user_replays
 from .utils.get_user_info import get_user_info
+from .utils.parse_profile import parse_profile
 from .permissions import IsOptionsPermission, IsPostPermission
 from .authentication import IsOptionsAuthentication
 
@@ -63,6 +64,9 @@ class ExternalLogin(APIView):
         if user is not None:
             login(request, user)
             user_info = get_user_info(user)
+
+            if not user_info['user']['verified']:
+                send_email_confirmation(request, user)
 
             response = Response(user_info)
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -466,6 +470,73 @@ class CheckUserInfo(APIView):
         user_info = get_user_info(user)
 
         response = Response(user_info)
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class AddUserProfile(APIView):
+    """
+    Handles validating, parsing and adding game profiles
+    """
+    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def post(self, request):
+        user = request.user
+
+        user_profile_url = request.body.decode('utf-8')
+        profile_data = parse_profile(user_profile_url)
+
+        if profile_data:
+            # save data to user model
+
+            user_battlenet_account = BattlenetAccount.objects.get(
+                user_account_id=user.email,
+            )
+
+            region_id = list(profile_data.keys())[0]
+            new_profile_id = profile_data[region_id]['profile_id'][0]
+
+            if region_id in user_battlenet_account.region_profiles:
+                current_profile_id = user_battlenet_account.region_profiles[region_id]['profile_id']
+                if new_profile_id not in current_profile_id:
+                    current_profile_id.append(new_profile_id)
+            else:
+                user_battlenet_account.region_profiles.update(profile_data)
+            user_battlenet_account.save()
+
+            response = Response()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+        else:
+            response = HttpResponseBadRequest()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class ResendEmail(APIView):
+    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def options(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def get(self, request):
+        user = request.user
+        send_email_confirmation(request, user)
+
+        response = Response()
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
