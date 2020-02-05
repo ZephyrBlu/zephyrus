@@ -325,13 +325,7 @@ class UploadReplays(APIView):
         replay_file.name = f'{file_hash}.SC2Replay'
         replay_file.seek(0)
 
-        try:
-            error = process_file(replay_file, request, file_hash)
-        except Exception as e:
-            response = HttpResponseServerError(e)
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization, content-type'
-            return response
+        error = process_file(replay_file, request, file_hash)
 
         if error == 'error':
             response = HttpResponseServerError()
