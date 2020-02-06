@@ -7,7 +7,8 @@ from .views import (
     FetchReplayTimeline,
     RaceStatsViewSet,
     Stats,
-    UploadReplays,
+    UploadReplay,
+    WriteReplaySet,
     BattlenetAuthorizationUrl,
     SetBattlenetAccount,
     CheckUserInfo,
@@ -25,6 +26,11 @@ user_stats = RaceStatsViewSet.as_view({
     'options': 'preflight',
 })
 
+write_replay = WriteReplaySet.as_view({
+    'post': 'write',
+    'options': 'preflight',
+})
+
 app_name = 'api'
 urlpatterns = [
     path('replays/all/', BattlenetAccountReplays.as_view(), name='replay_list'),
@@ -34,7 +40,8 @@ urlpatterns = [
     path('logout/', ExternalLogout.as_view(), name='external_logout'),
     path('stats/', Stats.as_view(), name='user_stats'),
     path('stats/<str:race>/', user_stats, name='race_stats'),
-    path('upload/', UploadReplays.as_view(), name='replay_upload'),
+    path('upload/', UploadReplay.as_view(), name='replay_upload'),
+    path('upload/data/', write_replay, name='write_replay_data'),
     path('authorize/url/', BattlenetAuthorizationUrl.as_view(), name='battlenet_authorization_url'),
     path('authorize/code/', SetBattlenetAccount.as_view(), name='set_battlenet_account'),
     path('authorize/check/', CheckUserInfo.as_view(), name='ping_battlenet_account'),
