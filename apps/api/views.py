@@ -1,12 +1,9 @@
 import requests
-import io
-import hashlib
 import json
 import logging
 from google.cloud import pubsub_v1
 
 from django.contrib.auth import authenticate, login, logout
-from django.core.files import File
 from django.http import (
     HttpResponseNotFound,
     HttpResponseBadRequest,
@@ -23,10 +20,16 @@ from rest_framework.permissions import IsAuthenticated
 from allauth.account.models import EmailAddress
 from allauth.account.utils import send_email_confirmation
 
-from zephyrus.settings import GS_PROJECT_ID, TIMELINE_STORAGE, API_KEY, FRONTEND_URL
+from zephyrus.settings import (
+    GS_PROJECT_ID,
+    UPLOAD_FUNC_TOPIC,
+    TIMELINE_STORAGE,
+    API_KEY,
+    FRONTEND_URL,
+)
 from apps.user_profile.models import Replay, BattlenetAccount
 from apps.process_replays.views import write_replay
-from apps.user_profile.secret.testing import CLIENT_ID, CLIENT_SECRET
+from apps.user_profile.secret.master import CLIENT_ID, CLIENT_SECRET
 
 from .utils.trends import trends as analyze_trends
 from .utils.filter_user_replays import filter_user_replays
@@ -317,7 +320,7 @@ class UploadReplay(APIView):
         file_data = request.body
 
         publisher = pubsub_v1.PublisherClient()
-        topic_path = publisher.topic_path(GS_PROJECT_ID, 'replay-upload-testing')
+        topic_path = publisher.topic_path(GS_PROJECT_ID, UPLOAD_FUNC_TOPIC)
 
         # When you publish a message, the client returns a future.
         publisher.publish(
@@ -347,7 +350,7 @@ class WriteReplaySet(viewsets.ModelViewSet):
             response = HttpResponseServerError()
             response['Access-Control-Allow-Headers'] = 'authorization'
         else:
-            response = Response({'saved': result})
+            response = Response(result)
             response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
