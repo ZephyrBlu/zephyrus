@@ -36,6 +36,14 @@ def write_replay(replay_data, request):
             for index, k in enumerate(kwargs):
                 try:
                     player_battlenet_account = user_battlenet_accounts.get(**k)
+                    bucket_path = f'{user.email}/{player_battlenet_account.battletag}/{filename}'
+                    player_profile_id = player_battlenet_account.region_profiles[str(match_region)]['profile_id']
+
+                    if players[str(metadata['winner'])]['profile_id'] in player_profile_id:
+                        win = True
+                    else:
+                        win = False
+
                     user_id = index + 1
                     break
                 except ObjectDoesNotExist:
@@ -43,15 +51,6 @@ def write_replay(replay_data, request):
                     user_id = None
         else:
             player_battlenet_account = None
-        if player_battlenet_account:
-            bucket_path = f'{user.email}/{player_battlenet_account.battletag}/{filename}'
-
-            player_profile_id = player_battlenet_account.region_profiles[str(match_region)]['profile_id']
-            if players[str(metadata['winner'])]['profile_id'] in player_profile_id:
-                win = True
-            else:
-                win = False
-        else:
             win = None
             bucket_path = f'{user.email}/{filename}'
 

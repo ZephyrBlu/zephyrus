@@ -5,6 +5,7 @@ from .views import (
     RaceReplayViewSet,
     BattlenetAccountReplays,
     FetchReplayTimeline,
+    FetchReplayFile,
     RaceStatsViewSet,
     Stats,
     UploadReplay,
@@ -16,8 +17,18 @@ from .views import (
     ResendEmail,
 )
 
+replay_download_link = FetchReplayFile.as_view({
+    'get': 'download',
+    'options': 'preflight',
+})
+
 user_replays = RaceReplayViewSet.as_view({
     'get': 'retrieve',
+    'options': 'preflight',
+})
+
+user_replays_count = RaceReplayViewSet.as_view({
+    'get': 'count',
     'options': 'preflight',
 })
 
@@ -35,6 +46,8 @@ app_name = 'api'
 urlpatterns = [
     path('replays/all/', BattlenetAccountReplays.as_view(), name='replay_list'),
     path('replays/<str:race>/', user_replays, name='race_replays'),
+    path('replays/<str:race>/count/', user_replays_count, name='race_replays_count'),
+    path('download/<str:file_hash>/', replay_download_link, name='replay_download'),
     path('replays/timeline/<str:file_hash>/', FetchReplayTimeline.as_view(), name='replay_timeline'),
     path('login/', ExternalLogin.as_view(), name='external_login'),
     path('logout/', ExternalLogout.as_view(), name='external_logout'),

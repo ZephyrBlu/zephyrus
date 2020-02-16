@@ -1,27 +1,29 @@
 import requests
 import json
 import logging
-from google.cloud import pubsub_v1
+from google.cloud import pubsub_v1, storage
 
 from django.contrib.auth import authenticate, login, logout
 from django.http import (
     HttpResponseNotFound,
     HttpResponseBadRequest,
     HttpResponseServerError,
+    FileResponse,
 )
 
 from rest_framework.views import APIView
 from rest_framework import viewsets
-from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
 
 from allauth.account.models import EmailAddress
 from allauth.account.utils import send_email_confirmation
 
 from zephyrus.settings import (
     GS_PROJECT_ID,
+    GS_CREDENTIALS,
+    REPLAY_STORAGE,
     UPLOAD_FUNC_TOPIC,
     TIMELINE_STORAGE,
     API_KEY,
@@ -111,10 +113,6 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
-    @action(
-        detail=False,
-        methods=['OPTIONS'],
-    )
     def preflight(self, request, race):
         response = Response()
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -129,7 +127,25 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
-        response = HttpResponseBadRequest("No replays found or invalid race")
+        response = HttpResponseBadRequest({'response': 'No replays found or invalid race'})
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def count(self, request, race=None):
+        replay_count = filter_user_replays(request, race, count=True)
+
+        if replay_count is not None:
+            response = Response(replay_count)
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
+        elif replay_count is False:
+            response = HttpResponseNotFound()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'authorization'
+            return response
+        response = HttpResponseBadRequest({'response': 'No replays found or invalid race'})
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
@@ -189,6 +205,34 @@ class FetchReplayTimeline(APIView):
         return response
 
 
+class FetchReplayFile(viewsets.ModelViewSet):
+    """
+    Returns a link to the downloadable replay file
+    """
+    authentication_classes = []
+    permission_classes = [IsAuthenticatedOrReadOnly | IsOptionsPermission]
+
+    def preflight(self, request, file_hash):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def download(self, request, file_hash):
+        replay = Replay.objects.get(file_hash=file_hash)
+
+        storage_client = storage.Client(project=GS_PROJECT_ID, credentials=GS_CREDENTIALS)
+        replay_storage = storage_client.get_bucket(REPLAY_STORAGE)
+        replay_blob_path = f'{replay.user_account_id}/{replay.battlenet_account_id}/{file_hash}.SC2Replay'
+        replay_blob = replay_storage.blob(replay_blob_path)
+
+        response = FileResponse(replay_blob.download_as_string(), as_attachment=True, filename=f'{file_hash}.SC2Replay')
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        response['Content-Disposition'] = f'attachment; filename="{file_hash}.SC2Replay"'
+        return response
+
+
 class RaceStatsViewSet(viewsets.ModelViewSet):
     """
     Returns the user's stats for the given race param
@@ -196,10 +240,6 @@ class RaceStatsViewSet(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
-    @action(
-        detail=False,
-        methods=['OPTIONS'],
-    )
     def preflight(self, request, race):
         response = Response()
         response['Access-Control-Allow-Origin'] = FRONTEND_URL

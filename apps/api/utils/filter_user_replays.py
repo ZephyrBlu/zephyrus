@@ -8,7 +8,7 @@ from apps.user_profile.models import Replay, BattlenetAccount
 from ..models import ReplaySerializer
 
 
-def filter_user_replays(request, race=None):
+def filter_user_replays(request, race=None, *, count=False):
     user = request.user
     user_id = EmailAddress.objects.get(email=user.email)
 
@@ -19,10 +19,7 @@ def filter_user_replays(request, race=None):
         )
     # if not return 404 response
     else:
-        response = HttpResponseNotFound()
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
+        return False
 
     replay_queryset = Replay.objects.filter(
         battlenet_account_id=battlenet_account
@@ -46,6 +43,10 @@ def filter_user_replays(request, race=None):
             if race == replay.players[player_id]['race'].lower():
                 race_replay_queryset.append(replay)
         replay_queryset = race_replay_queryset
+
+    # for count only return early
+    if count:
+        return len(replay_queryset)
 
     # limit returned replays to 100 for performance reasons
     limited_queryset = replay_queryset[:100]
