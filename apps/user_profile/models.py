@@ -15,7 +15,7 @@ class BattlenetAccount(models.Model):
 
 
 class Replay(models.Model):
-    file_hash = models.CharField(primary_key=True, max_length=64)
+    file_hash = models.CharField(max_length=64)
     user_account = models.ForeignKey(
         EmailAddress,
         to_field='email',
@@ -36,4 +36,11 @@ class Replay(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
     region_id = models.IntegerField()
     win = models.BooleanField(null=True)
-    # timeline = JSONField()
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['file_hash', 'user_account'],
+                name='unique_replay'
+            )
+        ]

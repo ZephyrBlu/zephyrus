@@ -26,11 +26,8 @@ def write_replay(replay_data, request):
 
     match_region = players['1']['region_id']
 
-    duplicate_replay = False
-    if replay_query:
-        duplicate_replay = True
-
-    if not duplicate_replay:
+    # means there is no duplicate
+    if not replay_query:
         kwargs = [
             {f'region_profiles__{match_region}__profile_id__contains': players['1']['profile_id']},
             {f'region_profiles__{match_region}__profile_id__contains': players['2']['profile_id']}
