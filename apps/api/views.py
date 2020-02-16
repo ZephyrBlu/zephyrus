@@ -1,11 +1,9 @@
 import requests
-import io
-import hashlib
 import json
 import logging
+from google.cloud import pubsub_v1
 
 from django.contrib.auth import authenticate, login, logout
-from django.core.files import File
 from django.http import (
     HttpResponseNotFound,
     HttpResponseBadRequest,
@@ -22,9 +20,15 @@ from rest_framework.permissions import IsAuthenticated
 from allauth.account.models import EmailAddress
 from allauth.account.utils import send_email_confirmation
 
-from zephyrus.settings import TIMELINE_STORAGE, API_KEY, FRONTEND_URL
+from zephyrus.settings import (
+    GS_PROJECT_ID,
+    UPLOAD_FUNC_TOPIC,
+    TIMELINE_STORAGE,
+    API_KEY,
+    FRONTEND_URL,
+)
 from apps.user_profile.models import Replay, BattlenetAccount
-from apps.process_replays.views import process_file
+from apps.process_replays.views import write_replay
 from apps.user_profile.secret.master import CLIENT_ID, CLIENT_SECRET
 
 from .utils.trends import trends as analyze_trends
@@ -291,7 +295,7 @@ class Stats(APIView):
         return response
 
 
-class UploadReplays(APIView):
+class UploadReplay(APIView):
     """
     Handles replay uploads from the /upload API endpoint
 
@@ -312,35 +316,42 @@ class UploadReplays(APIView):
         return response
 
     def post(self, request):
+        token = str(request.auth)
         file_data = request.body
 
-        def sha256sum(f):
-            h = hashlib.sha256()
-            h.update(f)
-            return h.hexdigest()
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(GS_PROJECT_ID, UPLOAD_FUNC_TOPIC)
 
-        file_hash = sha256sum(file_data)
-        replay_file = File(io.BufferedReader(io.BytesIO(file_data)))
+        # When you publish a message, the client returns a future.
+        publisher.publish(
+            topic_path, token=token, data=file_data  # data must be a bytestring.
+        )
 
-        replay_file.name = f'{file_hash}.SC2Replay'
-        replay_file.seek(0)
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization, content-type'
+        return response
 
-        try:
-            error = process_file(replay_file, request, file_hash)
-        except Exception as e:
-            response = HttpResponseServerError(e)
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization, content-type'
-            return response
 
-        if error == 'error':
+class WriteReplaySet(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def preflight(self, request):
+        response = Response()
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def write(self, request):
+        replay_data = json.loads(request.body)
+        result = write_replay(replay_data, request)
+
+        if result is None:
             response = HttpResponseServerError()
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization, content-type'
+            response['Access-Control-Allow-Headers'] = 'authorization'
         else:
-            response = Response()
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization, content-type'
+            response = Response(result)
+            response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
 
