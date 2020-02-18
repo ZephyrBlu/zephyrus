@@ -1,8 +1,6 @@
 import copy
 import datetime
 from math import floor
-from django.http import HttpResponseNotFound
-from zephyrus.settings import FRONTEND_URL
 from allauth.account.models import EmailAddress
 from apps.user_profile.models import Replay, BattlenetAccount
 from ..models import ReplaySerializer
@@ -22,6 +20,7 @@ def filter_user_replays(request, race=None, *, count=False):
         return False
 
     replay_queryset = Replay.objects.filter(
+        user_account_id=user_id,
         battlenet_account_id=battlenet_account
     )
 
