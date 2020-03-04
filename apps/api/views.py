@@ -5,10 +5,10 @@ from google.cloud import pubsub_v1, storage
 
 from django.contrib.auth import authenticate, login, logout
 from django.http import (
+    HttpResponse,
     HttpResponseNotFound,
     HttpResponseBadRequest,
     HttpResponseServerError,
-    FileResponse,
 )
 
 from rest_framework.views import APIView
@@ -219,16 +219,16 @@ class FetchReplayFile(viewsets.ModelViewSet):
         return response
 
     def download(self, request, file_hash):
-        replay = Replay.objects.get(file_hash=file_hash)
+        replay = list(Replay.objects.filter(file_hash=file_hash))[0]
 
         storage_client = storage.Client(project=GS_PROJECT_ID, credentials=GS_CREDENTIALS)
         replay_storage = storage_client.get_bucket(REPLAY_STORAGE)
         replay_blob_path = f'{replay.user_account_id}/{replay.battlenet_account_id}/{file_hash}.SC2Replay'
         replay_blob = replay_storage.blob(replay_blob_path)
+        downloaded_replay = replay_blob.download_as_string(raw_download=True)
 
-        response = FileResponse(replay_blob.download_as_string(), as_attachment=True, filename=f'{file_hash}.SC2Replay')
+        response = HttpResponse(downloaded_replay, content_type='application/octet-stream')
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
         response['Content-Disposition'] = f'attachment; filename="{file_hash}.SC2Replay"'
         return response
 
