@@ -3,6 +3,18 @@ from allauth.account.models import EmailAddress
 from django.contrib.postgres.fields import JSONField
 
 
+class FeatureVote(models.Model):
+    vote_id = models.UUIDField(editable=False)
+    user_account = models.ForeignKey(
+        EmailAddress,
+        to_field='email',
+        on_delete=models.CASCADE
+    )
+    feature = models.CharField(max_length=100)
+    comment = models.CharField(max_length=100)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+
 class BattlenetAccount(models.Model):
     id = models.CharField(unique=True, null=False, max_length=100)
     battletag = models.CharField(primary_key=True, max_length=100)

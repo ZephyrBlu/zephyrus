@@ -15,6 +15,7 @@ from .views import (
     CheckUserInfo,
     AddUserProfile,
     ResendEmail,
+    FeatureVoteSet,
 )
 
 replay_download_link = FetchReplayFile.as_view({
@@ -42,6 +43,12 @@ write_replay = WriteReplaySet.as_view({
     'options': 'preflight',
 })
 
+feature_vote = FeatureVoteSet.as_view({
+    'post': 'write',
+    'get': 'fetch',
+    'options': 'preflight',
+})
+
 app_name = 'api'
 urlpatterns = [
     path('replays/all/', BattlenetAccountReplays.as_view(), name='replay_list'),
@@ -60,4 +67,5 @@ urlpatterns = [
     path('authorize/check/', CheckUserInfo.as_view(), name='ping_battlenet_account'),
     path('profile/', AddUserProfile.as_view(), name='add_user_profile'),
     path('resend/', ResendEmail.as_view(), name='resend_email'),
+    path('vote/', feature_vote, name='feature_vote'),
 ]
