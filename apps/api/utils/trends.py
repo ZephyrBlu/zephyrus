@@ -33,6 +33,7 @@ def trends(account_replays, battlenet_id_list, race=None):
         else:
             while current_date < current_week - one_week:
                 current_week -= one_week
+                weekly_data[current_week] = []
 
             weekly_data[current_week] = [r]
 
@@ -48,6 +49,29 @@ def trends(account_replays, battlenet_id_list, race=None):
             'win_diff': {},
             'loss_diff': {}
         }
+
+        days = datetime.timedelta(
+            seconds=datetime.datetime.timestamp(datetime.datetime.now()) - week
+        ).days
+        weeks = int(round(days / 7, 0))
+        months = int(floor(weeks / 4))
+
+        # if months == 6:
+        #     trends['date'] = '6mo ago'
+        if months > 0:
+            if weeks - (months * 4) == 0:
+                trends['date'] = f'{months}m'
+            else:
+                trends['date'] = f'{months} *{weeks - (months * 4)}/4*'
+        else:
+            trends['date'] = f'{weeks}w'
+
+        if not replays:
+            weekly_trends.append({'date': trends['date'], 'count': 0})
+            if months >= 12 and weeks % 4 != 0 and days % 7 != 0:
+                break
+            else:
+                continue
 
         stat_values = {}
         win_loss_values = {'win': {}, 'loss': {}}
@@ -169,42 +193,71 @@ def trends(account_replays, battlenet_id_list, race=None):
         trends['win_diff'] = win_loss_difference['win']
         trends['loss_diff'] = win_loss_difference['loss']
 
-        days = datetime.timedelta(
-            seconds=datetime.datetime.timestamp(datetime.datetime.now()) - week
-        ).days
-        weeks = int(round(days / 7, 0))
-        months = int(floor(weeks / 4))
-        if months >= 6 and weeks > 0:
-            continue
-        elif months == 6:
-            trends['date'] = '6mo ago'
-        elif months > 0:
-            if weeks-(months*4) == 0:
-                trends['date'] = f'{months}m'
-            else:
-                trends['date'] = f'{months} *{weeks-(months*4)}/4*'
-        else:
-            trends['date'] = f'{weeks}w'
-
         trends['count'] = len(replays)
         winrate = round((len(win_loss_values['win']['sq']) / len(replays)) * 100, 1)
         trends['winrate'] = winrate
         weekly_trends.append(trends)
 
+        if months >= 12 and weeks % 4 != 0 and days % 7 != 0:
+            break
+
     weekly_trends = weekly_trends[::-1]
     weekly_trend_diff = []
-    current_weekly_avg = weekly_trends[0]
-    for i in range(1, len(weekly_trends)):
-        week = weekly_trends[i]
+
+    def period_avg(weekly_data, week_index):
+        weekly_totals = {}
+        weekly_avg = {'date': weekly_data[week_index]['date']}
+
+        for i in range(week_index, week_index + 10):
+            try:
+                week = weekly_data[i]
+            except IndexError:
+                break
+
+            if len(week) == 2:
+                continue
+
+            if 'winrate' not in weekly_totals:
+                weekly_totals['winrate'] = []
+            weekly_totals['winrate'].append(week['winrate'])
+
+            for stat_name, value in week['total_median'].items():
+                if stat_name not in weekly_totals:
+                    weekly_totals[stat_name] = []
+                weekly_totals[stat_name].append(value)
+
+        for stat_name, value_list in weekly_totals.items():
+            weekly_avg[stat_name] = median(value_list)
+
+        return weekly_avg
+
+    blank_trends = []
+    for i, t in enumerate(weekly_trends):
+        if 'total_median' in t:
+            current_weekly_avg = period_avg(weekly_trends, i)
+            break
+        else:
+            blank_trends.append(i)
+
+    for index in sorted(blank_trends, reverse=True):
+        weekly_trends.pop(index)
+
+    def period_trends(current_avg, week):
         current_trends = {}
 
         for calculated_stats, raw_stats in week.items():
             if calculated_stats not in ['count', 'date']:
                 if calculated_stats == 'total_median':
                     for stat, values in raw_stats.items():
-                        if values > 0 and week['count'] >= 5:
-                            if current_weekly_avg['total_median'][stat] > 0:
-                                diff = round(((week['total_median'][stat] / current_weekly_avg['total_median'][stat]) - 1) * 100, 1)
+                        if values > 0:
+                            if current_avg[stat] > 0:
+                                diff = round(
+                                    ((week['total_median'][stat] / current_avg[stat]) - 1) * 100, 1)
+                                # limit difference to +-50%
+                                if diff > 50:
+                                    diff = 50
+                                elif diff < -50:
+                                    diff = -50
                             else:
                                 diff = 0
                             current_trends[stat] = (week['total_median'][stat], diff)
@@ -213,15 +266,46 @@ def trends(account_replays, battlenet_id_list, race=None):
 
         current_trends['count'] = week['count']
         current_trends['date'] = week['date']
-        if current_weekly_avg['winrate'] == 0 or week['count'] < 5:
+        if current_avg['winrate'] == 0 or week['count'] < 5:
             current_trends['winrate'] = (week['winrate'], 0)
         else:
-            winrate_diff = round(((week['winrate'] / current_weekly_avg['winrate']) - 1) * 100, 1)
+            winrate_diff = round(((week['winrate'] / current_avg['winrate']) - 1) * 100, 1)
+            # limit difference to +-50%
+            if winrate_diff > 50:
+                winrate_diff = 50
+            elif winrate_diff < -50:
+                winrate_diff = -50
             current_trends['winrate'] = (week['winrate'], winrate_diff)
+        return current_trends
+
+    print(current_weekly_avg, current_weekly_avg['date'])
+
+    set_next = False
+    week_count = 0
+    for i in range(1, len(weekly_trends)):
+        if len(weekly_trends[i]) == 2:
+            weekly_trend_diff.append(weekly_trends[i])
+
+            # 3 month average
+            print('week modulus', (week_count + 2) % 12)
+            if (week_count + 2) % 12 == 0:
+                print('found 3mo', weekly_trends[i]['date'])
+                set_next = True
+            week_count += 1
+            continue
+
+        current_trends = period_trends(current_weekly_avg, weekly_trends[i])
         weekly_trend_diff.append(current_trends)
 
         # 3 month average
-        if i % 12 == 0:
-            current_weekly_avg = weekly_trends[i]
+        print('week modulus', (week_count + 2) % 12)
+        if (week_count + 2) % 12 == 0 or set_next:
+            print('found 3mo', weekly_trends[i]['date'])
+            current_weekly_avg = period_avg(weekly_trends, i)
+            week_count = 0
+
+            if set_next:
+                set_next = False
+        week_count += 1
 
     return {'weekly': weekly_trend_diff, 'recent': weekly_trends[-1]}
