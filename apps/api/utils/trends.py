@@ -278,8 +278,6 @@ def trends(account_replays, battlenet_id_list, race=None):
             current_trends['winrate'] = (week['winrate'], winrate_diff)
         return current_trends
 
-    print(current_weekly_avg, current_weekly_avg['date'])
-
     set_next = False
     week_count = 0
     for i in range(1, len(weekly_trends)):
@@ -287,9 +285,7 @@ def trends(account_replays, battlenet_id_list, race=None):
             weekly_trend_diff.append(weekly_trends[i])
 
             # 3 month average
-            print('week modulus', (week_count + 2) % 12)
             if (week_count + 2) % 12 == 0:
-                print('found 3mo', weekly_trends[i]['date'])
                 set_next = True
             week_count += 1
             continue
@@ -298,9 +294,7 @@ def trends(account_replays, battlenet_id_list, race=None):
         weekly_trend_diff.append(current_trends)
 
         # 3 month average
-        print('week modulus', (week_count + 2) % 12)
         if (week_count + 2) % 12 == 0 or set_next:
-            print('found 3mo', weekly_trends[i]['date'])
             current_weekly_avg = period_avg(weekly_trends, i)
             week_count = 0
 
