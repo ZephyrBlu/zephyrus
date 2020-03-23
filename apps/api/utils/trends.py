@@ -56,6 +56,9 @@ def trends(account_replays, battlenet_id_list, race=None):
         weeks = int(round(days / 7, 0))
         months = int(floor(weeks / 4))
 
+        if months >= 12 and weeks >= 52 and days >= 365:
+            break
+
         # if months == 6:
         #     trends['date'] = '6mo ago'
         if months > 0:
@@ -197,9 +200,6 @@ def trends(account_replays, battlenet_id_list, race=None):
         winrate = round((len(win_loss_values['win']['sq']) / len(replays)) * 100, 1)
         trends['winrate'] = winrate
         weekly_trends.append(trends)
-
-        if months >= 12 and weeks % 4 != 0 and days % 7 != 0:
-            break
 
     weekly_trends = weekly_trends[::-1]
     weekly_trend_diff = []
