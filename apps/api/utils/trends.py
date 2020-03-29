@@ -130,15 +130,25 @@ def trends(account_replays, battlenet_id_list, race=None):
                         win_loss_values['loss'][f'{stat}_minerals'].append(values['minerals'][user_player_id])
                         win_loss_values['loss'][f'{stat}_gas'].append(values['gas'][user_player_id])
                 else:
-                    stat_values[stat].append(values[user_player_id])
+                    if stat == 'workers_lost' or stat == 'workers_killed':
+                        stat_values[stat].append(values[user_player_id] - 12)
+                    else:
+                        stat_values[stat].append(values[user_player_id])
 
                     if stat in correlation_values:
                         correlation_values[stat].append(values[user_player_id])
 
+                    # need to do proper fix and remove worker value code
                     if replay.win:
-                        win_loss_values['win'][stat].append(values[user_player_id])
+                        if stat == 'workers_lost' or stat == 'workers_killed':
+                            win_loss_values['win'][stat].append(values[user_player_id] - 12)
+                        else:
+                            win_loss_values['win'][stat].append(values[user_player_id])
                     elif not replay.win:
-                        win_loss_values['loss'][stat].append(values[user_player_id])
+                        if stat == 'workers_lost' or stat == 'workers_killed':
+                            win_loss_values['loss'][stat].append(values[user_player_id] - 12)
+                        else:
+                            win_loss_values['loss'][stat].append(values[user_player_id])
 
         stat_medians = {}
         stat_MAD = {}
