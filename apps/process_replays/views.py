@@ -48,6 +48,8 @@ def write_replay(replay_data, request):
                     break
                 except ObjectDoesNotExist:
                     player_battlenet_account = None
+                    win = None
+                    bucket_path = f'{user.email}/{filename}'
                     user_id = None
         else:
             player_battlenet_account = None
