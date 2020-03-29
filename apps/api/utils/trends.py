@@ -1,4 +1,5 @@
 from statistics import median
+from scipy.stats import spearmanr
 from math import ceil, floor
 from copy import deepcopy
 import datetime
@@ -38,6 +39,16 @@ def trends(account_replays, battlenet_id_list, race=None):
             weekly_data[current_week] = [r]
 
     weekly_trends = []
+    correlation_values = {
+        'winrate': [],
+        'sq': [],
+        'apm': [],
+        'workers_produced': [],
+        'workers_killed': [],
+        'workers_lost': [],
+        'avg_unspent_resources_minerals': [],
+        'avg_unspent_resources_gas': [],
+    }
     for week, replays in weekly_data.items():
         trends = {
             'total_median': {},
@@ -83,12 +94,13 @@ def trends(account_replays, battlenet_id_list, race=None):
                 if info['profile_id'] in battlenet_id_list:
                     user_player_id = player_id
 
-            no_stat_list = ['mmr', 'mmr_diff']
+            no_stat_list = ['mmr_diff']
             stats = {}
             for stat, values in replay.match_data.items():
                 if stat not in no_stat_list:
                     stats[stat] = values
 
+            correlation_values['winrate'].append(1 if replay.win else 0)
             for stat, values in stats.items():
                 if stat not in stat_values:
                     if 'minerals' in values:
@@ -107,6 +119,10 @@ def trends(account_replays, battlenet_id_list, race=None):
                     stat_values[f'{stat}_minerals'].append(values['minerals'][user_player_id])
                     stat_values[f'{stat}_gas'].append(values['gas'][user_player_id])
 
+                    if f'{stat}_minerals' in correlation_values:
+                        correlation_values[f'{stat}_minerals'].append(values['minerals'][user_player_id])
+                        correlation_values[f'{stat}_gas'].append(values['gas'][user_player_id])
+
                     if replay.win:
                         win_loss_values['win'][f'{stat}_minerals'].append(values['minerals'][user_player_id])
                         win_loss_values['win'][f'{stat}_gas'].append(values['gas'][user_player_id])
@@ -115,6 +131,9 @@ def trends(account_replays, battlenet_id_list, race=None):
                         win_loss_values['loss'][f'{stat}_gas'].append(values['gas'][user_player_id])
                 else:
                     stat_values[stat].append(values[user_player_id])
+
+                    if stat in correlation_values:
+                        correlation_values[stat].append(values[user_player_id])
 
                     if replay.win:
                         win_loss_values['win'][stat].append(values[user_player_id])
@@ -312,4 +331,26 @@ def trends(account_replays, battlenet_id_list, race=None):
     weekly_trends[-1]['end_date'] = weekly_trend_diff[-1]['end_date']
     weekly_trends[-1]['total_count'] = weekly_trend_diff[-1]['total_count']
 
-    return {'weekly': weekly_trend_diff, 'recent': weekly_trends[-1]}
+    stat_correlations = {
+        'sq': None,
+        'apm': None,
+        'workers_produced': None,
+        'workers_killed': None,
+        'workers_lost': None,
+        'avg_unspent_resources_minerals': None,
+        'avg_unspent_resources_gas': None,
+        'count': len(correlation_values['winrate']),
+    }
+
+    for stat, values in correlation_values.items():
+        if stat != 'winrate':
+            c = spearmanr(correlation_values['winrate'], values)
+
+            # setting correlation as shared variance % of correlated values
+            stat_correlations[stat] = (c[0], round((c[0] ** 2) * 100, 1))
+
+    return {
+        'weekly': weekly_trend_diff,
+        'recent': weekly_trends[-1],
+        'correlations': stat_correlations,
+    }
