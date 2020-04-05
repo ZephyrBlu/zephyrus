@@ -184,8 +184,10 @@ class FetchReplayTimeline(APIView):
 
     Returns the download URL for the timeline file
     """
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated | IsOptionsPermission]
+    # authentication_classes = [TokenAuthentication]
+    # permission_classes = [IsAuthenticated | IsOptionsPermission]
+    authentication_classes = []
+    permission_classes = []
 
     def options(self, request, file_hash):
         response = Response()

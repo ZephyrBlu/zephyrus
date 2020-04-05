@@ -1,0 +1,17 @@
+{% load static %}
+
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Zephyrus | SC2 Replay Analysis</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="{% static 'site_structure/index.737bd68b8ec78c37ee94bed33091de4b.css' %}" rel="stylesheet">
+</head>
+<body>
+<div id="root" data-replay="{{ replay_data }}">
+</div>
+<script src="{% static 'site_structure/runtime.a9edc78d5cd6127c9851.js' %}"></script>
+<script src="{% static 'site_structure/index.86eb800c11e1a37ce9ab.js' %}"></script>
+</body>
+</html>

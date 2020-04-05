@@ -1,6 +1,7 @@
 import copy
 import datetime
 from math import floor
+from base64 import urlsafe_b64encode
 from allauth.account.models import EmailAddress
 from apps.user_profile.models import Replay, BattlenetAccount
 from ..models import ReplaySerializer
@@ -83,6 +84,7 @@ def filter_user_replays(request, race=None, *, count=False):
         serializer = ReplaySerializer(replay)
         serializer = copy.deepcopy(serializer.data)
         serializer['played_at'] = date_diff
+        serializer['url'] = urlsafe_b64encode(bytes.fromhex(serializer['file_hash'][:18])).decode('utf-8')
 
         new_serializer = {}
         for stat, info in serializer.items():
