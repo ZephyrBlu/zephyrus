@@ -21,6 +21,7 @@ def replay_page(request, base64_url):
 
     if replay_query.exists():
         replay = ReplaySerializer(replay_query[0]).data
+        replay['url'] = urlsafe_b64encode(bytes.fromhex(replay['file_hash'][:18])).decode('utf-8')
         for n, info in replay['players'].items():
             info.pop('user_id', None)
             info.pop('realm_id', None)
