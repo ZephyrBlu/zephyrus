@@ -97,7 +97,7 @@ def trends(account_replays, battlenet_id_list, race=None):
             no_stat_list = ['mmr_diff']
             stats = {}
             for stat, values in replay.match_data.items():
-                if stat not in no_stat_list:
+                if stat != 'race' and stat not in no_stat_list:
                     stats[stat] = values
 
             correlation_values['winrate'].append(1 if replay.win else 0)
