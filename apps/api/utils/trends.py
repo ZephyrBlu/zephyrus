@@ -258,7 +258,10 @@ def trends(account_replays, battlenet_id_list, race=None):
                 weekly_totals[stat_name].append(value)
 
         if 'end_date' not in weekly_avg:
-            weekly_avg['end_date'] = weekly_data[week_index + 11]['date']
+            try:
+                weekly_avg['end_date'] = weekly_data[week_index + 11]['date']
+            except IndexError:
+                weekly_avg['end_date'] = weekly_data[-1]['date']
 
         for stat_name, value_list in weekly_totals.items():
             weekly_avg[stat_name] = median(value_list)
