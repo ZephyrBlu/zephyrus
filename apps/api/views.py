@@ -31,7 +31,7 @@ from zephyrus.settings import (
 )
 from apps.user_profile.models import FeatureVote, Replay, BattlenetAccount
 from apps.process_replays.views import write_replay
-from apps.user_profile.secret.testing import CLIENT_ID, CLIENT_SECRET
+from apps.user_profile.secret.production import CLIENT_ID, CLIENT_SECRET
 
 from .utils.trends import trends as analyze_trends
 from .utils.filter_user_replays import filter_user_replays
