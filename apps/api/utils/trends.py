@@ -97,7 +97,7 @@ def trends(account_replays, battlenet_id_list, race=None):
             no_stat_list = ['mmr_diff']
             stats = {}
             for stat, values in replay.match_data.items():
-                if stat not in no_stat_list:
+                if stat != 'race' and stat not in no_stat_list:
                     stats[stat] = values
 
             correlation_values['winrate'].append(1 if replay.win else 0)
@@ -258,7 +258,10 @@ def trends(account_replays, battlenet_id_list, race=None):
                 weekly_totals[stat_name].append(value)
 
         if 'end_date' not in weekly_avg:
-            weekly_avg['end_date'] = weekly_data[week_index + 11]['date']
+            try:
+                weekly_avg['end_date'] = weekly_data[week_index + 11]['date']
+            except IndexError:
+                weekly_avg['end_date'] = weekly_data[-1]['date']
 
         for stat_name, value_list in weekly_totals.items():
             weekly_avg[stat_name] = median(value_list)

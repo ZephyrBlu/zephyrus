@@ -31,7 +31,7 @@ from zephyrus.settings import (
 )
 from apps.user_profile.models import FeatureVote, Replay, BattlenetAccount
 from apps.process_replays.views import write_replay
-from apps.user_profile.secret.master import CLIENT_ID, CLIENT_SECRET
+from apps.user_profile.secret.production import CLIENT_ID, CLIENT_SECRET
 
 from .utils.trends import trends as analyze_trends
 from .utils.filter_user_replays import filter_user_replays
@@ -89,8 +89,10 @@ class ExternalLogout(APIView):
     """
     Handles user logouts from the /logout API endpoint
     """
-    authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
-    permission_classes = [IsAuthenticated | IsOptionsPermission]
+    # authentication_classes = [TokenAuthentication, IsOptionsAuthentication]
+    # permission_classes = [IsAuthenticated | IsOptionsPermission]
+    authentication_classes = []
+    permission_classes = []
 
     def options(self, request):
         response = Response()
@@ -470,29 +472,31 @@ class SetBattlenetAccount(APIView):
         current_account = EmailAddress.objects.get(email=request.user.email)
 
         user_id = user_info['id']
-        # profile_data_url = f'https://us.api.blizzard.com/sc2/player/{user_id}?access_token={access_token}'
-        # profile_data = requests.get(profile_data_url)
-        # profile_data = profile_data.json()
+        profile_data_url = f'https://us.api.blizzard.com/sc2/player/{user_id}?access_token={access_token}'
+        profile_data = requests.get(profile_data_url)
+        profiles = {}
 
-        # regions = {1: 'NA', 2: 'EU', 3: 'KR'}
-        # profiles = {}
+        if profile_data.ok:
+            profile_data = profile_data.json()
 
-        # for profile in profile_data:
-        #     if int(profile['regionId']) in profiles:
-        #         profiles[int(profile['regionId'])]['profile_id'].append(int(profile['profileId']))
-        #     else:
-        #         profiles[int(profile['regionId'])] = {
-        #             'profile_name': profile['name'],
-        #             'region_name': regions[profile['regionId']],
-        #             'profile_id': [int(profile['profileId'])],
-        #             'realm_id': int(profile['realmId'])
-        #         }
+            regions = {1: 'NA', 2: 'EU', 3: 'KR'}
+
+            for profile in profile_data:
+                if int(profile['regionId']) in profiles:
+                    profiles[int(profile['regionId'])]['profile_id'].append(int(profile['profileId']))
+                else:
+                    profiles[int(profile['regionId'])] = {
+                        'profile_name': profile['name'],
+                        'region_name': regions[profile['regionId']],
+                        'profile_id': [int(profile['profileId'])],
+                        'realm_id': int(profile['realmId'])
+                    }
 
         authorized_account = BattlenetAccount(
             id=user_id,
             battletag=user_info['battletag'],
             user_account=current_account,
-            region_profiles={}
+            region_profiles=profiles
         )
         authorized_account.save()
 

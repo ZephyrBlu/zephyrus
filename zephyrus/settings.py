@@ -14,7 +14,7 @@ import os
 from google.oauth2 import service_account
 import socket
 from .env_settings.base import *
-from .env_settings.master import *
+from .env_settings.production import *
 
 SITE_ID = 1
 
