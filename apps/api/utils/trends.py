@@ -357,11 +357,11 @@ def trends(account_replays, battlenet_id_list, race=None):
 
     for stat, values in correlation_values.items():
         if stat != 'winrate':
-            if len(correlation_values['winrate']) == 1 and correlation_values['winrate'][0] == 0:
+            c = spearmanr(correlation_values['winrate'], values)
+
+            if str(c[0]) == 'nan':
                 stat_correlations[stat] = (0, 0)
             else:
-                c = spearmanr(correlation_values['winrate'], values)
-
                 # setting correlation as shared variance % of correlated values
                 stat_correlations[stat] = (round(c[0], 3), round((c[0] ** 2) * 100, 1))
 
