@@ -97,10 +97,36 @@ textarea {
    Author's custom styles
    ========================================================================== */
 
+:root {
+    --text: hsl(0, 0%, 85%);
+    --grey: hsl(0, 0%, 47%);
+    --light-grey: hsl(0, 0%, 70%);
+    --purple: hsl(270, 80%, 30%);
+    --green: hsl(120, 100%, 40%);
+    --red: hsl(0, 100%, 30%);
+    --green-highlight: hsla(120, 80%, 25%, 0.6);
+    --red-highlight: hsla(0, 70%, 25%, 0.6);
+
+    --primary-blue: hsl(210, 68%, 47%);
+    --primary-blue-hover: hsl(210, 85%, 60%);
+    --primary-dark-1: hsl(230, 70%, 6%);
+    --primary-dark-2: hsl(230, 60%, 8%);
+    --primary-light-1: hsl(210, 70%, 16%);
+    --primary-light-2: hsl(210, 65%, 20%);
+    --primary-light-3: hsl(210, 60%, 24%);
+    --secondary-dark-1: hsl(210, 90%, 8%);
+    --secondary-dark-2: hsl(210, 85%, 10%);
+    --secondary-dark-3: hsl(210, 80%, 12%);
+}
+
+html, body, #wrapper, .content {
+    width: 100%;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
-    background-color: #030317;
-    color: hsl(0, 0%, 85%);
+    background-color: var(--primary-dark-1);
+    color: var(--text);
     font-weight: 400;
 }
 

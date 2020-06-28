@@ -1,0 +1,74 @@
+{% extends 'site_structure/index.html' %}
+
+{% load static %}
+
+{% block stylesheet %}
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'site_structure/css/landing.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="Landing">
+    <h1 class="Landing__title">
+        Identify your mistakes in
+        <span class="Landing__underline">seconds</span>
+    </h1>
+    <h2 class="Landing__sub-title">
+        See your games and performance visualized clearly
+    </h2>
+    <div class="Landing__benefits">
+        <div class="Landing__benefit-details">
+            <h3 class="Landing__benefit-title">
+                See all the details
+            </h3>
+            <div class="Landing__benefit-wrapper">
+                <p class="Landing__benefit-explanation">
+                    Want to see how good your Creep spread was?
+                    We've got that.
+                </p>
+                <p class="Landing__benefit-explanation">
+                    How about Resources Mined? Got it.
+                </p>
+                <p class="Landing__benefit-explanation">
+                    Chronoboost targets? You know the answer.
+                </p>
+                Build tracking coming soon.
+            </div>
+        </div>
+        <div class="Landing__benefit-details">
+            <h3 class="Landing__benefit-title">
+                Track your Performance
+            </h3>
+            <div class="Landing__benefit-wrapper">
+                <p class="Landing__benefit-explanation">
+                    View your seasonal and current performance
+                    across all the important stats
+                </p>
+                <p class="Landing__benefit-explanation">
+                    Compare your current and recent performance
+                    to see how much you're improving.
+                </p>
+                Trends re-work coming soon.
+            </div>
+        </div>
+        <div class="Landing__benefit-details">
+            <h3 class="Landing__benefit-title">
+                Be Delighted
+            </h3>
+            <div class="Landing__benefit-wrapper">
+                <p class="Landing__benefit-explanation">
+                    Replay analysis shouldn't be a chore.
+                </p>
+                Zephyrus has a beautiful and intuitive UI
+                that presents you the information you need in
+                a clear and concise way.
+            </div>
+        </div>
+    </div>
+    <div class="Landing__get-started-wrapper">
+        <a class="Landing__get-started">
+            GET STARTED
+        </a>
+    </div>
+</div>
+{% endblock %}
