@@ -25,12 +25,12 @@
 
 .Landing__benefits {
     display: flex;
-    width: max-content;
-    margin: 60px auto 0 ;
+    width: 80%;
+    margin: 60px auto 0;
 }
 
 .Landing__benefit-wrapper {
-    height: 140px;
+    height: 160px;
     border: 1px solid var(--primary-light-3);
     border-radius: 25px;
     background-color: var(--secondary-dark-3);
