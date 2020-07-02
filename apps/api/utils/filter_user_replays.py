@@ -7,7 +7,7 @@ from apps.user_profile.models import Replay, BattlenetAccount
 from ..models import ReplaySerializer
 
 
-def filter_user_replays(request, race=None, *, count=False):
+def filter_user_replays(request, race=None, target=None):
     user = request.user
     user_id = EmailAddress.objects.get(email=user.email)
 
@@ -20,10 +20,16 @@ def filter_user_replays(request, race=None, *, count=False):
     else:
         return False
 
-    replay_queryset = Replay.objects.filter(
-        user_account_id=user_id,
-        battlenet_account_id=battlenet_account
-    )
+    if target == 'summary':
+        replay_queryset = Replay.objects.filter(
+            user_account_id=user_id,
+            battlenet_account_id=battlenet_account
+        )
+    else:
+        replay_queryset = Replay.objects.filter(
+            user_account_id=user_id,
+            battlenet_account_id=battlenet_account
+        )
 
     serialized_replays = []
     replay_queryset = list(replay_queryset)
@@ -45,8 +51,23 @@ def filter_user_replays(request, race=None, *, count=False):
         replay_queryset = race_replay_queryset
 
     # for count only return early
-    if count:
+    if target == 'count':
         return len(replay_queryset)
+
+    if target == 'summary':
+        linked_replays = 0
+        unlinked_replays = 0
+
+        for replay in replay_queryset:
+            if replay.battlenet_account:
+                linked_replays += 1
+            else:
+                unlinked_replays += 1
+
+        return {
+            'linked': linked_replays,
+            'unlinked': unlinked_replays,
+        }
 
     # limit returned replays to 100 for performance reasons
     limited_queryset = replay_queryset[:100]

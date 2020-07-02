@@ -108,6 +108,27 @@ class ExternalLogout(APIView):
         return response
 
 
+class ReplaySummaryViewset(viewsets.ModelViewSet):
+    """
+    Returns all user replays played with the given race param
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def preflight(self, request, race):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def retrieve(self, request):
+        replay_summary = filter_user_replays(request, None, 'summary')
+        response = Response(replay_summary)
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
 class RaceReplayViewSet(viewsets.ModelViewSet):
     """
     Returns all user replays played with the given race param
@@ -135,7 +156,7 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
         return response
 
     def count(self, request, race=None):
-        replay_count = filter_user_replays(request, race, count=True)
+        replay_count = filter_user_replays(request, race, 'count')
 
         if replay_count is not None:
             response = Response(replay_count)
@@ -148,33 +169,6 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
         response = HttpResponseBadRequest({'response': 'No replays found or invalid race'})
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
-
-
-class BattlenetAccountReplays(APIView):
-    """
-    Returns all the replays associated with a user's battlenet account
-    """
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated | IsOptionsPermission]
-
-    def options(self, request):
-        response = Response()
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
-
-    def get(self, request):
-        serialized_replays = filter_user_replays(request)
-
-        if serialized_replays is not None:
-            response = Response(serialized_replays)
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization'
-            return response
-        response = HttpResponseBadRequest("No replays found or invalid race")
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
