@@ -3,6 +3,7 @@ from .views import (
     ExternalLogout,
     ExternalLogin,
     RaceReplayViewSet,
+    VerifyReplaysViewset,
     ReplaySummaryViewset,
     FetchReplayTimeline,
     FetchReplayFile,
@@ -20,6 +21,11 @@ from .views import (
 
 replay_download_link = FetchReplayFile.as_view({
     'get': 'download',
+    'options': 'preflight',
+})
+
+verify_replays = VerifyReplaysViewset.as_view({
+    'get': 'verify',
     'options': 'preflight',
 })
 
@@ -56,6 +62,7 @@ feature_vote = FeatureVoteSet.as_view({
 
 app_name = 'api'
 urlpatterns = [
+    path('replays/verify/', verify_replays, name='verify_replays'),
     path('replays/summary/', replay_summary, name='replay_summary'),
     path('replays/<str:race>/', user_replays, name='race_replays'),
     path('replays/<str:race>/count/', user_replays_count, name='race_replays_count'),

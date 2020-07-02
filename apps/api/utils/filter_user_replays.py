@@ -20,10 +20,9 @@ def filter_user_replays(request, race=None, target=None):
     else:
         return False
 
-    if target == 'summary':
+    if target == 'verify' or target == 'summary':
         replay_queryset = Replay.objects.filter(
             user_account_id=user_id,
-            battlenet_account_id=battlenet_account
         )
     else:
         replay_queryset = Replay.objects.filter(
@@ -53,6 +52,14 @@ def filter_user_replays(request, race=None, target=None):
     # for count only return early
     if target == 'count':
         return len(replay_queryset)
+
+    if target == 'verify':
+        def is_unlinked(replay):
+            if not replay.battlenet_account:
+                return True
+            return False
+
+        return list(filter(is_unlinked, replay_queryset))
 
     if target == 'summary':
         linked_replays = 0

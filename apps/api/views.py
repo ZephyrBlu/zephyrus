@@ -25,6 +25,7 @@ from zephyrus.settings import (
     GS_CREDENTIALS,
     REPLAY_STORAGE,
     UPLOAD_FUNC_TOPIC,
+    VERIFY_FUNC_TOPIC,
     TIMELINE_STORAGE,
     API_KEY,
     FRONTEND_URL,
@@ -108,6 +109,45 @@ class ExternalLogout(APIView):
         return response
 
 
+class VerifyReplaysViewset(viewsets.ModelViewSet):
+    """
+    Returns all user replays played with the given race param
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def preflight(self, request):
+        unlinked_replays = filter_user_replays(request, None, 'verify')
+
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(GS_PROJECT_ID, VERIFY_FUNC_TOPIC)
+
+        for replay in unlinked_replays:
+            replay_data = {
+                'file_hash': replay.file_hash,
+                'user_account': replay.user_account,
+            }
+            byte_data = json.dumps(replay_data).encode('utf-8')
+
+            # When you publish a message, the client returns a future.
+            publisher.publish(
+                topic_path, data=byte_data  # data must be a bytestring.
+            )
+
+        response = Response({
+            'count': len(unlinked_replays),
+        })
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def verify(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
 class ReplaySummaryViewset(viewsets.ModelViewSet):
     """
     Returns all user replays played with the given race param
@@ -115,7 +155,7 @@ class ReplaySummaryViewset(viewsets.ModelViewSet):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
-    def preflight(self, request, race):
+    def preflight(self, request):
         response = Response()
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
