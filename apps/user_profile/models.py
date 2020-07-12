@@ -24,6 +24,7 @@ class BattlenetAccount(models.Model):
         on_delete=models.CASCADE
     )
     region_profiles = JSONField()
+    linked_at = models.DateTimeField(auto_now_add=True)
 
 
 class Replay(models.Model):

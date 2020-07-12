@@ -6,7 +6,9 @@ from .find_main_race import find_main_race
 
 def get_user_info(user):
     user_account = EmailAddress.objects.get(email=user.email)
-    user_battlenet = BattlenetAccount.objects.filter(user_account_id=user.email)
+    user_battlenet = BattlenetAccount.objects.filter(
+        user_account_id=user.email
+    ).order_by('linked_at').first()
     if user_battlenet:
         battlenet_accounts = []
         for account in user_battlenet:

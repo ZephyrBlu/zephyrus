@@ -8,7 +8,6 @@ from django.http import (
     HttpResponse,
     HttpResponseNotFound,
     HttpResponseBadRequest,
-    HttpResponseServerError,
 )
 
 from rest_framework.views import APIView
@@ -117,6 +116,13 @@ class VerifyReplaysViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated | IsOptionsPermission]
 
     def preflight(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def verify(self, request):
+        token = str(request.auth)
         unlinked_replays = filter_user_replays(request, None, 'verify')
 
         publisher = pubsub_v1.PublisherClient()
@@ -125,24 +131,18 @@ class VerifyReplaysViewset(viewsets.ModelViewSet):
         for replay in unlinked_replays:
             replay_data = {
                 'file_hash': replay.file_hash,
-                'user_account': replay.user_account,
+                'user_account': replay.user_account.email,
             }
             byte_data = json.dumps(replay_data).encode('utf-8')
 
             # When you publish a message, the client returns a future.
             publisher.publish(
-                topic_path, data=byte_data  # data must be a bytestring.
+                topic_path, token=token, data=byte_data  # data must be a bytestring.
             )
 
         response = Response({
             'count': len(unlinked_replays),
         })
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
-
-    def verify(self, request):
-        response = Response()
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
@@ -296,7 +296,9 @@ class RaceStatsViewSet(viewsets.ModelViewSet):
         user_id = EmailAddress.objects.get(email=user.email)
 
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-            battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
+            battlenet_account = BattlenetAccount.objects.filter(
+                user_account_id=user_id
+            ).order_by('linked_at').first()
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -342,9 +344,9 @@ class Stats(APIView):
         user_id = EmailAddress.objects.get(email=user.email)
 
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-            battlenet_account = BattlenetAccount.objects.get(
+            battlenet_account = BattlenetAccount.objects.filter(
                 user_account_id=user_id
-            )
+            ).order_by('linked_at').first()
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -424,12 +426,8 @@ class WriteReplaySet(viewsets.ModelViewSet):
         replay_data = json.loads(request.body)
         result = write_replay(replay_data, request)
 
-        if result is None:
-            response = HttpResponseServerError()
-            response['Access-Control-Allow-Headers'] = 'authorization'
-        else:
-            response = Response(result)
-            response['Access-Control-Allow-Headers'] = 'authorization'
+        response = Response(result)
+        response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
 
@@ -588,9 +586,9 @@ class AddUserProfile(APIView):
         if profile_data:
             # save data to user model
 
-            user_battlenet_account = BattlenetAccount.objects.get(
+            user_battlenet_account = BattlenetAccount.objects.filter(
                 user_account_id=user.email,
-            )
+            ).order_by('linked_at').first()
 
             region_id = list(profile_data.keys())[0]
             new_profile_id = profile_data[region_id]['profile_id'][0]

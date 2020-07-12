@@ -13,9 +13,9 @@ def filter_user_replays(request, race=None, target=None):
 
     # check that user has a battlenet account linked
     if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-        battlenet_account = BattlenetAccount.objects.get(
+        battlenet_account = BattlenetAccount.objects.filter(
             user_account_id=user_id
-        )
+        ).order_by('linked_at').first()
     # if not return 404 response
     else:
         return False
@@ -64,16 +64,20 @@ def filter_user_replays(request, race=None, target=None):
     if target == 'summary':
         linked_replays = 0
         unlinked_replays = 0
+        other_account = 0
 
         for replay in replay_queryset:
-            if replay.battlenet_account:
+            if replay.battlenet_account == battlenet_account:
                 linked_replays += 1
+            elif replay.battlenet_account:
+                other_account += 1
             else:
                 unlinked_replays += 1
 
         return {
             'linked': linked_replays,
             'unlinked': unlinked_replays,
+            'other': other_account,
         }
 
     # limit returned replays to 100 for performance reasons
