@@ -3,6 +3,7 @@ import json
 import logging
 from google.cloud import pubsub_v1, storage
 
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.http import (
     HttpResponse,
@@ -298,7 +299,7 @@ class RaceStatsViewSet(viewsets.ModelViewSet):
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
             battlenet_account = BattlenetAccount.objects.filter(
                 user_account_id=user_id
-            ).order_by('linked_at').first()
+            ).order_by('-linked_at').first()
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -346,7 +347,7 @@ class Stats(APIView):
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
             battlenet_account = BattlenetAccount.objects.filter(
                 user_account_id=user_id
-            ).order_by('linked_at').first()
+            ).order_by('-linked_at').first()
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -528,7 +529,8 @@ class SetBattlenetAccount(APIView):
             id=user_id,
             battletag=user_info['battletag'],
             user_account=current_account,
-            region_profiles=profiles
+            region_profiles=profiles,
+            linked_at=timezone.now(),
         )
         authorized_account.save()
 
@@ -588,7 +590,7 @@ class AddUserProfile(APIView):
 
             user_battlenet_account = BattlenetAccount.objects.filter(
                 user_account_id=user.email,
-            ).order_by('linked_at').first()
+            ).order_by('-linked_at').first()
 
             region_id = list(profile_data.keys())[0]
             new_profile_id = profile_data[region_id]['profile_id'][0]

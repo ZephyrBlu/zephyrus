@@ -15,7 +15,7 @@ def filter_user_replays(request, race=None, target=None):
     if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
         battlenet_account = BattlenetAccount.objects.filter(
             user_account_id=user_id
-        ).order_by('linked_at').first()
+        ).order_by('-linked_at').first()
     # if not return 404 response
     else:
         return False
