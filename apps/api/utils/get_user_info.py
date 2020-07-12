@@ -6,15 +6,16 @@ from .find_main_race import find_main_race
 
 def get_user_info(user):
     user_account = EmailAddress.objects.get(email=user.email)
-    user_battlenet = BattlenetAccount.objects.filter(user_account_id=user.email)
+    user_battlenet = BattlenetAccount.objects.filter(
+        user_account_id=user.email
+    ).order_by('-linked_at').first()
     if user_battlenet:
         battlenet_accounts = []
-        for account in user_battlenet:
-            current_account = {
-                'battletag': account.battletag,
-                'profiles': account.region_profiles,
-            }
-            battlenet_accounts.append(current_account)
+        current_account = {
+            'battletag': user_battlenet.battletag,
+            'profiles': user_battlenet.region_profiles,
+        }
+        battlenet_accounts.append(current_account)
     else:
         battlenet_accounts = None
     token = Token.objects.get(user=user)

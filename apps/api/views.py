@@ -3,12 +3,12 @@ import json
 import logging
 from google.cloud import pubsub_v1, storage
 
+from django.utils import timezone
 from django.contrib.auth import authenticate, login, logout
 from django.http import (
     HttpResponse,
     HttpResponseNotFound,
     HttpResponseBadRequest,
-    HttpResponseServerError,
 )
 
 from rest_framework.views import APIView
@@ -25,6 +25,7 @@ from zephyrus.settings import (
     GS_CREDENTIALS,
     REPLAY_STORAGE,
     UPLOAD_FUNC_TOPIC,
+    VERIFY_FUNC_TOPIC,
     TIMELINE_STORAGE,
     API_KEY,
     FRONTEND_URL,
@@ -108,6 +109,67 @@ class ExternalLogout(APIView):
         return response
 
 
+class VerifyReplaysViewset(viewsets.ModelViewSet):
+    """
+    Returns all user replays played with the given race param
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def preflight(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def verify(self, request):
+        token = str(request.auth)
+        unlinked_replays = filter_user_replays(request, None, 'verify')
+
+        publisher = pubsub_v1.PublisherClient()
+        topic_path = publisher.topic_path(GS_PROJECT_ID, VERIFY_FUNC_TOPIC)
+
+        for replay in unlinked_replays:
+            replay_data = {
+                'file_hash': replay.file_hash,
+                'user_account': replay.user_account.email,
+            }
+            byte_data = json.dumps(replay_data).encode('utf-8')
+
+            # When you publish a message, the client returns a future.
+            publisher.publish(
+                topic_path, token=token, data=byte_data  # data must be a bytestring.
+            )
+
+        response = Response({
+            'count': len(unlinked_replays),
+        })
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class ReplaySummaryViewset(viewsets.ModelViewSet):
+    """
+    Returns all user replays played with the given race param
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def preflight(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def retrieve(self, request):
+        replay_summary = filter_user_replays(request, None, 'summary')
+        response = Response(replay_summary)
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
 class RaceReplayViewSet(viewsets.ModelViewSet):
     """
     Returns all user replays played with the given race param
@@ -135,7 +197,7 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
         return response
 
     def count(self, request, race=None):
-        replay_count = filter_user_replays(request, race, count=True)
+        replay_count = filter_user_replays(request, race, 'count')
 
         if replay_count is not None:
             response = Response(replay_count)
@@ -148,33 +210,6 @@ class RaceReplayViewSet(viewsets.ModelViewSet):
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
         response = HttpResponseBadRequest({'response': 'No replays found or invalid race'})
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
-
-
-class BattlenetAccountReplays(APIView):
-    """
-    Returns all the replays associated with a user's battlenet account
-    """
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated | IsOptionsPermission]
-
-    def options(self, request):
-        response = Response()
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'authorization'
-        return response
-
-    def get(self, request):
-        serialized_replays = filter_user_replays(request)
-
-        if serialized_replays is not None:
-            response = Response(serialized_replays)
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'authorization'
-            return response
-        response = HttpResponseBadRequest("No replays found or invalid race")
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
@@ -262,7 +297,9 @@ class RaceStatsViewSet(viewsets.ModelViewSet):
         user_id = EmailAddress.objects.get(email=user.email)
 
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-            battlenet_account = BattlenetAccount.objects.get(user_account_id=user_id)
+            battlenet_account = BattlenetAccount.objects.filter(
+                user_account_id=user_id
+            ).order_by('-linked_at').first()
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -308,9 +345,9 @@ class Stats(APIView):
         user_id = EmailAddress.objects.get(email=user.email)
 
         if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-            battlenet_account = BattlenetAccount.objects.get(
+            battlenet_account = BattlenetAccount.objects.filter(
                 user_account_id=user_id
-            )
+            ).order_by('-linked_at').first()
         else:
             response = HttpResponseNotFound()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -390,12 +427,8 @@ class WriteReplaySet(viewsets.ModelViewSet):
         replay_data = json.loads(request.body)
         result = write_replay(replay_data, request)
 
-        if result is None:
-            response = HttpResponseServerError()
-            response['Access-Control-Allow-Headers'] = 'authorization'
-        else:
-            response = Response(result)
-            response['Access-Control-Allow-Headers'] = 'authorization'
+        response = Response(result)
+        response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
 
@@ -496,7 +529,8 @@ class SetBattlenetAccount(APIView):
             id=user_id,
             battletag=user_info['battletag'],
             user_account=current_account,
-            region_profiles=profiles
+            region_profiles=profiles,
+            linked_at=timezone.now(),
         )
         authorized_account.save()
 
@@ -554,9 +588,9 @@ class AddUserProfile(APIView):
         if profile_data:
             # save data to user model
 
-            user_battlenet_account = BattlenetAccount.objects.get(
+            user_battlenet_account = BattlenetAccount.objects.filter(
                 user_account_id=user.email,
-            )
+            ).order_by('-linked_at').first()
 
             region_id = list(profile_data.keys())[0]
             new_profile_id = profile_data[region_id]['profile_id'][0]

@@ -57,6 +57,8 @@ def write_replay(replay_data, request):
 
     if replay_query:
         replay = Replay.objects.get(file_hash=file_hash, user_account=user_account)
+        replay.battlenet_account = player_battlenet_account
+        replay.user_match_id = user_id
         replay.players = players
         replay.match_data = summary_stats
     else:

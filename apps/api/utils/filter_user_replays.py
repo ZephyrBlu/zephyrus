@@ -7,23 +7,28 @@ from apps.user_profile.models import Replay, BattlenetAccount
 from ..models import ReplaySerializer
 
 
-def filter_user_replays(request, race=None, *, count=False):
+def filter_user_replays(request, race=None, target=None):
     user = request.user
     user_id = EmailAddress.objects.get(email=user.email)
 
     # check that user has a battlenet account linked
     if BattlenetAccount.objects.filter(user_account_id=user_id).exists():
-        battlenet_account = BattlenetAccount.objects.get(
+        battlenet_account = BattlenetAccount.objects.filter(
             user_account_id=user_id
-        )
+        ).order_by('-linked_at').first()
     # if not return 404 response
     else:
         return False
 
-    replay_queryset = Replay.objects.filter(
-        user_account_id=user_id,
-        battlenet_account_id=battlenet_account
-    )
+    if target == 'verify' or target == 'summary':
+        replay_queryset = Replay.objects.filter(
+            user_account_id=user_id,
+        )
+    else:
+        replay_queryset = Replay.objects.filter(
+            user_account_id=user_id,
+            battlenet_account_id=battlenet_account
+        )
 
     serialized_replays = []
     replay_queryset = list(replay_queryset)
@@ -45,8 +50,35 @@ def filter_user_replays(request, race=None, *, count=False):
         replay_queryset = race_replay_queryset
 
     # for count only return early
-    if count:
+    if target == 'count':
         return len(replay_queryset)
+
+    if target == 'verify':
+        def is_unlinked(replay):
+            if not replay.battlenet_account:
+                return True
+            return False
+
+        return list(filter(is_unlinked, replay_queryset))
+
+    if target == 'summary':
+        linked_replays = 0
+        unlinked_replays = 0
+        other_account = 0
+
+        for replay in replay_queryset:
+            if replay.battlenet_account == battlenet_account:
+                linked_replays += 1
+            elif replay.battlenet_account:
+                other_account += 1
+            else:
+                unlinked_replays += 1
+
+        return {
+            'linked': linked_replays,
+            'unlinked': unlinked_replays,
+            'other': other_account,
+        }
 
     # limit returned replays to 100 for performance reasons
     limited_queryset = replay_queryset[:100]
