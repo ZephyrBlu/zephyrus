@@ -1,23 +1,18 @@
 from django.urls import path
-from .views import (
-    ExternalLogout,
-    ExternalLogin,
-    RaceReplayViewSet,
-    VerifyReplaysViewset,
+
+from .authentication import ExternalLogin, ExternalLogout
+from .authorization import BattlenetAuthorizationUrl, SetBattlenetAccount
+from .feature_vote import FeatureVoteSet
+from .pubsub import UploadReplay, VerifyReplaysViewset
+from .replays import (
     ReplaySummaryViewset,
+    RaceReplayViewSet,
     FetchReplayTimeline,
     FetchReplayFile,
-    RaceStatsViewSet,
-    Stats,
-    UploadReplay,
     WriteReplaySet,
-    BattlenetAuthorizationUrl,
-    SetBattlenetAccount,
-    CheckUserInfo,
-    AddUserProfile,
-    ResendEmail,
-    FeatureVoteSet,
 )
+from .trends import RaceStatsViewSet, Stats
+from .user import CheckUserInfo, AddUserProfile, ResendEmail
 
 replay_download_link = FetchReplayFile.as_view({
     'get': 'download',
