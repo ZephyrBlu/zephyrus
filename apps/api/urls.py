@@ -11,7 +11,7 @@ from .replays import (
     FetchReplayFile,
     WriteReplaySet,
 )
-from .trends import RaceStatsViewSet, Stats
+from .trends import RaceStatsViewSet
 from .user import CheckUserInfo, AddUserProfile, ResendEmail
 
 replay_download_link = FetchReplayFile.as_view({
@@ -65,7 +65,6 @@ urlpatterns = [
     path('replays/timeline/<str:file_hash>/', FetchReplayTimeline.as_view(), name='replay_timeline'),
     path('login/', ExternalLogin.as_view(), name='external_login'),
     path('logout/', ExternalLogout.as_view(), name='external_logout'),
-    path('stats/', Stats.as_view(), name='user_stats'),
     path('stats/<str:race>/', user_stats, name='race_stats'),
     path('upload/', UploadReplay.as_view(), name='replay_upload'),
     path('upload/data/', write_replay, name='write_replay_data'),
