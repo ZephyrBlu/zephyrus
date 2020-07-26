@@ -6,6 +6,7 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
     account_replays = list(account_replays)
     account_replays.sort(key=lambda r: r.played_at, reverse=True)
 
+    prev_season_start = 1584403200
     current_season_start = 1591747200
 
     replays = {
@@ -17,9 +18,9 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
         for replay in account_replays:
             player_id = str(replay.user_match_id)
             if race == replay.players[player_id]['race'].lower():
-                if replay.played_at.timestamp() < current_season_start:
+                if prev_season_start <= replay.played_at.timestamp() < current_season_start:
                     replays['previous'].append(replay)
-                else:
+                elif replay.played_at.timestamp() >= current_season_start:
                     replays['current'].append(replay)
 
     if not replays['previous'] and not replays['current']:
