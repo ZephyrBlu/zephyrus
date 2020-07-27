@@ -82,7 +82,13 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
 
                 for s in stat_values.keys():
                     if s in stat_values and s != 'winrate':
-                        stat_values[s].append(replay.match_data[s][user_player_id])
+                        if s == 'mmr':
+                            stat_values[s].append(replay.match_data[s][user_player_id])
+                        else:
+                            stat_values[s].append({
+                                'win': replay.win,
+                                'value': replay.match_data[s][user_player_id]
+                            })
 
             stat_values['winrate'] = wins / (wins + losses) if wins + losses else None
 
@@ -100,14 +106,31 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                     }
                 else:
                     slice_index_offset = round(len(values) / 10) if len(values) / 10 > 1 else 1
-                    filtered_values = sorted(values)[slice_index_offset:-slice_index_offset]
-                    raw_hist = histogram(filtered_values, bins=7)
+                    filtered_values = sorted(values, key=lambda x: x['value'])[slice_index_offset:-slice_index_offset]
+                    raw_hist = histogram(list(map(lambda x: x['value'], filtered_values)), bins=7)
                     stat_counts = raw_hist[0]
-                    stat_bins = raw_hist[1]
-                    stat_hist = list(zip(stat_counts, stat_bins))
+                    # need to alter how edges are used
+                    stat_edges = raw_hist[1]
+
+                    win_values = list(filter(lambda x: x['win'], filtered_values))
+                    win_hist = histogram(list(map(lambda x: x['value'], win_values)), bins=7, range=(stat_edges[0], stat_edges[-1]))
+                    win_counts = win_hist[0]
+
+                    loss_values = list(filter(lambda x: not x['win'], filtered_values))
+                    loss_hist = histogram(list(map(lambda x: x['value'], loss_values)), bins=7, range=(stat_edges[0], stat_edges[-1]))
+                    loss_counts = loss_hist[0]
+
+                    def hist_to_data(hist):
+                        if len(hist[0]) == 2:
+                            return list(map(lambda x: {'value': int(x[0]), 'bin': round(x[1], 0)}, hist))
+                        return list(map(lambda x: {'win': int(x[0]), 'loss': int(x[1]), 'bin': round(x[2], 0)}, hist))
+
                     trends[stat] = {
-                        'avg': round(median(values), 0),
-                        'values': list(map(lambda x: {'value': int(x[0]), 'bin': round(x[1], 0)}, stat_hist)),
+                        'avg': round(median(list(map(lambda x: x['value'], values))), 0),
+                        'values': {
+                            'all': hist_to_data(list(zip(stat_counts, stat_edges))),
+                            'win_loss': hist_to_data(list(zip(win_counts, loss_counts, stat_edges))),
+                        },
                     }
             season_trends[season].update(trends)
         matchup_trends[matchup] = {'seasons': season_trends}
