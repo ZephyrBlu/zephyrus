@@ -59,6 +59,7 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
             stat_values = {
                 'winrate': None,
                 'mmr': [],
+                'match_length': [],
                 'apm': [],
                 'spm': [],
                 'sq': [],
@@ -66,6 +67,7 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                 'workers_produced': [],
                 'workers_lost': [],
                 'workers_killed': [],
+                'workers_killed_lost_diff': [],
             }
 
             wins = 0
@@ -84,10 +86,21 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                     if s in stat_values and s != 'winrate':
                         if s == 'mmr':
                             stat_values[s].append(replay.match_data[s][user_player_id])
-                        else:
+                        elif s == 'workers_killed_lost_diff':
+                            value = replay.match_data['workers_killed'][user_player_id] - replay.match_data['workers_lost'][user_player_id]
                             stat_values[s].append({
                                 'win': replay.win,
-                                'value': replay.match_data[s][user_player_id]
+                                'value': value,
+                            })
+                        else:
+                            if s == 'match_length':
+                                value = replay.match_length
+                            else:
+                                value = replay.match_data[s][user_player_id]
+
+                            stat_values[s].append({
+                                'win': replay.win,
+                                'value': value,
                             })
 
             stat_values['winrate'] = wins / (wins + losses) if wins + losses else None
@@ -105,7 +118,7 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                         'values': list(map(lambda x: {'value': x}, values))[::-1],
                     }
                 else:
-                    slice_index_offset = round(len(values) / 10) if len(values) / 10 > 1 else 1
+                    slice_index_offset = round(len(values) / 20) if len(values) / 20 > 1 else 1
                     filtered_values = sorted(values, key=lambda x: x['value'])[slice_index_offset:-slice_index_offset]
                     raw_hist = histogram(list(map(lambda x: x['value'], filtered_values)), bins=7)
                     stat_counts = raw_hist[0]
