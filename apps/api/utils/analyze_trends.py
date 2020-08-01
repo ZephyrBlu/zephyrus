@@ -1,3 +1,4 @@
+import math
 from statistics import median
 from numpy import histogram
 
@@ -122,24 +123,40 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                     filtered_values = sorted(values, key=lambda x: x['value'])[slice_index_offset:-slice_index_offset]
                     raw_hist = histogram(list(map(lambda x: x['value'], filtered_values)), bins=7)
                     stat_counts = raw_hist[0]
-                    # need to alter how edges are used
-                    stat_edges = raw_hist[1]
+                    raw_stat_edges = raw_hist[1]
+                    stat_edges = []
 
+                    def to_minutes(val):
+                        mins = math.floor(val / 60)
+                        secs = val - (math.floor(val / 60) * 60)
+                        if secs < 10:
+                            secs = f'0{secs}'
+                        return f'{mins}:{secs}'
+
+                    for i in range(1, len(raw_stat_edges)):
+                        if stat == 'match_length':
+                            stat_edges.append(f'{to_minutes(int(round(raw_stat_edges[i-1], 0)))} - {to_minutes(int(round(raw_stat_edges[i], 0)) - 1)}')
+                        else:
+                            stat_edges.append(f'{int(round(raw_stat_edges[i-1], 0))} - {int(round(raw_stat_edges[i], 0)) - 1}')
                     win_values = list(filter(lambda x: x['win'], filtered_values))
-                    win_hist = histogram(list(map(lambda x: x['value'], win_values)), bins=7, range=(stat_edges[0], stat_edges[-1]))
+                    win_hist = histogram(list(map(lambda x: x['value'], win_values)), bins=7, range=(raw_stat_edges[0], raw_stat_edges[-1]))
                     win_counts = win_hist[0]
 
                     loss_values = list(filter(lambda x: not x['win'], filtered_values))
-                    loss_hist = histogram(list(map(lambda x: x['value'], loss_values)), bins=7, range=(stat_edges[0], stat_edges[-1]))
+                    loss_hist = histogram(list(map(lambda x: x['value'], loss_values)), bins=7, range=(raw_stat_edges[0], raw_stat_edges[-1]))
                     loss_counts = loss_hist[0]
 
                     def hist_to_data(hist):
                         if len(hist[0]) == 2:
-                            return list(map(lambda x: {'value': int(x[0]), 'bin': round(x[1], 0)}, hist))
-                        return list(map(lambda x: {'win': int(x[0]), 'loss': int(x[1]), 'bin': round(x[2], 0)}, hist))
+                            return list(map(lambda x: {'value': int(x[0]), 'bin': x[1]}, hist))
+                        return list(map(lambda x: {'win': int(x[0]), 'loss': int(x[1]), 'bin': x[2]}, hist))
 
+                    if stat == 'match_length':
+                        stat_avg = to_minutes(round(median(list(map(lambda x: x['value'], values))), 0))
+                    else:
+                        stat_avg = round(median(list(map(lambda x: x['value'], values))), 0)
                     trends[stat] = {
-                        'avg': round(median(list(map(lambda x: x['value'], values))), 0),
+                        'avg': stat_avg,
                         'values': {
                             'all': hist_to_data(list(zip(stat_counts, stat_edges))),
                             'win_loss': hist_to_data(list(zip(win_counts, loss_counts, stat_edges))),
