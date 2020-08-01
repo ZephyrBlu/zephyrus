@@ -1,0 +1,14 @@
+{% load account %}{% load i18n %}{% autoescape off %}{% blocktrans %}
+
+Hi,
+
+I’m Luke, the Founder of Zephyrus.
+
+Before you start using Zephyrus, I have a confession to make.
+
+I’m a filthy Protoss player.
+
+There, I said it. If you can find it in your heart to forgive me, construct an additional Pylon (And verify your email address) by clicking the link below
+
+{{ activate_url }}{% endblocktrans %}
+{% endautoescape %}
