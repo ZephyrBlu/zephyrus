@@ -20,7 +20,7 @@ from .utils.analyze_performance import analyze_performance
 from .permissions import IsOptionsPermission
 
 
-class RaceTrendsViewSet(viewsets.ModelViewSet):
+class RaceStatsViewSet(viewsets.ModelViewSet):
     """
     Returns the user's stats for the given race param
     """
@@ -66,7 +66,7 @@ class RaceTrendsViewSet(viewsets.ModelViewSet):
         for region_id, info in battlenet_account.region_profiles.items():
             battlenet_id_list.extend(info['profile_id'])
 
-        trend_data = analyze_performance(account_replays, battlenet_id_list, race)
+        trend_data = analyze_trends(account_replays, battlenet_id_list, race)
         if trend_data:
             serialized_data = json.dumps(trend_data)
         else:

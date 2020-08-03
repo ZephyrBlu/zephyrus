@@ -11,7 +11,7 @@ from .replays import (
     FetchReplayFile,
     WriteReplaySet,
 )
-from .trends import RaceStatsViewSet
+from .performance import RaceStatsViewSet
 from .user import CheckUserInfo, AddUserProfile, ResendEmail
 
 replay_download_link = FetchReplayFile.as_view({
