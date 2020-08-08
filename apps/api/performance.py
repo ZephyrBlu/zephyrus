@@ -66,7 +66,7 @@ class RaceStatsViewSet(viewsets.ModelViewSet):
         for region_id, info in battlenet_account.region_profiles.items():
             battlenet_id_list.extend(info['profile_id'])
 
-        trend_data = analyze_trends(account_replays, battlenet_id_list, race)
+        trend_data = analyze_performance(account_replays, battlenet_id_list, race)
         if trend_data:
             serialized_data = json.dumps(trend_data)
         else:

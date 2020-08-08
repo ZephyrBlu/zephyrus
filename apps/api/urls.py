@@ -12,6 +12,7 @@ from .replays import (
     WriteReplaySet,
 )
 from .performance import RaceStatsViewSet
+from .trends import RaceTrendsViewSet
 from .user import CheckUserInfo, AddUserProfile, ResendEmail
 
 replay_download_link = FetchReplayFile.as_view({
@@ -44,6 +45,11 @@ user_stats = RaceStatsViewSet.as_view({
     'options': 'preflight',
 })
 
+user_trends = RaceTrendsViewSet.as_view({
+    'get': 'retrieve',
+    'options': 'preflight',
+})
+
 write_replay = WriteReplaySet.as_view({
     'post': 'write',
     'options': 'preflight',
@@ -66,6 +72,7 @@ urlpatterns = [
     path('login/', ExternalLogin.as_view(), name='external_login'),
     path('logout/', ExternalLogout.as_view(), name='external_logout'),
     path('stats/<str:race>/', user_stats, name='race_stats'),
+    path('trends/<str:race>/', user_trends, name='race_trends'),
     path('upload/', UploadReplay.as_view(), name='replay_upload'),
     path('upload/data/', write_replay, name='write_replay_data'),
     path('authorize/url/', BattlenetAuthorizationUrl.as_view(), name='battlenet_authorization_url'),
