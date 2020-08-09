@@ -16,6 +16,8 @@ import socket
 from .env_settings.base import *
 from .env_settings.production import *
 
+MAX_TRENDS_REPLAYS = 50
+
 SITE_ID = 1
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
