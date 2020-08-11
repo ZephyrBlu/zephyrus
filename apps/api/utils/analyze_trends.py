@@ -157,9 +157,9 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
         }
         for stat, gameloop_values in match_values.items():
             for gameloop, values in gameloop_values.items():
-                if math.floor(gameloop / 22.4) not in collated_values[stat]:
-                    collated_values[stat][math.floor(gameloop / 22.4)] = []
-                collated_values[stat][math.floor(gameloop / 22.4)].extend(values)
+                if gameloop not in collated_values[stat]:
+                    collated_values[stat][gameloop] = []
+                collated_values[stat][gameloop].extend(values)
 
         matchup_stats = {
             'workers_active': [],
@@ -183,7 +183,7 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                 }
 
                 time_stats = {
-                    'time': time_s,
+                    'gameloop': time_s,
                     'count': len(values),
                 }
                 for outcome, outcome_values in stat_values.items():
@@ -205,7 +205,7 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                         ],
                     }
                 matchup_stats[stat].append(time_stats)
-            matchup_stats[stat].sort(key=lambda x: x['time'])
+            matchup_stats[stat].sort(key=lambda x: x['gameloop'])
         match_trends[matchup] = matchup_stats
 
     timeline_end = time.time()
