@@ -58,13 +58,22 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
 
     timeline_start = time.time()
 
-    def check_match_length(match_length):
-        if match_length < 420:
+    # 2 base, 8 patches (16 workers) + 2 geysers = (660 + 228) * 2 = 1776
+    # 3 base, 8 patches (16 workers) + 2 geysers = (660 + 228) * 3 = 2664
+    def check_match_stage(max_value):
+        if max_value < 1776:
             return 'early'
-        elif 420 <= match_length < 720:
+        elif 1776 <= max_value < 2664:
             return 'mid'
         else:
             return 'late'
+
+        # if match_length < 420:
+        #     return 'early'
+        # elif 420 <= match_length < 720:
+        #     return 'mid'
+        # else:
+        #     return 'late'
 
     match_values = {
         'workers_active': {},
@@ -83,7 +92,14 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                 user_player_id = player_id
                 opp_id = '1' if player_id == '2' else '2'
 
+        max_player_collection_rate = 0
         replay_timeline = cached_timelines[replay.file_hash]
+        for game_state in replay_timeline:
+            player_game_state = game_state[user_player_id]
+            player_collection_rate = player_game_state['resource_collection_rate']['minerals'] + player_game_state['resource_collection_rate']['gas']
+            if player_collection_rate > max_player_collection_rate:
+                max_player_collection_rate = player_collection_rate
+
         for game_state in replay_timeline:
             player_game_state = game_state[user_player_id]
             opp_game_state = game_state[opp_id]
@@ -129,7 +145,8 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                     'value': stat_value,
                     'win': replay.win,
                     'matchup': replay.players[opp_id]['race'].lower(),
-                    'stage': check_match_length(replay.match_length),
+                    'stage': check_match_stage(max_player_collection_rate),
+                    'max_rate': max_player_collection_rate,
                 })
 
     # collated_values = {
