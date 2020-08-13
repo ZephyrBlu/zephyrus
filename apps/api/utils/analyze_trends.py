@@ -68,13 +68,7 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
         else:
             return 'early'
 
-        # if match_length < 420:
-        #     return 'early'
-        # elif 420 <= match_length < 720:
-        #     return 'mid'
-        # else:
-        #     return 'late'
-
+    replay_values = []
     match_values = {
         'workers_active': {},
         'workers_killed': {},
@@ -108,6 +102,13 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
 
             if opp_collection_rate > max_collection_rate['opp']:
                 max_collection_rate['opp'] = opp_collection_rate
+
+        replay_value = {
+            'win': replay.win,
+            'matchup': replay.players[opp_id]['race'].lower(),
+            'stage': check_match_stage(max_collection_rate),
+        }
+        replay_values.append(replay_value)
 
         for game_state in replay_timeline:
             player_game_state = game_state[user_player_id]
@@ -237,5 +238,8 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
     # if at least one trends exist, return them otherwise None
     for values in match_values.values():
         if values:
-            return match_values
+            return {
+                'replays': replay_values,
+                'trends': match_values,
+            }
     return None
