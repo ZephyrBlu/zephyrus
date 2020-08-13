@@ -59,14 +59,14 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
     timeline_start = time.time()
 
     # 2 base, 8 patches (16 workers) + 2 geysers = (660 + 228) * 2 = 1776
-    # 3 base, 8 patches (16 workers) + 2 geysers = (660 + 228) * 3 = 2664
-    def check_match_stage(max_value):
-        if max_value < 1776:
-            return 'early'
-        elif 1776 <= max_value < 2664:
+    # 4 base, 8 patches (16 workers) + 2 geysers = (660 + 228) * 4 = 3552
+    def check_match_stage(max_values):
+        if max_values['player'] >= 3552 and max_values['opp'] >= 3552:
+            return 'late'
+        elif max_values['player'] >= 1776 and max_values['opp'] >= 1776:
             return 'mid'
         else:
-            return 'late'
+            return 'early'
 
         # if match_length < 420:
         #     return 'early'
@@ -92,13 +92,22 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                 user_player_id = player_id
                 opp_id = '1' if player_id == '2' else '2'
 
-        max_player_collection_rate = 0
+        max_collection_rate = {
+            'player': 0,
+            'opp': 0,
+        }
         replay_timeline = cached_timelines[replay.file_hash]
         for game_state in replay_timeline:
             player_game_state = game_state[user_player_id]
+            opp_game_state = game_state[opp_id]
             player_collection_rate = player_game_state['resource_collection_rate']['minerals'] + player_game_state['resource_collection_rate']['gas']
-            if player_collection_rate > max_player_collection_rate:
-                max_player_collection_rate = player_collection_rate
+            opp_collection_rate = opp_game_state['resource_collection_rate']['minerals'] + opp_game_state['resource_collection_rate']['gas']
+
+            if player_collection_rate > max_collection_rate['player']:
+                max_collection_rate['player'] = player_collection_rate
+
+            if opp_collection_rate > max_collection_rate['opp']:
+                max_collection_rate['opp'] = opp_collection_rate
 
         for game_state in replay_timeline:
             player_game_state = game_state[user_player_id]
@@ -145,8 +154,8 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                     'value': stat_value,
                     'win': replay.win,
                     'matchup': replay.players[opp_id]['race'].lower(),
-                    'stage': check_match_stage(max_player_collection_rate),
-                    'max_rate': max_player_collection_rate,
+                    'stage': check_match_stage(max_collection_rate),
+                    'max_rate': max_collection_rate,
                 })
 
     # collated_values = {
