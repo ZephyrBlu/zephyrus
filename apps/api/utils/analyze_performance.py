@@ -83,26 +83,32 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                 else:
                     losses += 1
 
+                auto_leave = False
+                if replay.match_length < 60:
+                    auto_leave = True
+
                 for s in stat_values.keys():
                     if s in stat_values and s != 'winrate':
                         if s == 'mmr':
                             stat_values[s].append(replay.match_data[s][user_player_id])
-                        elif s == 'workers_killed_lost_diff':
-                            value = replay.match_data['workers_killed'][user_player_id] - replay.match_data['workers_lost'][user_player_id]
-                            stat_values[s].append({
-                                'win': replay.win,
-                                'value': value,
-                            })
-                        else:
-                            if s == 'match_length':
-                                value = replay.match_length
-                            else:
-                                value = replay.match_data[s][user_player_id]
 
-                            stat_values[s].append({
-                                'win': replay.win,
-                                'value': value,
-                            })
+                        elif not auto_leave:
+                            if s == 'workers_killed_lost_diff':
+                                value = replay.match_data['workers_killed'][user_player_id] - replay.match_data['workers_lost'][user_player_id]
+                                stat_values[s].append({
+                                    'win': replay.win,
+                                    'value': value,
+                                })
+                            else:
+                                if s == 'match_length':
+                                    value = replay.match_length
+                                else:
+                                    value = replay.match_data[s][user_player_id]
+
+                                stat_values[s].append({
+                                    'win': replay.win,
+                                    'value': value,
+                                })
 
             stat_values['winrate'] = wins / (wins + losses) if wins + losses else None
 

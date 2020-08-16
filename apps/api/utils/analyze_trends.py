@@ -1,12 +1,14 @@
 from concurrent.futures import as_completed
 from requests_futures.sessions import FuturesSession
-from zephyrus.settings import TIMELINE_STORAGE, API_KEY, MAX_TRENDS_REPLAYS
+from zephyrus.settings import TIMELINE_STORAGE, MAX_TRENDS_REPLAYS, API_KEY
 import time
 
 
 def analyze_trends(account_replays, battlenet_id_list, race=None):
     account_replays = list(account_replays)
     account_replays.sort(key=lambda r: r.played_at, reverse=True)
+
+    # current_season_start = 1591747200
 
     replays = []
     replay_file_hashes = []
@@ -16,13 +18,12 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
         has_mmr = bool(list(filter(lambda x: x, replay.match_data['mmr'].values())))
         return is_not_ai and has_mmr
 
-    start = time.time()
-
     if race:
         for replay in account_replays:
             player_id = str(replay.user_match_id)
             opp_id = '1' if replay.user_match_id == 2 else '2'
             if (
+                # replay.played_at.timestamp() >= current_season_start
                 replay.match_length >= 60
                 and race == replay.players[player_id]['race'].lower()
                 and is_ladder_replay(replay)
@@ -56,12 +57,12 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
         for future in as_completed(futures):
             future.result()
 
-    timeline_start = time.time()
-
-    # 2 base, 8 patches (16 workers) + 2 geysers = (660 + 228) * 2 = 1776
-    # 4 base, 8 patches (16 workers) + 2 geysers = (660 + 228) * 4 = 3552
+    # 2 base, 16 patches (32 workers) + 2 geysers (6 workers) = (660 + 228) * 2 = 1776
+    # 3 base, 24 patches (48 workers) + 3 geysers (18 workers) = (660 + 228) * 3 = 2664
+    # 3 base + 4 workers, 26 patches (52 workers) + 3 geysers (18 workers) = 2664 + (4 * 75) = 2964
+    # Source: https://liquipedia.net/starcraft2/Mining_Minerals
     def check_match_stage(max_values):
-        if max_values['player'] >= 3552 and max_values['opp'] >= 3552:
+        if max_values['player'] >= 2964 and max_values['opp'] >= 2964:
             return 'late'
         elif max_values['player'] >= 1776 and max_values['opp'] >= 1776:
             return 'mid'
@@ -73,7 +74,6 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
         'workers_active': {},
         'workers_killed': {},
         'workers_lost': {},
-        'supply_block': {},
         'total_army_value': {},
         'total_resources_lost': {},
         'total_unspent_resources': {},
@@ -116,27 +116,16 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
             for stat in match_values.keys():
                 if stat == 'total_unspent_resources':
                     player_unspent_resources = player_game_state['unspent_resources']['minerals'] + player_game_state['unspent_resources']['gas']
-                    player_collection_rate = player_game_state['resource_collection_rate']['minerals'] + player_game_state['resource_collection_rate']['gas']
-                    if player_collection_rate == 0:
-                        stat_value = 0
-                    else:
-                        stat_value = round((player_unspent_resources / (player_collection_rate / 60)), 1)
+                    # player_collection_rate = player_game_state['resource_collection_rate']['minerals'] + player_game_state['resource_collection_rate']['gas']
+                    stat_value = player_unspent_resources
                 elif stat == 'total_collection_rate':
                     player_value = player_game_state['resource_collection_rate']['minerals'] + player_game_state['resource_collection_rate']['gas']
                     opp_value = opp_game_state['resource_collection_rate']['minerals'] + opp_game_state['resource_collection_rate']['gas']
-                    if opp_value == 0:
-                        stat_value = 0
-                    else:
-                        stat_value = round(((player_value / opp_value) - 1) * 100, 1)
-                        stat_value = stat_value if stat_value <= 100 else 100
+                    stat_value = player_value - opp_value
                 elif stat == 'total_army_value':
                     player_value = player_game_state['total_army_value']
                     opp_value = opp_game_state['total_army_value']
-                    if opp_value == 0:
-                        stat_value = 0
-                    else:
-                        stat_value = round(((player_value / opp_value) - 1) * 100, 1)
-                        stat_value = stat_value if stat_value <= 100 else 100
+                    stat_value = player_value - opp_value
                 elif stat == 'total_resources_lost':
                     player_value = player_game_state['total_resources_lost']
                     opp_value = opp_game_state['total_resources_lost']
@@ -158,82 +147,6 @@ def analyze_trends(account_replays, battlenet_id_list, race=None):
                     'stage': check_match_stage(max_collection_rate),
                     'max_rate': max_collection_rate,
                 })
-
-    # collated_values = {
-    #     'workers_active': {},
-    #     'workers_killed': {},
-    #     'workers_lost': {},
-    #     'supply_block': {},
-    #     'total_army_value': {},
-    #     'total_resources_lost': {},
-    #     'total_unspent_resources': {},
-    #     'total_collection_rate': {},
-    # }
-    # for stat, gameloop_values in match_values.items():
-    #     for gameloop, values in gameloop_values.items():
-    #         if gameloop not in collated_values[stat]:
-    #             collated_values[stat][gameloop] = []
-    #         collated_values[stat][gameloop].extend(values)
-    #
-    # matchup_stats = {
-    #     'workers_active': [],
-    #     'workers_killed': [],
-    #     'workers_lost': [],
-    #     'supply_block': [],
-    #     'total_army_value': [],
-    #     'total_resources_lost': [],
-    #     'total_unspent_resources': [],
-    #     'total_collection_rate': [],
-    # }
-    # for stat, time_values in collated_values.items():
-    #     for time_s, match_stages in time_values.items():
-    #         time_stats = {
-    #             'gameloop': time_s,
-    #             'early': None,
-    #             'mid': None,
-    #             'late': None,
-    #         }
-    #         for stage, values in match_stages.items():
-    #             if len(values) < 10:
-    #                 continue
-    #
-    #             stat_values = {
-    #                 'all': list(map(lambda x: x['value'], values)),
-    #                 'win': list(map(lambda x: x['value'], filter(lambda x: x['win'], values))),
-    #                 'loss': list(map(lambda x: x['value'], filter(lambda x: not x['win'], values))),
-    #             }
-    #
-    #             stage_stats = {
-    #                 'gameloop': time_s,
-    #                 'count': len(values),
-    #             }
-    #             for outcome, outcome_values in stat_values.items():
-    #                 time_median = np.median(outcome_values) if outcome_values else 0
-    #                 time_upper_quartile = np.quantile(outcome_values, 0.75) if outcome_values else 0
-    #                 time_lower_quartile = np.quantile(outcome_values, 0.25) if outcome_values else 0
-    #                 time_max = np.quantile(outcome_values, 0.9) if outcome_values else 0
-    #                 time_min = np.quantile(outcome_values, 0.1) if outcome_values else 0
-    #
-    #                 stage_stats[outcome] = {
-    #                     'median': round(int(time_median), 0),
-    #                     'quartile_range': [
-    #                         round(int(time_upper_quartile), 0),
-    #                         round(int(time_lower_quartile), 0),
-    #                     ],
-    #                     'total_range': [
-    #                         round(int(time_max), 0),
-    #                         round(int(time_min), 0),
-    #                     ],
-    #                 }
-    #             stage_stats[stage].append(stage_stats)
-    #         matchup_stats[stat].append(time_stats)
-    #     matchup_stats[stat].sort(key=lambda x: x['gameloop'])
-
-    timeline_end = time.time()
-    end = time.time()
-
-    print(f'Execution time for total analysis: {end - start}s')
-    print(f'Execution time for timeline analysis: {timeline_end - timeline_start}s')
 
     # if at least one trends exist, return them otherwise None
     for values in match_values.values():
