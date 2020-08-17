@@ -1,5 +1,3 @@
-import json
-
 from django.http import (
     HttpResponseNotFound,
     HttpResponseBadRequest,
@@ -62,17 +60,14 @@ class RaceTrendsViewSet(viewsets.ModelViewSet):
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
-        battlenet_id_list = []
-        for region_id, info in battlenet_account.region_profiles.items():
-            battlenet_id_list.extend(info['profile_id'])
-
-        trend_data = analyze_trends(account_replays, battlenet_id_list, race)
+        trend_data = analyze_trends(account_replays, race)
         if trend_data:
-            serialized_data = json.dumps(trend_data)
+            # serialized_data = json.dumps(trend_data)
+            serialized_data = trend_data
         else:
             serialized_data = None
 
-        response = Response(serialized_data)
+        response = Response(serialized_data.decode('utf-8'))
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
