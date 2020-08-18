@@ -1,6 +1,6 @@
 import gzip
 import requests
-from zephyrus.settings import MAX_TRENDS_REPLAYS
+from zephyrus.settings import MAX_TRENDS_REPLAYS, PROCESS_TIMELINES_URL
 
 
 def analyze_trends(account_replays, race=None):
@@ -46,11 +46,10 @@ def analyze_trends(account_replays, race=None):
                 if len(replays) >= MAX_TRENDS_REPLAYS:
                     break
 
-    process_timelines_url = 'https://us-central1-reflected-codex-228006.cloudfunctions.net/process-timelines-testing'
     replay_data = {
         'file_hashes': replay_file_hashes,
         'replays': serialized_replays,
     }
-    processed_timelines_response = requests.post(process_timelines_url, json=replay_data)
+    processed_timelines_response = requests.post(PROCESS_TIMELINES_URL, json=replay_data)
     aggregated_timelines = gzip.decompress(processed_timelines_response.content)
     return aggregated_timelines
