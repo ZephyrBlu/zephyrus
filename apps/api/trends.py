@@ -62,12 +62,11 @@ class RaceTrendsViewSet(viewsets.ModelViewSet):
 
         trend_data = analyze_trends(account_replays, race)
         if trend_data:
-            # serialized_data = json.dumps(trend_data)
-            serialized_data = trend_data
+            serialized_data = trend_data.decode('utf-8')
         else:
             serialized_data = None
 
-        response = Response(serialized_data.decode('utf-8'))
+        response = Response(serialized_data)
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
