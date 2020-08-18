@@ -16,7 +16,7 @@ import socket
 from .env_settings.base import *
 from .env_settings.production import *
 
-MAX_TRENDS_REPLAYS = 225
+MAX_TRENDS_REPLAYS = 250
 
 SITE_ID = 1
 
