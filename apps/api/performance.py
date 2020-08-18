@@ -1,3 +1,5 @@
+import json
+
 from django.http import (
     HttpResponseNotFound,
     HttpResponseBadRequest,
@@ -14,11 +16,11 @@ from zephyrus.settings import FRONTEND_URL
 
 from apps.user_profile.models import Replay, BattlenetAccount
 
-from .utils.analyze_trends import analyze_trends
+from .utils.analyze_performance import analyze_performance
 from .permissions import IsOptionsPermission
 
 
-class RaceTrendsViewSet(viewsets.ModelViewSet):
+class RaceStatsViewSet(viewsets.ModelViewSet):
     """
     Returns the user's stats for the given race param
     """
@@ -60,9 +62,13 @@ class RaceTrendsViewSet(viewsets.ModelViewSet):
             response['Access-Control-Allow-Headers'] = 'authorization'
             return response
 
-        trend_data = analyze_trends(account_replays, race)
+        battlenet_id_list = []
+        for region_id, info in battlenet_account.region_profiles.items():
+            battlenet_id_list.extend(info['profile_id'])
+
+        trend_data = analyze_performance(account_replays, battlenet_id_list, race)
         if trend_data:
-            serialized_data = trend_data.decode('utf-8')
+            serialized_data = json.dumps(trend_data)
         else:
             serialized_data = None
 
