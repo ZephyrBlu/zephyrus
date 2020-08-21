@@ -1,10 +1,9 @@
-from rest_framework.authtoken.models import Token
 from allauth.account.models import EmailAddress
 from apps.user_profile.models import BattlenetAccount
 from .find_main_race import find_main_race
 
 
-def get_user_info(user):
+def get_user_info(user, token):
     user_account = EmailAddress.objects.get(email=user.email)
     user_battlenet = BattlenetAccount.objects.filter(
         user_account_id=user.email
@@ -18,7 +17,6 @@ def get_user_info(user):
         battlenet_accounts.append(current_account)
     else:
         battlenet_accounts = None
-    token = Token.objects.get(user=user)
     main_race = find_main_race(user)
 
     return {
@@ -26,7 +24,7 @@ def get_user_info(user):
             'email': user.email,
             'verified': user_account.verified,
             'battlenet_accounts': battlenet_accounts,
-            'token': token.key,
+            'token': token,
             'main_race': main_race,
         }
     }

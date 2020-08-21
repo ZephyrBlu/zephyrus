@@ -3,6 +3,7 @@ import json
 from django.contrib.auth import authenticate, login, logout
 from django.http import HttpResponseBadRequest
 
+from rest_framework.authtoken.models import Token
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authentication import BaseAuthentication
@@ -54,7 +55,8 @@ class ExternalLogin(APIView):
 
         if user is not None:
             login(request, user)
-            user_info = get_user_info(user)
+            token = Token.objects.get(user=user)
+            user_info = get_user_info(user, token.key)
 
             if not user_info['user']['verified']:
                 send_email_confirmation(request, user)

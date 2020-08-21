@@ -8,7 +8,5 @@ def find_main_race(user):
     for replay in account_replays:
         user_race = replay.players[str(replay.user_match_id)]['race']
         race_count[user_race.lower()] += 1
-    counts = list(race_count.values())
-    races = list(race_count.keys())
-    max_count_index = counts.index(max(counts))
-    return races[max_count_index]
+    max_count_race = max(race_count, key=lambda x: race_count[x])
+    return max_count_race

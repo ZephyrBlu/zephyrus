@@ -30,6 +30,11 @@ def filter_user_replays(request, race=None, target=None):
             battlenet_account_id=battlenet_account
         )
 
+    def is_ladder_replay(replay):
+        is_not_ai = len(list(filter(lambda x: 'A.I.' not in x, list(map(lambda x: x['name'], replay.players.values()))))) == 2
+        has_mmr = bool(list(filter(lambda x: x, replay.match_data['mmr'].values())))
+        return is_not_ai and has_mmr
+
     serialized_replays = []
     replay_queryset = list(replay_queryset)
     replay_queryset.sort(key=lambda x: x.played_at, reverse=True)
@@ -44,6 +49,9 @@ def filter_user_replays(request, race=None, target=None):
         # use .filter() method?
         race_replay_queryset = []
         for replay in replay_queryset:
+            if not is_ladder_replay(replay):
+                continue
+
             player_id = str(replay.user_match_id)
             if race == replay.players[player_id]['race'].lower():
                 race_replay_queryset.append(replay)
