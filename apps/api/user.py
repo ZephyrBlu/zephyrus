@@ -33,7 +33,7 @@ class CheckUserInfo(APIView):
     def get(self, request):
         user = request.user
         token = request.auth
-        user_info = get_user_info(user, token)
+        user_info = get_user_info(user, token.key)
 
         response = Response(user_info)
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
