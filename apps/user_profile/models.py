@@ -57,3 +57,23 @@ class Replay(models.Model):
                 name='unique_replay'
             )
         ]
+
+
+class Feedback(models.Model):
+    ISSUE = 'I'
+    SUGGESTION = 'S'
+    FEEDBACK_TYPES = [
+        (ISSUE, 'Issue'),
+        (SUGGESTION, 'Suggestion'),
+    ]
+    feedback = models.CharField(max_length=300)
+    feedback_type = models.CharField(
+        max_length=1,
+        choices=FEEDBACK_TYPES,
+    )
+    user_account = models.ForeignKey(
+        EmailAddress,
+        to_field='email',
+        on_delete=models.CASCADE
+    )
+    submitted_at = models.DateTimeField(auto_now_add=True)
