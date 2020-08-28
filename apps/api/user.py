@@ -1,6 +1,9 @@
+import json
+
 from django.http import HttpResponseBadRequest
 
 from rest_framework.response import Response
+from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -9,7 +12,7 @@ from allauth.account.utils import send_email_confirmation
 
 from zephyrus.settings import FRONTEND_URL
 
-from apps.user_profile.models import BattlenetAccount
+from apps.user_profile.models import BattlenetAccount, Feedback
 
 from .utils.get_user_info import get_user_info
 from .utils.parse_profile import parse_profile
@@ -85,6 +88,37 @@ class AddUserProfile(APIView):
             response = HttpResponseBadRequest()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
             response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+
+class UserFeedback(viewsets.ModelViewSet):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated | IsOptionsPermission]
+
+    def preflight(self, request):
+        response = Response()
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
+        return response
+
+    def write(self, request):
+        feedback = json.loads(request.body)
+        feedback_text = feedback['feedback']
+        feedback_type = feedback['type']
+
+        if len(feedback_text) >= 10 and feedback_type.upper() in ['ISSUE', 'SUGGESTION']:
+            new_feedback = Feedback(
+                user_account_id=request.user.email,
+                feedback=feedback_text[:300],
+                feedback_type=feedback_type[0].upper(),
+            )
+            new_feedback.save()
+            response = Response()
+        else:
+            response = HttpResponseBadRequest()
+
+        response['Access-Control-Allow-Origin'] = FRONTEND_URL
+        response['Access-Control-Allow-Headers'] = 'authorization'
         return response
 
 

@@ -13,7 +13,7 @@ from .replays import (
 )
 from .performance import RaceStatsViewSet
 from .trends import RaceTrendsViewSet
-from .user import CheckUserInfo, AddUserProfile, ResendEmail
+from .user import CheckUserInfo, AddUserProfile, UserFeedback, ResendEmail
 
 replay_download_link = FetchReplayFile.as_view({
     'get': 'download',
@@ -61,6 +61,11 @@ feature_vote = FeatureVoteSet.as_view({
     'options': 'preflight',
 })
 
+user_feedback = UserFeedback.as_view({
+    'post': 'write',
+    'options': 'preflight',
+})
+
 app_name = 'api'
 urlpatterns = [
     path('replays/verify/', verify_replays, name='verify_replays'),
@@ -81,4 +86,5 @@ urlpatterns = [
     path('profile/', AddUserProfile.as_view(), name='add_user_profile'),
     path('resend/', ResendEmail.as_view(), name='resend_email'),
     path('vote/', feature_vote, name='feature_vote'),
+    path('feedback/', user_feedback, name='user_feedback'),
 ]
