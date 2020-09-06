@@ -90,7 +90,10 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                 for s in stat_values.keys():
                     if s in stat_values and s != 'winrate':
                         if s == 'mmr':
-                            stat_values[s].append(replay.match_data[s][user_player_id])
+                            mmr = replay.match_data[s][user_player_id]
+                            if mmr < 0:
+                                continue
+                            stat_values[s].append(mmr)
 
                         elif not auto_leave:
                             if s == 'workers_killed_lost_diff':
@@ -114,6 +117,10 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
 
             trends = {}
             for stat, values in stat_values.items():
+                if not values:
+                    season_trends[season] = None
+                    break
+
                 if stat == 'winrate':
                     if values is not None:
                         trends[stat] = round(values * 100, 1)
@@ -168,7 +175,8 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                             'win_loss': hist_to_data(list(zip(win_counts, loss_counts, stat_edges))),
                         },
                     }
-            season_trends[season].update(trends)
+            if season_trends[season]:
+                season_trends[season].update(trends)
         matchup_trends[matchup] = {'seasons': season_trends}
 
     # if at least one trends exist, return them otherwise None
