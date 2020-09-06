@@ -52,6 +52,9 @@ def filter_user_replays(request, race=None, target=None):
             if not is_ladder_replay(replay):
                 continue
 
+            if not target and replay.match_length < 60:
+                continue
+
             player_id = str(replay.user_match_id)
             if race == replay.players[player_id]['race'].lower():
                 race_replay_queryset.append(replay)
