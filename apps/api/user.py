@@ -1,5 +1,6 @@
 import json
 
+from django.core.mail import send_mail
 from django.http import HttpResponseBadRequest
 
 from rest_framework.response import Response
@@ -113,6 +114,18 @@ class UserFeedback(viewsets.ModelViewSet):
                 feedback_type=feedback_type[0].upper(),
             )
             new_feedback.save()
+
+            feedback_message = f'''
+            Feedback Type: {feedback_type}
+            User: {request.user.email}
+            Message: {feedback_text}
+            '''
+            send_mail(
+                'New Suggestion/Issue Submitted',
+                feedback_message,
+                'hello@zephyrus.gg',
+                ['hello@zephyrus.gg'],
+            )
             response = Response()
         else:
             response = HttpResponseBadRequest()
