@@ -7,4 +7,4 @@ node_modules/
 .vscode/
 *.pyc
 .idea/
-Zephyrus-f579da64eb8e.json
+*.json

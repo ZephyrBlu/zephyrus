@@ -1,6 +1,7 @@
 import gzip
 import json
 import traceback
+import asyncio
 from zephyrus_sc2_parser import parse_replay
 
 from django.core.management.base import BaseCommand, CommandError
@@ -9,7 +10,15 @@ from apps.user_profile.models import Replay
 from rest_framework.authtoken.models import Token
 from storages.backends.gcloud import GoogleCloudStorage
 from google.cloud import pubsub_v1
-from zephyrus.settings import TIMELINE_STORAGE, GS_PROJECT_ID, UPLOAD_FUNC_TOPIC
+from allauth.account.models import EmailAddress
+from zephyrus.settings import (
+    TIMELINE_STORAGE,
+    GS_PROJECT_ID,
+    GS_CREDENTIALS,
+    UPLOAD_FUNC_TOPIC,
+)
+
+MAX_CONCURRENT_REPLAYS = 25
 
 
 class Command(BaseCommand):
@@ -32,7 +41,31 @@ class Command(BaseCommand):
         if options['local'] and TIMELINE_STORAGE != 'sc2-timelines-dev':
             return
 
-        replays = list(Replay.objects.all())
+        self.stdout.write('Querying for required data')
+
+        # pre-fetch all users, replays and tokens to minimize database queries
+        # call .values() to convert objects -> dict for faster access
+        # cast to list to force Django to execute the queries
+        user_objects = list(EmailAddress.objects.all().values())
+        self.stdout.write('Fetched user accounts')
+
+        replays = list(Replay.objects.all().values())
+        self.stdout.write('Fetched replays')
+
+        token_objects = list(Token.objects.all().values())
+        self.stdout.write('Fetched auth tokens\n\n')
+
+        # cache user data for later use
+        users = {}
+        for user in user_objects:
+            users[user['email']] = user
+
+        # cache user tokens for later use
+        user_tokens = {}
+        for token in token_objects:
+            user_tokens[token['user_id']] = token['key']
+
+        self.stdout.write(f'{len(replays)} replays found, starting re-processing\n\n')
         error_list = []
 
         if options['local']:
@@ -91,35 +124,52 @@ class Command(BaseCommand):
                 if options['details']:
                     self.stdout.write(f'Success!\n\n')
         else:
-            publisher = pubsub_v1.PublisherClient()
-            topic_path = publisher.topic_path(GS_PROJECT_ID, UPLOAD_FUNC_TOPIC)
-
-            for replay in replays:
-                user = replay.user_account
-                if replay.battlenet_account:
-                    replay_path = f'{user.email}/{replay.battlenet_account.battletag}/{replay.file_hash}.SC2Replay'
-                else:
-                    replay_path = f'{user.email}/{replay.file_hash}.SC2Replay'
-                timeline_path = f'{replay.file_hash}.json.gz'
-
-                if options['details']:
-                    self.stdout.write(f'User: {user.email}')
-                    if replay.battlenet_account:
-                        self.stdout.write(f'Battlenet Account: {replay.battlenet_account.battletag}')
-                    self.stdout.write(f'File Hash: {replay.file_hash}')
-
-                token = Token.objects.get(user_id=replay.user_account.id)
-
-                # When you publish a message, the client returns a future.
-                publisher.publish(
-                    topic_path,
-                    token=str(token),
-                    paths=json.dumps({'replay': replay_path, 'timeline': timeline_path}),
-                    data=b''  # data must be a bytestring.
+            async def update_replays_async():
+                settings = pubsub_v1.types.BatchSettings(
+                    max_messages=MAX_CONCURRENT_REPLAYS,
+                    max_latency=1,
                 )
+                client = pubsub_v1.PublisherClient(
+                    credentials=GS_CREDENTIALS,
+                    publisher_options=pubsub_v1.types.PublisherOptions(
+                        flow_control=pubsub_v1.types.PublishFlowControl(
+                            message_limit=MAX_CONCURRENT_REPLAYS,
+                            limit_exceeded_behavior=pubsub_v1.types.LimitExceededBehavior.BLOCK,
+                        ),
+                    ),
+                    batch_settings=settings,
+                )
+                topic_path = client.topic_path(GS_PROJECT_ID, UPLOAD_FUNC_TOPIC)
 
-                if options['details']:
-                    self.stdout.write('Data sent to Cloud Function\n\n')
+                for count, replay in enumerate(replays):
+                    if count % MAX_CONCURRENT_REPLAYS == 0:
+                        self.stdout.write('Sleeping for 1s\n\n')
+                        await asyncio.sleep(1)
+
+                    if not replay['user_account_id']:
+                        continue
+
+                    if replay['battlenet_account_id']:
+                        replay_path = f'{replay["user_account_id"]}/{replay["battlenet_account_id"]}/{replay["file_hash"]}.SC2Replay'
+                    else:
+                        replay_path = f'{replay["user_account_id"]}/{replay["file_hash"]}.SC2Replay'
+                    timeline_path = f'{replay["file_hash"]}.json.gz'
+
+                    if options['details']:
+                        self.stdout.write(f'User: {replay["user_account_id"]}')
+                        if replay['battlenet_account_id']:
+                            self.stdout.write(f'Battlenet Account: {replay["battlenet_account_id"]}')
+                        self.stdout.write(f'File Hash: {replay["file_hash"]}\n\n')
+
+                    current_user = users[replay['user_account_id']]
+                    token = user_tokens[current_user['user_id']]
+                    client.publish(
+                        topic_path,
+                        token=token,
+                        paths=json.dumps({'replay': replay_path, 'timeline': timeline_path}),
+                        data=b''  # data must be a bytestring.
+                    )
+            asyncio.run(update_replays_async())
 
         num_replays = len(replays)
         self.stdout.write(self.style.SUCCESS(f'Successfully updated {num_replays} replays'))

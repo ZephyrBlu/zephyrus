@@ -110,7 +110,7 @@ class Command(BaseCommand):
                 user_match_id=user_id,
                 match_data=summary_stats,
                 match_length=metadata['game_length'],
-                played_at=metadata['time_played_at'],
+                played_at=metadata['played_at'],
                 uploaded_at=timezone.now(),
                 map=metadata['map'],
                 region_id=match_region,

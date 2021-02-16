@@ -189,7 +189,7 @@ LOGGING = {
 
 DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
 GS_BUCKET_NAME = REPLAY_STORAGE
-GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-f579da64eb8e.json')
+GS_CREDENTIALS = service_account.Credentials.from_service_account_file('static/Zephyrus-361f3a6008af.json')
 GS_PROJECT_ID = 'reflected-codex-228006'
 
 # MEDIA_URL = '/media/'

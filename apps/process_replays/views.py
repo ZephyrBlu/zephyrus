@@ -70,7 +70,7 @@ def write_replay(replay_data, request):
             user_match_id=user_id,
             match_data=summary_stats,
             match_length=metadata['game_length'],
-            played_at=datetime.datetime.fromtimestamp(metadata['time_played_at']).replace(tzinfo=pytz.utc),
+            played_at=datetime.datetime.fromtimestamp(metadata['played_at']).replace(tzinfo=pytz.utc),
             map=metadata['map'],
             region_id=match_region,
             win=win
