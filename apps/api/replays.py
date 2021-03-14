@@ -169,4 +169,3 @@ class WriteReplaySet(viewsets.ModelViewSet):
         response = Response(result)
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
-

@@ -209,7 +209,7 @@ DEFAULT_FROM_EMAIL = 'Luke from Zephyrus <hello@zephyrus.gg>'
 ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = FRONTEND_URL
 ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = FRONTEND_URL
 
-EMAIL_HOST = socket.gethostbyname('smtp.zoho.com.au')
+EMAIL_HOST = 'smtp.sendgrid.net'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

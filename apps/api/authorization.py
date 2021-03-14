@@ -10,10 +10,9 @@ from rest_framework.permissions import IsAuthenticated
 
 from allauth.account.models import EmailAddress
 
-from zephyrus.settings import FRONTEND_URL
+from zephyrus.settings import FRONTEND_URL, CLIENT_ID, CLIENT_SECRET
 
 from apps.user_profile.models import BattlenetAccount
-from apps.user_profile.secret.production import CLIENT_ID, CLIENT_SECRET
 
 from .permissions import IsOptionsPermission
 from .authentication import IsOptionsAuthentication
