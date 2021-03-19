@@ -1,5 +1,3 @@
-from django.urls import path
-
 from .authentication import ExternalLogin, ExternalLogout
 from .authorization import BattlenetAuthorizationUrl, SetBattlenetAccount
 from .feature_vote import FeatureVoteSet
@@ -15,6 +13,7 @@ from .performance import RaceStatsViewSet
 from .trends import RaceTrendsViewSet
 from .winrate import WinrateViewSet
 from .user import CheckUserInfo, AddUserProfile, UserFeedback, ResendEmail
+from .password import PasswordReset, PasswordResetFromKey
 
 replay_download_link = FetchReplayFile.as_view({
     'get': 'download',
@@ -72,6 +71,16 @@ user_feedback = UserFeedback.as_view({
     'options': 'preflight',
 })
 
+password_reset = PasswordReset.as_view({
+    'post': 'reset',
+    'options': 'preflight',
+})
+
+password_reset_from_key = PasswordResetFromKey.as_view({
+    'post': 'reset',
+    'options': 'preflight',
+})
+
 app_name = 'api'
 urlpatterns = [
     path('replays/verify/', verify_replays, name='verify_replays'),
@@ -82,6 +91,8 @@ urlpatterns = [
     path('replays/timeline/<str:file_hash>/', FetchReplayTimeline.as_view(), name='replay_timeline'),
     path('login/', ExternalLogin.as_view(), name='external_login'),
     path('logout/', ExternalLogout.as_view(), name='external_logout'),
+    path('password/reset/', password_reset, name='password_reset'),
+    path('password/reset/key/<str:uidb36>-<str:key>', password_reset_from_key, name='password_reset_from_key'),
     path('stats/<str:race>/', user_stats, name='race_stats'),
     path('trends/<str:race>/', user_trends, name='race_trends'),
     path('winrate/<str:race>/', user_winrate, name='race_winrate'),
