@@ -9,6 +9,7 @@ from django.shortcuts import redirect
 from django.contrib.auth import get_user_model, logout
 from django.contrib.sessions.backends.db import SessionStore
 from django.core.exceptions import ObjectDoesNotExist
+from django.views.decorators.debug import sensitive_variables
 
 from rest_framework.response import Response
 from rest_framework import viewsets
@@ -17,6 +18,7 @@ from allauth.account.models import EmailAddress
 from allauth.account.adapter import get_adapter
 from allauth.account.forms import default_token_generator
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
+from allauth.account import app_settings, signals
 
 from zephyrus.settings import BACKEND_URL, FRONTEND_URL
 
@@ -54,6 +56,7 @@ class PasswordReset(viewsets.ViewSet):
             response['Access-Control-Allow-Headers'] = 'content-type'
             return response
 
+        # accounts must be verified in order to reset the password
         if not user_account.verified:
             response = HttpResponseForbidden()
             response['Access-Control-Allow-Origin'] = FRONTEND_URL
@@ -103,6 +106,7 @@ class PasswordResetFromKey(viewsets.ViewSet):
             return None
         return user
 
+    @sensitive_variables('password1', 'password2')
     def reset(self, request, uidb36, key):
         # this is second request from frontend containing updated password
         if request.method == 'POST':
@@ -116,7 +120,7 @@ class PasswordResetFromKey(viewsets.ViewSet):
             password1 = request.data['password1']
             password2 = request.data['password2']
 
-            if not password1 or password2:
+            if not password1 or not password2:
                 response = HttpResponseBadRequest()
                 response['Access-Control-Allow-Origin'] = FRONTEND_URL
                 response['Access-Control-Allow-Headers'] = 'content-type'
@@ -126,17 +130,17 @@ class PasswordResetFromKey(viewsets.ViewSet):
                 response = HttpResponse('401 Unauthorized', status=401)
                 response['Access-Control-Allow-Origin'] = FRONTEND_URL
                 response['Access-Control-Allow-Headers'] = 'content-type'
-
-            key = session.get(INTERNAL_RESET_SESSION_KEY, '')
-
-        user = self._get_reset_user(uidb36, key)
-        if user is None:
-            response = HttpResponse('401 Unauthorized', status=401)
-            response['Access-Control-Allow-Origin'] = FRONTEND_URL
-            response['Access-Control-Allow-Headers'] = 'content-type'
-            return response
+                return response
 
         if key == INTERNAL_RESET_SESSION_KEY:
+            key = session.get(INTERNAL_RESET_SESSION_KEY, '')
+            user = self._get_reset_user(uidb36, key)
+            if user is None:
+                response = HttpResponse('401 Unauthorized', status=401)
+                response['Access-Control-Allow-Origin'] = FRONTEND_URL
+                response['Access-Control-Allow-Headers'] = 'content-type'
+                return response
+
             # In the event someone clicks on a password reset link
             # for one account while logged into another account,
             # logout of the currently logged in account.
@@ -146,11 +150,28 @@ class PasswordResetFromKey(viewsets.ViewSet):
             ):
                 logout(user)
                 session[INTERNAL_RESET_SESSION_KEY] = key
+
+            # set the new password
+            adapter = get_adapter()
+            adapter.set_password(user, password1)
+
+            # allauth stuff
+            # https://github.com/pennersr/django-allauth/blob/master/allauth/account/views.py#L785
+            signals.password_reset.send(
+                sender=user.__class__,
+                request=request,
+                user=user,
+            )
+
+            response = Response()
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'content-type'
+            return response
+        elif request.method == 'POST' and key != INTERNAL_RESET_SESSION_KEY:
+            response = HttpResponse('401 Unauthorized', status=401)
+            response['Access-Control-Allow-Origin'] = FRONTEND_URL
+            response['Access-Control-Allow-Headers'] = 'content-type'
+            return response
         else:
             session[INTERNAL_RESET_SESSION_KEY] = key
             return redirect(f'{FRONTEND_URL}/password-reset/{uidb36}-{INTERNAL_RESET_SESSION_KEY}?session={session.session_key}')
-
-        response = Response()
-        response['Access-Control-Allow-Origin'] = FRONTEND_URL
-        response['Access-Control-Allow-Headers'] = 'content-type'
-        return response
