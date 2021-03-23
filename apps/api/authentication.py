@@ -93,4 +93,3 @@ class ExternalLogout(APIView):
         response['Access-Control-Allow-Origin'] = FRONTEND_URL
         response['Access-Control-Allow-Headers'] = 'authorization'
         return response
-
