@@ -18,7 +18,7 @@ from allauth.account.models import EmailAddress
 from allauth.account.adapter import get_adapter
 from allauth.account.forms import default_token_generator
 from allauth.account.utils import user_pk_to_url_str, url_str_to_user_pk
-from allauth.account import app_settings, signals
+from allauth.account import signals
 
 from zephyrus.settings import BACKEND_URL, FRONTEND_URL
 

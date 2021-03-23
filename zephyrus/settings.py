@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 
 import os
 from google.oauth2 import service_account
-import socket
 from .env_settings.base import *
 from .env_settings.production import *
 
@@ -44,11 +43,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'sslserver',
 
-    'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
-    'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
 ]
