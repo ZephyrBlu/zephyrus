@@ -98,9 +98,10 @@ def filter_user_replays(request, race=None, target=None):
     # replace with native HTML?
     for replay in limited_queryset:
         date = replay.played_at
-        days = datetime.timedelta(
+        delta = datetime.timedelta(
             seconds=datetime.datetime.timestamp(datetime.datetime.now()) - datetime.datetime.timestamp(date)
-        ).days
+        )
+        days = delta.days
 
         if days != -1:
             weeks = int(round(days / 7, 0))
@@ -117,8 +118,8 @@ def filter_user_replays(request, race=None, target=None):
         elif weeks > 0:
             date_diff = f'{weeks}w'
         else:
-            if days == -1:
-                date_diff = 'Today'
+            if days == 0:
+                date_diff = f'{round(delta.seconds / 60 / 60)}h'
             elif days == 1:
                 date_diff = 'Yesterday'
             else:

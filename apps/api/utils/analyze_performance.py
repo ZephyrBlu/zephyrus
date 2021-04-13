@@ -7,8 +7,8 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
     account_replays = list(account_replays)
     account_replays.sort(key=lambda r: r.played_at, reverse=True)
 
-    prev_season_start = 1591747200
-    current_season_start = 1601377200
+    prev_season_start = 1611644400
+    current_season_start = 1617692400
 
     matchups = ['all', 'protoss', 'zerg', 'terran']
     matchup_trends = {
