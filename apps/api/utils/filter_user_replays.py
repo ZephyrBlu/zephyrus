@@ -1,7 +1,10 @@
 import copy
 import datetime
+from collections import defaultdict
 from math import floor
 from base64 import urlsafe_b64encode
+from scipy.stats import percentileofscore
+from numpy import percentile
 from allauth.account.models import EmailAddress
 from apps.user_profile.models import Replay, BattlenetAccount
 from ..models import ReplaySerializer
@@ -91,6 +94,22 @@ def filter_user_replays(request, race=None, target=None):
             'other': other_account,
         }
 
+    # calculate per-game percentile
+    # current_season_start = 1617692400
+    percentile_values = defaultdict(list)
+    for replay in replay_queryset:
+        # if replay.played_at.timestamp() > current_season_start:
+        for stat, stat_values in replay.match_data.items():
+            if stat == 'race':
+                continue
+
+            str_id = str(replay.user_match_id)
+            if str_id not in stat_values:
+                value = stat_values['minerals'][str_id] + stat_values['gas'][str_id]
+            else:
+                value = stat_values[str_id]
+            percentile_values[stat].append(value)
+
     # limit returned replays to 100 for performance reasons
     limited_queryset = replay_queryset[:100]
 
@@ -129,6 +148,17 @@ def filter_user_replays(request, race=None, target=None):
         serializer = copy.deepcopy(serializer.data)
         serializer['played_at'] = date_diff
         serializer['url'] = urlsafe_b64encode(bytes.fromhex(serializer['file_hash'][:18])).decode('utf-8')
+
+        for stat, stat_values in replay.match_data.items():
+            if stat == 'race':
+                continue
+
+            str_id = str(replay.user_match_id)
+            if str_id not in stat_values:
+                value = stat_values['minerals'][str_id] + stat_values['gas'][str_id]
+            else:
+                value = stat_values[str_id]
+            serializer['percentile'] = percentileofscore(percentile_values[stat], value)
 
         new_serializer = {}
         for stat, info in serializer.items():
