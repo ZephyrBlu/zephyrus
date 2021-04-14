@@ -1,6 +1,6 @@
 import math
 from statistics import median
-from numpy import histogram
+import numpy as np
 
 
 def analyze_performance(account_replays, battlenet_id_list, race=None):
@@ -64,11 +64,9 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                 'apm': [],
                 'spm': [],
                 'sq': [],
-                'supply_block': [],
                 'workers_produced': [],
                 'workers_lost': [],
                 'workers_killed': [],
-                'workers_killed_lost_diff': [],
             }
 
             wins = 0
@@ -132,12 +130,15 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                         'values': list(map(lambda x: {'value': x}, values))[::-1],
                     }
                 else:
-                    slice_index_offset = round(len(values) / 20) if len(values) / 20 > 1 else 1
-                    filtered_values = sorted(values, key=lambda x: x['value'])[slice_index_offset:-slice_index_offset]
-                    raw_hist = histogram(list(map(lambda x: x['value'], filtered_values)), bins=7)
-                    stat_counts = raw_hist[0]
-                    raw_stat_edges = raw_hist[1]
-                    stat_edges = []
+                    # slice_index_offset = round(len(values) / 20) if len(values) / 20 > 1 else 1
+                    # filtered_values = sorted(values, key=lambda x: x['value'])[slice_index_offset:-slice_index_offset]
+                    # raw_hist = histogram(list(map(lambda x: x['value'], filtered_values)), bins=10)
+                    # stat_counts = map(lambda x: x / len(filtered_values) if x != 0 else 0, raw_hist[0])
+                    # raw_stat_edges = raw_hist[1]
+
+                    percentile_values = list([i * 5 for i in range(0, 21)])
+                    filtered_values = list(map(lambda x: x['value'], values))
+                    percentiles = np.percentile(filtered_values, percentile_values)
 
                     def to_minutes(val):
                         mins = math.floor(val / 60)
@@ -146,23 +147,34 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                             secs = f'0{secs}'
                         return f'{mins}:{secs}'
 
-                    for i in range(1, len(raw_stat_edges)):
-                        if stat == 'match_length':
-                            stat_edges.append(f'{to_minutes(int(round(raw_stat_edges[i-1], 0)))} - {to_minutes(int(round(raw_stat_edges[i], 0)) - 1)}')
-                        else:
-                            stat_edges.append(f'{int(round(raw_stat_edges[i-1], 0))} - {int(round(raw_stat_edges[i], 0)) - 1}')
-                    win_values = list(filter(lambda x: x['win'], filtered_values))
-                    win_hist = histogram(list(map(lambda x: x['value'], win_values)), bins=7, range=(raw_stat_edges[0], raw_stat_edges[-1]))
-                    win_counts = win_hist[0]
+                    # for i in range(1, len(raw_stat_edges)):
+                    #     # if stat == 'match_length':
+                    #     #     stat_edges.append(f'{to_minutes(int(round(raw_stat_edges[i-1], 0)))} - {to_minutes(int(round(raw_stat_edges[i], 0)) - 1)}')
+                    #     # else:
+                    #     #     stat_edges.append(f'{int(round(raw_stat_edges[i-1], 0))} - {int(round(raw_stat_edges[i], 0)) - 1}')
+                    #     stat_edges.append(int(round((raw_stat_edges[i-1] + raw_stat_edges[i]) / 2, 0)))
+                    # win_values = list(filter(lambda x: x['win'], filtered_values))
+                    # win_hist = histogram(list(map(lambda x: x['value'], win_values)), bins=10, range=(raw_stat_edges[0], raw_stat_edges[-1]))
+                    # win_counts = map(lambda x: x / len(win_values) if x != 0 else 0, win_hist[0])
+                    #
+                    # loss_values = list(filter(lambda x: not x['win'], filtered_values))
+                    # loss_hist = histogram(list(map(lambda x: x['value'], loss_values)), bins=10, range=(raw_stat_edges[0], raw_stat_edges[-1]))
+                    # loss_counts = map(lambda x: x / len(loss_values) if x != 0 else 0, loss_hist[0])
 
-                    loss_values = list(filter(lambda x: not x['win'], filtered_values))
-                    loss_hist = histogram(list(map(lambda x: x['value'], loss_values)), bins=7, range=(raw_stat_edges[0], raw_stat_edges[-1]))
-                    loss_counts = loss_hist[0]
+                    win_values = list(map(lambda x: x['value'], list(filter(lambda x: x['win'], values))))
+                    win_percentiles = np.percentile(win_values, percentile_values)
 
-                    def hist_to_data(hist):
+                    loss_values = list(map(lambda x: x['value'], list(filter(lambda x: not x['win'], values))))
+                    loss_percentiles = np.percentile(loss_values, percentile_values)
+
+                    def hist_to_data(hist, hist_type):
+                        # if hist_type == 'win':
+                        #     return list(map(lambda x: {'win': int(x[0]), 'percentile': int(x[2])}, hist))
+                        # elif hist_type == 'loss':
+                        #     return list(map(lambda x: {'loss': int(x[0]), 'percentile': int(x[2])}, hist))
                         if len(hist[0]) == 2:
-                            return list(map(lambda x: {'value': int(x[0]), 'bin': x[1]}, hist))
-                        return list(map(lambda x: {'win': int(x[0]), 'loss': int(x[1]), 'bin': x[2]}, hist))
+                            return list(map(lambda x: {'series': hist_type, 'value': int(x[0]), 'percentile': x[1]}, hist))
+                        return list(map(lambda x: {'series': hist_type, 'win': int(x[0]), 'loss': int(x[1]), 'percentile': x[2]}, hist))
 
                     if stat == 'match_length':
                         stat_avg = to_minutes(round(median(list(map(lambda x: x['value'], values))), 0))
@@ -171,8 +183,9 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                     trends[stat] = {
                         'avg': stat_avg,
                         'values': {
-                            'all': hist_to_data(list(zip(stat_counts, stat_edges))),
-                            'win_loss': hist_to_data(list(zip(win_counts, loss_counts, stat_edges))),
+                            'all': hist_to_data(list(zip(percentiles, percentile_values)), 'all'),
+                            'win': hist_to_data(list(zip(win_percentiles, percentile_values)), 'win'),
+                            'loss': hist_to_data(list(zip(loss_percentiles, percentile_values)), 'loss'),
                         },
                     }
             if season_trends[season]:
