@@ -100,7 +100,7 @@ def filter_user_replays(request, race=None, target=None):
     for replay in replay_queryset:
         # if replay.played_at.timestamp() > current_season_start:
         for stat, stat_values in replay.match_data.items():
-            if stat == 'race':
+            if stat == 'race' or stat == 'mmr':
                 continue
 
             str_id = str(replay.user_match_id)
@@ -147,10 +147,13 @@ def filter_user_replays(request, race=None, target=None):
         serializer = ReplaySerializer(replay)
         serializer = copy.deepcopy(serializer.data)
         serializer['played_at'] = date_diff
-        serializer['url'] = urlsafe_b64encode(bytes.fromhex(serializer['file_hash'][:18])).decode('utf-8')
+        serializer['url'] = urlsafe_b64encode(
+            bytes.fromhex(serializer['file_hash'][:18])
+        ).decode('utf-8')
 
+        serializer['percentile'] = {}
         for stat, stat_values in replay.match_data.items():
-            if stat == 'race':
+            if stat == 'race' or stat == 'mmr':
                 continue
 
             str_id = str(replay.user_match_id)
@@ -158,7 +161,11 @@ def filter_user_replays(request, race=None, target=None):
                 value = stat_values['minerals'][str_id] + stat_values['gas'][str_id]
             else:
                 value = stat_values[str_id]
-            serializer['percentile'] = percentileofscore(percentile_values[stat], value)
+
+            if stat == 'avg_resource_collection_rate':
+                serializer['percentile']['avg_collection_rate'] = percentileofscore(percentile_values[stat], value)
+            else:
+                serializer['percentile'][stat] = percentileofscore(percentile_values[stat], value)
 
         new_serializer = {}
         for stat, info in serializer.items():
