@@ -32,10 +32,12 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                     race == replay.players[player_id]['race'].lower()
                     and (matchup == 'all' or matchup == replay.players[opp_id]['race'].lower())
                 ):
-                    if prev_season_start <= replay.played_at.timestamp() < current_season_start:
-                        replays['previous'].append(replay)
-                    elif replay.played_at.timestamp() >= current_season_start:
-                        replays['current'].append(replay)
+                    # if prev_season_start <= replay.played_at.timestamp() < current_season_start:
+                    #     replays['previous'].append(replay)
+                    # elif replay.played_at.timestamp() >= current_season_start:
+                    #     replays['current'].append(replay)
+                    replays['previous'].append(replay)
+                    replays['current'].append(replay)
 
         def is_ladder_replay(replay):
             is_not_ai = len(list(filter(lambda x: 'A.I.' not in x, list(map(lambda x: x['name'], replay.players.values()))))) == 2
@@ -136,9 +138,11 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                     # stat_counts = map(lambda x: x / len(filtered_values) if x != 0 else 0, raw_hist[0])
                     # raw_stat_edges = raw_hist[1]
 
-                    percentile_values = list([i * 5 for i in range(0, 21)])
+                    percentile_values = list([i * 10 for i in range(0, 11)])
                     filtered_values = list(map(lambda x: x['value'], values))
                     percentiles = np.percentile(filtered_values, percentile_values)
+                    counts, bins = np.histogram(filtered_values, bins=percentiles)
+                    hist = list(zip(list(counts), list(bins)))
 
                     def to_minutes(val):
                         mins = math.floor(val / 60)
@@ -147,34 +151,25 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                             secs = f'0{secs}'
                         return f'{mins}:{secs}'
 
-                    # for i in range(1, len(raw_stat_edges)):
-                    #     # if stat == 'match_length':
-                    #     #     stat_edges.append(f'{to_minutes(int(round(raw_stat_edges[i-1], 0)))} - {to_minutes(int(round(raw_stat_edges[i], 0)) - 1)}')
-                    #     # else:
-                    #     #     stat_edges.append(f'{int(round(raw_stat_edges[i-1], 0))} - {int(round(raw_stat_edges[i], 0)) - 1}')
-                    #     stat_edges.append(int(round((raw_stat_edges[i-1] + raw_stat_edges[i]) / 2, 0)))
-                    # win_values = list(filter(lambda x: x['win'], filtered_values))
-                    # win_hist = histogram(list(map(lambda x: x['value'], win_values)), bins=10, range=(raw_stat_edges[0], raw_stat_edges[-1]))
-                    # win_counts = map(lambda x: x / len(win_values) if x != 0 else 0, win_hist[0])
-                    #
-                    # loss_values = list(filter(lambda x: not x['win'], filtered_values))
-                    # loss_hist = histogram(list(map(lambda x: x['value'], loss_values)), bins=10, range=(raw_stat_edges[0], raw_stat_edges[-1]))
-                    # loss_counts = map(lambda x: x / len(loss_values) if x != 0 else 0, loss_hist[0])
-
                     win_values = list(map(lambda x: x['value'], list(filter(lambda x: x['win'], values))))
                     win_percentiles = np.percentile(win_values, percentile_values)
+                    win_counts, win_bins = np.histogram(win_values, bins=win_percentiles)
+                    win_hist = list(zip(list(win_counts), list(win_bins)))
 
                     loss_values = list(map(lambda x: x['value'], list(filter(lambda x: not x['win'], values))))
                     loss_percentiles = np.percentile(loss_values, percentile_values)
+                    loss_counts, loss_bins = np.histogram(loss_values, bins=loss_percentiles)
+                    loss_hist = list(zip(list(loss_counts), list(loss_bins)))
 
                     def hist_to_data(hist, hist_type):
+                        print(stat, hist)
                         # if hist_type == 'win':
                         #     return list(map(lambda x: {'win': int(x[0]), 'percentile': int(x[2])}, hist))
                         # elif hist_type == 'loss':
                         #     return list(map(lambda x: {'loss': int(x[0]), 'percentile': int(x[2])}, hist))
                         if len(hist[0]) == 2:
-                            return list(map(lambda x: {'series': hist_type, 'value': int(x[0]), 'percentile': x[1]}, hist))
-                        return list(map(lambda x: {'series': hist_type, 'win': int(x[0]), 'loss': int(x[1]), 'percentile': x[2]}, hist))
+                            return list(map(lambda x: {'series': hist_type, 'value': int(x[0]), 'percentile': float(x[1])}, hist))
+                        return list(map(lambda x: {'series': hist_type, 'win': int(x[0]), 'loss': int(x[1]), 'percentile': float(x[2])}, hist))
 
                     if stat == 'match_length':
                         stat_avg = to_minutes(round(median(list(map(lambda x: x['value'], values))), 0))
@@ -183,9 +178,9 @@ def analyze_performance(account_replays, battlenet_id_list, race=None):
                     trends[stat] = {
                         'avg': stat_avg,
                         'values': {
-                            'all': hist_to_data(list(zip(percentiles, percentile_values)), 'all'),
-                            'win': hist_to_data(list(zip(win_percentiles, percentile_values)), 'win'),
-                            'loss': hist_to_data(list(zip(loss_percentiles, percentile_values)), 'loss'),
+                            'all': hist_to_data(hist, 'all'),
+                            'win': hist_to_data(win_hist, 'win'),
+                            'loss': hist_to_data(loss_hist, 'loss'),
                         },
                     }
             if season_trends[season]:
