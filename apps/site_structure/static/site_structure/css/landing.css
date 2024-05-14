@@ -1,0 +1,78 @@
+@import "main.css";
+
+.Landing {
+    width: 100%;
+    background-color: var(--primary-dark-1);
+}
+
+.Landing__title {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 42px;
+    width: max-content;
+    margin: 100px auto 10px;
+}
+
+.Landing__sub-title {
+    font-size: 24px;
+    color: var(--grey);
+    width: max-content;
+    margin: 0 auto;
+}
+
+.Landing__underline {
+    text-decoration: underline;
+}
+
+.Landing__benefits {
+    display: flex;
+    width: 80%;
+    margin: 60px auto 0;
+}
+
+.Landing__benefit-wrapper {
+    height: 160px;
+    border: 1px solid var(--primary-light-3);
+    border-radius: 25px;
+    background-color: var(--secondary-dark-3);
+    padding: 20px;
+}
+
+.Landing__benefit-details {
+    width: 400px;
+    margin: 0 20px;
+    font-size: 16px;
+}
+
+.Landing__benefit-title {
+    font-weight: 300;
+    font-size: 28px;
+    margin: 0 20px 10px;
+}
+
+.Landing__benefit-explanation {
+    margin: 0 0 10px;
+}
+
+.Landing__get-started-wrapper {
+     display: flex;
+    justify-content: center;
+    margin-top: 40px;
+}
+
+.Landing__get-started {
+    padding: 15px 80px;
+    background-color: var(--primary-blue);
+    color: #000;
+    font-size: 18px;
+    font-family: Roboto, sans-serif;
+    font-weight: 500;
+    border: none;
+    border-radius: 15px;
+    transition: .3s;
+}
+
+.Landing__get-started:focus, .Landing__get-started:hover {
+    outline: none;
+    background-color: var(--primary-blue-hover);
+    cursor: pointer;
+}

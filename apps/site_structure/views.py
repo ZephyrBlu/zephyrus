@@ -5,6 +5,10 @@ from apps.user_profile.models import Replay
 from apps.api.models import ReplaySerializer
 
 
+def landing_page(request):
+    return render(request, 'site_structure/landing.html')
+
+
 def replay_page(request, base64_url):
     """
     1) get replay info from database
